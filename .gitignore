@@ -1,0 +1,13 @@
+# сборка
+dist/
+.astro/
+node_modules/
+
+# системное
+.DS_Store
+Thumbs.db
+*.log
+
+# среда
+.env
+.env.production

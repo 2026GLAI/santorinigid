@@ -1,0 +1,71 @@
+---
+import { WHATSAPP, CONTACTS } from '../data/site';
+
+interface Props {
+  title?: string;
+  text?: string;
+  waLink?: string;
+}
+
+const {
+  title = 'Готовы увидеть Санторини без суеты?',
+  text = 'Напишите мне в мессенджер — отвечу в течение часа и помогу составить программу под ваши даты.',
+  waLink = WHATSAPP.general,
+} = Astro.props;
+---
+
+<section class="cta-band">
+  <div class="container cta-inner reveal">
+    <div>
+      <h2>{title}</h2>
+      <p>{text}</p>
+    </div>
+    <div class="cta-actions">
+      <a href={waLink} class="btn btn-whatsapp btn-lg" target="_blank" rel="noopener">
+        Написать в WhatsApp
+      </a>
+      <a href={CONTACTS.telegram} class="btn btn-ghost btn-lg" target="_blank" rel="noopener">
+        Telegram
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta-band {
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+    background:
+      radial-gradient(120% 140% at 15% 0%, rgb(63 159 212 / 0.16), transparent 55%),
+      var(--bg-alt);
+    border-block: 1px solid var(--border);
+  }
+
+  .cta-inner {
+    display: grid;
+    gap: var(--sp-5);
+    align-items: center;
+  }
+
+  .cta-inner h2 {
+    font-size: var(--fs-2xl);
+  }
+
+  .cta-inner p {
+    margin-top: var(--sp-3);
+    color: var(--text-soft);
+    max-width: 52ch;
+  }
+
+  .cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+  }
+
+  @media (min-width: 860px) {
+    .cta-inner {
+      grid-template-columns: 1fr auto;
+      gap: var(--sp-7);
+    }
+  }
+</style>

@@ -1,0 +1,546 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { WHATSAPP, EXTERNAL, SITE_URL } from '../data/site';
+import { REVIEWS } from '../data/tours';
+
+import heroOia from '../assets/img/hero-oia.jpg';
+import portrait from '../assets/img/vladimir-portrait.jpg';
+import ferry from '../assets/img/ferry-seajets.jpg';
+import cruise from '../assets/img/cruise-tender.jpg';
+import yachtImg from '../assets/img/yachts-01.jpg';
+import heliImg from '../assets/img/helicopters-01.jpg';
+import hotelImg from '../assets/img/hotels-04.jpg';
+import tourImg from '../assets/img/tours-07.jpg';
+
+const title = 'Гид на Санторини | Экскурсии, яхты, вертолёты — 2026';
+const description =
+  'Русскоязычный гид на Санторини — 30 лет на острове. Индивидуальные экскурсии, яхты, вертолёты. Для туристов с лайнеров и с Крита. Цены 2026.';
+
+/** Разметка для поисковиков: сайт + личность гида. */
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${SITE_URL}/#website`,
+    url: SITE_URL,
+    name: 'Гид на Санторини — Владимир',
+    inLanguage: 'ru',
+    publisher: { '@id': `${SITE_URL}/#business` },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: 'Владимир',
+    jobTitle: 'Частный русскоязычный гид на Санторини',
+    knowsLanguage: ['ru', 'el'],
+    worksFor: { '@id': `${SITE_URL}/#business` },
+    description:
+      '30 лет живёт на Санторини, 14 лет профессионального опыта проведения индивидуальных экскурсий.',
+  },
+];
+
+const services = [
+  {
+    href: '/tours',
+    img: tourImg,
+    title: 'Индивидуальные экскурсии',
+    text: 'Весь остров за один день: Ия, гора Пророка Ильи, древняя церковь и дегустация вина в подземном музее.',
+    tag: 'Основное',
+  },
+  {
+    href: '/vip-service/yacht-rent-santorini',
+    img: yachtImg,
+    title: 'Аренда яхт и катамаранов',
+    text: 'Дневные и закатные круизы, Full Day. 8 судов на выбор, всё включено: трансфер, бар, обед на борту.',
+    tag: 'от €1 200',
+  },
+  {
+    href: '/vip-service/helicopter-tours',
+    img: heliImg,
+    title: 'Вертолётные прогулки',
+    text: 'Кальдера с высоты птичьего полёта и VIP-трансферы на Миконос, Крит и в Афины.',
+    tag: 'VIP',
+  },
+  {
+    href: '/vip-service/santorini-hotels-2026',
+    img: hotelImg,
+    title: 'Лучшие отели острова',
+    text: '14 проверенных отелей с видом на Кальдеру. Бронирование картами РФ и любыми картами мира.',
+    tag: 'Подборка',
+  },
+];
+
+const facts = [
+  { n: '30', label: 'лет на острове' },
+  { n: '14', label: 'лет как гид' },
+  { n: '8', label: 'судов во флоте' },
+  { n: '24/7', label: 'на связи' },
+];
+---
+
+<BaseLayout title={title} description={description} schema={schema}>
+  <Hero
+    image={heroOia}
+    alt="Панорама деревни Ия на Санторини: белые дома, синие купола церквей и Эгейское море"
+    size="full"
+    priority
+    eyebrow="Санторини · Греция"
+    title="Индивидуальные экскурсии на Санторини"
+    subtitle="Санторини. Так, как знаю его я."
+    text="30 лет жизни на острове и 14 лет опыта — для вашего безупречного дня."
+  >
+    <a href="/tours" class="btn btn-primary btn-lg">Выбрать экскурсию</a>
+    <a href={WHATSAPP.tour} class="btn btn-whatsapp btn-lg" target="_blank" rel="noopener">
+      Написать в WhatsApp
+    </a>
+  </Hero>
+
+  <!-- Знакомство -->
+  <section class="section" id="content">
+    <div class="container about-grid">
+      <div class="about-photo reveal">
+        <Image
+          src={portrait}
+          alt="Владимир — русскоязычный гид на Санторини, на борту яхты"
+          widths={[380, 560, 760]}
+          sizes="(min-width: 900px) 420px, 90vw"
+          quality={82}
+        />
+        <div class="about-badge">
+          <strong>30 лет</strong>
+          <span>на Санторини</span>
+        </div>
+      </div>
+
+      <div class="about-text reveal">
+        <p class="eyebrow">Гид на Санторини</p>
+        <h2 class="section-title">Рад встрече! Меня зовут Владимир</h2>
+        <p class="lede">
+          Моя история с Санторини началась три десятилетия назад, и за эти годы я изучил каждый
+          его секрет.
+        </p>
+        <p>
+          Организация отдыха для меня — это прежде всего ответственность за ваши впечатления.
+          Я здесь, чтобы избавить вас от организационных забот, предложить честные рекомендации
+          и провести по маршрутам, проверенным временем. Если вы ищете надежного проводника и
+          спокойную, дружескую атмосферу — нам по пути.
+        </p>
+        <div class="facts">
+          {
+            facts.map((f) => (
+              <div class="fact">
+                <strong>{f.n}</strong>
+                <span>{f.label}</span>
+              </div>
+            ))
+          }
+        </div>
+        <a href="/about" class="btn btn-ghost">Подробнее обо мне</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Услуги -->
+  <section class="section section-alt">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="eyebrow">Что я предлагаю</p>
+        <h2 class="section-title">Весь Санторини — под ключ</h2>
+        <p class="lede">
+          От обзорной экскурсии на автомобиле до яхты, вертолёта и подбора отеля.
+          Я позабочусь о каждой детали вашего отдыха.
+        </p>
+      </header>
+
+      <div class="grid-auto">
+        {
+          services.map((s) => (
+            <a href={s.href} class="card service-card reveal">
+              <div class="service-media">
+                <Image
+                  src={s.img}
+                  alt={s.title}
+                  widths={[380, 560, 760]}
+                  sizes="(min-width: 1100px) 280px, (min-width: 700px) 45vw, 90vw"
+                  quality={78}
+                />
+                <span class="service-tag">{s.tag}</span>
+              </div>
+              <div class="card-body">
+                <h3 class="card-title">{s.title}</h3>
+                <p class="card-text">{s.text}</p>
+                <span class="card-more">Подробнее →</span>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- С Крита -->
+  <section class="section">
+    <div class="container split">
+      <div class="split-media reveal">
+        <Image
+          src={ferry}
+          alt="Скоростной паром SeaJets на фоне кальдеры Санторини"
+          widths={[460, 700, 940]}
+          sizes="(min-width: 900px) 520px, 90vw"
+          quality={80}
+        />
+      </div>
+      <div class="split-text reveal">
+        <p class="eyebrow">Однодневная поездка</p>
+        <h2 class="section-title">С Крита на Санторини: без очередей и суеты</h2>
+        <p>
+          Поездка на Санторини с Крита — это классика. Многие мои гости приезжают на один день
+          из портов Ираклиона или Ретимно. Чтобы ваша поездка была легкой, а наша встреча в
+          порту — быстрой, поделюсь парой профессиональных советов:
+        </p>
+        <ul class="tips">
+          <li>
+            <strong>Выбирайте скоростные паромы:</strong> Самый быстрый способ оказаться на
+            острове — это скоростные катамараны (например, компании SeaJets). Путь по морю
+            занимает около 2–2,5 часов.
+          </li>
+          <li>
+            <strong>Бронируйте билеты заранее:</strong> В сезон места на утренние рейсы
+            разлетаются быстро. Лучше иметь электронный билет на руках, чтобы не стоять в
+            кассах порта в день отплытия.
+          </li>
+          <li>
+            <strong>Прибытие в порт Афиньос:</strong> Ваш паром придет в главный порт острова —
+            Афиньос. Это оживленное место, где важно не потеряться в потоке туристов и автобусов.
+          </li>
+        </ul>
+        <a href={EXTERNAL.ferries} class="btn btn-ghost" target="_blank" rel="noopener">
+          Расписание паромов ↗
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Круизным пассажирам -->
+  <section class="section section-alt">
+    <div class="container split split-reverse">
+      <div class="split-media reveal">
+        <Image
+          src={cruise}
+          alt="Круизный лайнер и тендерные лодки у кальдеры Санторини"
+          widths={[460, 700, 940]}
+          sizes="(min-width: 900px) 520px, 90vw"
+          quality={80}
+        />
+      </div>
+      <div class="split-text reveal">
+        <p class="eyebrow">Для пассажиров лайнеров</p>
+        <h2 class="section-title">Ваша высадка на берег: как не испортить начало дня</h2>
+        <p>
+          Поскольку крупные суда швартуются чуть дальше от берега, трансфер до порта
+          осуществляется на небольших катерах-тендерах. Чтобы избежать длительного ожидания и
+          начать экскурсию вовремя, настоятельно рекомендую получить номерок на тендерную лодку
+          заблаговременно. Это позволит вам попасть на первый поток.
+        </p>
+        <p>
+          Вы прибудете в Старый порт «Меса Ялос». Оттуда до города Фиры есть несколько вариантов
+          подъема:
+        </p>
+        <ul class="tips">
+          <li>
+            <strong>Фуникулер:</strong> Самый быстрый и удобный способ с великолепными
+            панорамными видами (стоимость 10 евро).
+          </li>
+          <li>
+            <strong>Ослики:</strong> Традиционный, но более медленный подъем (стоимость 10 евро).
+          </li>
+          <li>
+            <strong>Экстремальный:</strong> Пешком по 588 ступеням. Предупреждаю сразу: это
+            сомнительное удовольствие. Идти по жаре в гору, лавируя между осликами и наслаждаясь
+            «ароматами» их жизнедеятельности — сомнительное начало для идеального дня.
+          </li>
+        </ul>
+        <p class="note">
+          Я буду ожидать вас непосредственно у выхода со станции фуникулера, чтобы сразу же
+          начать нашу индивидуальную программу.
+        </p>
+        <a href="/tours" class="btn btn-primary">Выбрать экскурсию</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Отзывы -->
+  <section class="section">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="eyebrow">Отзывы</p>
+        <h2 class="section-title">Что говорят мои гости</h2>
+      </header>
+      <div class="grid-auto">
+        {
+          REVIEWS.map((r) => (
+            <figure class="card review reveal">
+              <div class="card-body">
+                <div class="stars" aria-label="Оценка 5 из 5">
+                  {[1, 2, 3, 4, 5].map(() => (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z" />
+                    </svg>
+                  ))}
+                </div>
+                <blockquote>{r.text}</blockquote>
+                <figcaption>
+                  <strong>{r.author}</strong>
+                  <span>{r.date}</span>
+                </figcaption>
+              </div>
+            </figure>
+          ))
+        }
+      </div>
+      <p class="reviews-more reveal">
+        <a href="/about#reviews" class="btn btn-ghost">Все отзывы и моя история</a>
+      </p>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .section-head {
+    max-width: 60ch;
+    margin-bottom: var(--sp-7);
+  }
+
+  /* --- знакомство --- */
+  .about-grid {
+    display: grid;
+    gap: var(--sp-7);
+    align-items: center;
+  }
+
+  .about-photo {
+    position: relative;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .about-photo :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+
+  .about-badge {
+    position: absolute;
+    left: var(--sp-4);
+    bottom: var(--sp-4);
+    display: flex;
+    flex-direction: column;
+    padding: var(--sp-3) var(--sp-5);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter: blur(8px);
+    box-shadow: var(--shadow);
+    line-height: 1.2;
+  }
+
+  .about-badge strong {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    color: var(--accent);
+  }
+
+  .about-badge span {
+    font-size: 0.76rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .about-text > * + * {
+    margin-top: var(--sp-4);
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: var(--sp-4);
+    padding-block: var(--sp-5);
+    border-block: 1px solid var(--border);
+  }
+
+  .fact {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fact strong {
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .fact span {
+    margin-top: 4px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  /* --- услуги --- */
+  .service-card {
+    text-decoration: none;
+  }
+
+  .service-media {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .service-media :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    transition: transform 600ms var(--ease);
+  }
+
+  .service-card:hover .service-media :global(img) {
+    transform: scale(1.06);
+  }
+
+  .service-tag {
+    position: absolute;
+    top: var(--sp-3);
+    left: var(--sp-3);
+    padding: 0.28rem 0.7rem;
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--surface) 90%, transparent);
+    backdrop-filter: blur(6px);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+  }
+
+  .card-more {
+    margin-top: auto;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  /* --- сплит-блоки --- */
+  .split {
+    display: grid;
+    gap: var(--sp-7);
+    align-items: center;
+  }
+
+  .split-media {
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .split-media :global(img) {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+
+  .split-text > * + * {
+    margin-top: var(--sp-4);
+  }
+
+  .tips {
+    display: grid;
+    gap: var(--sp-3);
+  }
+
+  .tips li {
+    position: relative;
+    padding-left: 1.7rem;
+    color: var(--text-soft);
+    font-size: var(--fs-sm);
+  }
+
+  .tips li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.6em;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .tips strong {
+    color: var(--text);
+  }
+
+  .note {
+    padding: var(--sp-4);
+    border-left: 3px solid var(--accent);
+    background: var(--bg-alt);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    font-size: var(--fs-sm);
+    color: var(--text-soft);
+  }
+
+  .section-alt .note {
+    background: var(--surface);
+  }
+
+  /* --- отзывы --- */
+  .stars {
+    display: flex;
+    gap: 2px;
+    color: var(--c-sunset-500);
+  }
+
+  .review blockquote {
+    font-size: var(--fs-sm);
+    color: var(--text-soft);
+    line-height: 1.7;
+  }
+
+  .review figcaption {
+    margin-top: auto;
+    padding-top: var(--sp-3);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--sp-2);
+    font-size: var(--fs-sm);
+  }
+
+  .review figcaption span {
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  .reviews-more {
+    margin-top: var(--sp-6);
+    text-align: center;
+  }
+
+  @media (min-width: 900px) {
+    .about-grid {
+      grid-template-columns: 420px 1fr;
+    }
+    .split {
+      grid-template-columns: 1fr 1fr;
+    }
+    .split-reverse .split-media {
+      order: 2;
+    }
+  }
+</style>

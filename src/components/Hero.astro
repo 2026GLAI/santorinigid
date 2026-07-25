@@ -1,0 +1,216 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  image: ImageMetadata;
+  alt: string;
+  eyebrow?: string;
+  title: string;
+  subtitle?: string;
+  text?: string;
+  /** Высокий вариант для главной, компактный — для внутренних страниц */
+  size?: 'full' | 'compact';
+  priority?: boolean;
+}
+
+const {
+  image,
+  alt,
+  eyebrow,
+  title,
+  subtitle,
+  text,
+  size = 'compact',
+  priority = false,
+} = Astro.props;
+---
+
+<section class:list={['hero', `hero-${size}`]}>
+  <div class="hero-media">
+    <Image
+      src={image}
+      alt={alt}
+      widths={[640, 960, 1440, 1920, 2400]}
+      sizes="100vw"
+      loading={priority ? 'eager' : 'lazy'}
+      fetchpriority={priority ? 'high' : 'auto'}
+      quality={80}
+      format="avif"
+    />
+    <div class="hero-scrim"></div>
+  </div>
+
+  <div class="container hero-content">
+    {eyebrow && <p class="hero-eyebrow">{eyebrow}</p>}
+    <h1 class="hero-title">{title}</h1>
+    {subtitle && <p class="hero-subtitle">{subtitle}</p>}
+    {text && <p class="hero-text">{text}</p>}
+    <div class="hero-actions">
+      <slot />
+    </div>
+  </div>
+
+  {
+    size === 'full' && (
+      <a href="#content" class="hero-scroll" aria-label="Листать вниз">
+        <span />
+      </a>
+    )
+  }
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    display: grid;
+    align-items: end;
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .hero-full {
+    min-height: min(92dvh, 860px);
+  }
+
+  .hero-compact {
+    min-height: min(58dvh, 520px);
+  }
+
+  .hero-media {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+  }
+
+  .hero-media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Лёгкий «кен-бёрнс»: изображение медленно приближается */
+    animation: kenburns 24s var(--ease) infinite alternate;
+  }
+
+  @keyframes kenburns {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.07);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-media :global(img) {
+      animation: none;
+    }
+  }
+
+  .hero-scrim {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to top, rgb(6 30 48 / 0.88) 0%, rgb(6 30 48 / 0.45) 42%, rgb(6 30 48 / 0.12) 75%),
+      linear-gradient(to right, rgb(6 30 48 / 0.4), transparent 60%);
+  }
+
+  .hero-content {
+    padding-block: clamp(2.5rem, 7vw, 5.5rem);
+    color: #fff;
+    max-width: 62rem;
+  }
+
+  .hero-eyebrow {
+    display: inline-block;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--c-sunset-200);
+    margin-bottom: var(--sp-3);
+  }
+
+  .hero-title {
+    font-size: var(--fs-4xl);
+    color: #fff;
+    text-shadow: 0 2px 24px rgb(0 0 0 / 0.35);
+    max-width: 20ch;
+  }
+
+  .hero-compact .hero-title {
+    font-size: var(--fs-3xl);
+    max-width: 24ch;
+  }
+
+  .hero-subtitle {
+    margin-top: var(--sp-3);
+    font-family: var(--font-display);
+    font-size: var(--fs-xl);
+    font-weight: 500;
+    font-style: italic;
+    color: var(--c-aegean-100);
+  }
+
+  .hero-text {
+    margin-top: var(--sp-4);
+    max-width: 54ch;
+    font-size: var(--fs-lg);
+    color: rgb(255 255 255 / 0.9);
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+    margin-top: var(--sp-6);
+  }
+
+  .hero-actions:empty {
+    display: none;
+  }
+
+  .hero-scroll {
+    position: absolute;
+    left: 50%;
+    bottom: var(--sp-5);
+    translate: -50% 0;
+    width: 26px;
+    height: 42px;
+    border: 2px solid rgb(255 255 255 / 0.5);
+    border-radius: var(--radius-full);
+    display: grid;
+    place-items: start center;
+    padding-top: 7px;
+  }
+
+  .hero-scroll span {
+    width: 3px;
+    height: 8px;
+    border-radius: 2px;
+    background: #fff;
+    animation: scrollDot 1.8s var(--ease) infinite;
+  }
+
+  @keyframes scrollDot {
+    0% {
+      opacity: 0;
+      transform: translateY(0);
+    }
+    35% {
+      opacity: 1;
+    }
+    70% {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-scroll span {
+      animation: none;
+    }
+  }
+</style>

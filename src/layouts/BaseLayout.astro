@@ -1,0 +1,164 @@
+---
+/**
+ * Базовый макет: <head> со всей SEO/GEO-разметкой, шапка, подвал.
+ * Каждая страница передаёт свой title/description/изображение.
+ */
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import WhatsappFab from '../components/WhatsappFab.astro';
+import ChatWidget from '../components/ChatWidget.astro';
+import { SITE_URL, SITE_NAME } from '../data/site';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Путь к OG-картинке относительно корня сайта, напр. /og/tours.jpg */
+  ogImage?: string;
+  /** Дополнительный JSON-LD, специфичный для страницы */
+  schema?: Record<string, unknown> | Record<string, unknown>[];
+  noindex?: boolean;
+}
+
+const { title, description, ogImage = '/og-default.jpg', schema, noindex = false } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, SITE_URL).href.replace(/\/$/, '') || SITE_URL;
+const ogUrl = new URL(ogImage, SITE_URL).href;
+
+/** Организация — основная сущность сайта. Показывается ИИ-поисковикам и Google. */
+const localBusiness = {
+  '@context': 'https://schema.org',
+  '@type': 'TouristInformationCenter',
+  '@id': `${SITE_URL}/#business`,
+  name: 'Владимир — русскоязычный гид на Санторини',
+  description:
+    'Индивидуальные экскурсии по Санторини с русскоязычным гидом. 30 лет жизни на острове, 14 лет профессионального опыта. Аренда яхт, вертолётные туры, подбор отелей.',
+  url: SITE_URL,
+  telephone: '+306946800255',
+  email: 'santorinivip@gmail.com',
+  image: `${SITE_URL}/og-default.jpg`,
+  priceRange: '€€€',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Санторини (Тира)',
+    addressRegion: 'Южные Эгейские острова',
+    addressCountry: 'GR',
+  },
+  areaServed: {
+    '@type': 'Place',
+    name: 'Санторини, Греция',
+  },
+  availableLanguage: { '@type': 'Language', name: 'Russian', alternateName: 'ru' },
+  sameAs: [
+    'https://t.me/SANTORINI_VLADIMIR',
+    'https://www.instagram.com/vova_gid_santorini/',
+    'https://www.santorinivip.com/',
+  ],
+};
+
+const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [schema]) : [])];
+---
+
+<!doctype html>
+<html lang="ru" data-theme-init>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {!noindex && <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />}
+
+    <!-- Open Graph — красивые карточки при пересылке ссылки -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogUrl} />
+
+    <meta name="author" content="Владимир — гид на Санторини" />
+    <meta name="theme-color" content="#1b6fa8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0c1a24" media="(prefers-color-scheme: dark)" />
+
+    <!-- Иконки -->
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Шрифты: подключаем локально-независимо, с fallback без сдвига вёрстки -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
+      />
+    </noscript>
+
+    <!-- Структурированные данные для Google и ИИ-поисковиков -->
+    {schemas.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
+  </head>
+
+  <body>
+    <a href="#main" class="skip-link">Перейти к содержимому</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <WhatsappFab />
+    <ChatWidget />
+
+    <script>
+      // Плавное появление блоков при прокрутке — без библиотек.
+      const items = document.querySelectorAll('.reveal');
+      if (items.length) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                e.target.classList.add('is-visible');
+                io.unobserve(e.target);
+              }
+            }
+          },
+          { rootMargin: '0px 0px -10% 0px', threshold: 0.05 },
+        );
+        items.forEach((el) => io.observe(el));
+      }
+    </script>
+
+    <style>
+      .skip-link {
+        position: absolute;
+        top: -100px;
+        left: var(--sp-4);
+        z-index: 999;
+        padding: var(--sp-3) var(--sp-5);
+        background: var(--accent);
+        color: #fff;
+        border-radius: var(--radius);
+        transition: top var(--dur) var(--ease);
+      }
+      .skip-link:focus {
+        top: var(--sp-4);
+      }
+    </style>
+  </body>
+</html>
