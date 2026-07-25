@@ -7,6 +7,25 @@
 export const SITE_URL = 'https://santorinigid.com';
 export const SITE_NAME = 'Гид на Санторини — Владимир';
 
+/**
+ * Полное имя владельца — подтверждено на площадках-партнёрах:
+ * Tourister.ru и NeedGuide («Русский гид на Санторини Владимир Лунгу»).
+ * Нужно поисковикам и ИИ, чтобы связать сайт, профили и отзывы в одну личность.
+ */
+export const OWNER_FULL_NAME = 'Владимир Лунгу';
+
+/**
+ * Профили на площадках-партнёрах. Идут в JSON-LD (sameAs) — это помогает
+ * поисковикам понять, что сайт, профили и отзывы относятся к одному человеку.
+ */
+export const PROFILES = [
+  'https://vladimir-santorini.tourister.ru',
+  'https://needguide.ru/view_guide.php?user_id=1230',
+  'https://t.me/SANTORINI_VLADIMIR',
+  'https://www.instagram.com/vova_gid_santorini/',
+  'https://www.santorinivip.com/',
+] as const;
+
 export const CONTACTS = {
   phone: '+30 6946800255',
   phoneHref: 'tel:+306946800255',
@@ -41,6 +60,7 @@ export const NAV = [
   { href: '/tours', label: 'Экскурсии' },
   { href: '/santorini', label: 'О Санторини' },
   { href: '/about', label: 'Обо мне' },
+  { href: '/reviews', label: 'Отзывы' },
   {
     href: '/vip-service',
     label: 'VIP услуги',
@@ -58,6 +78,7 @@ export const FOOTER_NAV = [
   { href: '/tours', label: 'Экскурсии' },
   { href: '/santorini', label: 'О Санторини' },
   { href: '/about', label: 'Обо мне' },
+  { href: '/reviews', label: 'Отзывы' },
   { href: '/vip-service', label: 'VIP услуги' },
   { href: '/vip-service/santorini-hotels-2026', label: 'Отели' },
   { href: '/vip-service/yacht-rent-santorini', label: 'Яхты' },

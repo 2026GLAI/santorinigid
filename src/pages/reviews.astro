@@ -1,0 +1,120 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Reviews from '../components/Reviews.astro';
+import ReviewForm from '../components/ReviewForm.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { SITE_URL, WHATSAPP } from '../data/site';
+import { REVIEWS, REVIEWS_SOURCE } from '../data/reviews';
+
+const title = 'Отзывы о гиде Владимире на Санторини — 15 отзывов туристов';
+const description = `Реальные отзывы туристов об экскурсиях с русскоязычным гидом Владимиром Лунгу на Санторини за ${REVIEWS[REVIEWS.length - 1].datePublished.slice(0, 4)}–${REVIEWS[0].datePublished.slice(0, 4)} годы. Каждый отзыв со ссылкой на оригинал.`;
+
+/**
+ * Разметка отзывов для поисковиков и ИИ.
+ *
+ * ⚠️ Сознательно БЕЗ reviewRating и без aggregateRating:
+ *  1. Оценок нет в источнике — на Tourister у отзывов нет поля рейтинга,
+ *     на NeedGuide рейтинг отключён (ratingOff: true). Проставить «5» =
+ *     выдумать цифру, которую клиенты не ставили.
+ *  2. Даже с оценками звёзд в Google не будет: по правилам Google страницы
+ *     LocalBusiness/Organization с отзывами о самих себе не участвуют в
+ *     показе звёзд. [ПРОВЕРЕНО: developers.google.com/search/docs/appearance/
+ *     structured-data/review-snippet]
+ *
+ * Что разметка всё равно даёт: Google, Яндекс и ИИ-поисковики понимают, что
+ * это отзывы конкретных людей с именами и датами, и цитируют их в ответах.
+ * Звёзды в поиске появляются из Google Business Profile — это отдельная
+ * задача владельца, см. docs/promotion-plan.md
+ */
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Отзывы туристов о гиде Владимире Лунгу на Санторини',
+    numberOfItems: REVIEWS.length,
+    itemListElement: REVIEWS.map((r, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'Review',
+        '@id': `${SITE_URL}/reviews#review-${r.id}`,
+        reviewBody: r.text,
+        datePublished: r.datePublished,
+        inLanguage: 'ru',
+        author: { '@type': 'Person', name: r.author },
+        itemReviewed: {
+          '@type': 'TouristTrip',
+          name: 'Индивидуальная экскурсия по Санторини с гидом Владимиром',
+          provider: { '@id': `${SITE_URL}/#business` },
+        },
+        publisher: { '@type': 'Organization', name: REVIEWS_SOURCE.name },
+        url: r.sourceUrl,
+      },
+    })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Отзывы', item: `${SITE_URL}/reviews` },
+    ],
+  },
+];
+---
+
+<BaseLayout title={title} description={description} schema={schema}>
+  <section class="section rv-hero">
+    <div class="container container-narrow text-center">
+      <p class="eyebrow mx-auto">Отзывы</p>
+      <h1>Что говорят мои гости</h1>
+      <p class="lede mx-auto">
+        {REVIEWS.length} отзывов от настоящих путешественников, которые провели день
+        на Санторини вместе со мной. Все они опубликованы на площадке
+        {' '}{REVIEWS_SOURCE.name} — у каждого отзыва есть ссылка на оригинал,
+        и вы можете проверить любой.
+      </p>
+      <div class="rv-hero-actions">
+        <a href="#review-form" class="btn btn-primary">Оставить свой отзыв</a>
+        <a href={WHATSAPP.tour} class="btn btn-whatsapp" target="_blank" rel="noopener">
+          Обсудить экскурсию
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <Reviews
+    title="Все отзывы"
+    eyebrow=""
+    lede=""
+    visible={6}
+    showForm={false}
+  />
+
+  <ReviewForm />
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .rv-hero {
+    padding-bottom: 0;
+  }
+
+  .rv-hero h1 {
+    font-size: var(--fs-3xl);
+    margin-top: var(--sp-3);
+  }
+
+  .rv-hero .lede {
+    margin-top: var(--sp-4);
+  }
+
+  .rv-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--sp-3);
+    margin-top: var(--sp-6);
+  }
+</style>

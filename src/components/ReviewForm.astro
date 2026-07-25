@@ -1,0 +1,291 @@
+---
+/**
+ * Форма «оставить отзыв».
+ *
+ * Как это работает и почему именно так:
+ *  Сайт статический — своей базы данных у него нет, и это сознательно
+ *  (ноль платежей, полная независимость). Поэтому отзыв не публикуется
+ *  автоматически, а приходит Владимиру: он читает, подтверждает и добавляет
+ *  на сайт. Плюсы такого порядка:
+ *   • на сайт физически невозможно накидать спам;
+ *   • каждый опубликованный отзыв — настоящий, а не бот;
+ *   • отзыв попадает прямо в HTML и его видят поисковики и ИИ.
+ *  Минус честно называем гостю: отзыв появляется не мгновенно.
+ *
+ * Пока не подключён Formspree — форма открывает WhatsApp с готовым текстом,
+ * так отзыв точно не потеряется.
+ */
+import { CONTACTS } from '../data/site';
+
+const FORMSPREE_ID = '';
+const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
+---
+
+<section class="section section-alt" id="review-form">
+  <div class="container container-narrow">
+    <header class="rf-head reveal">
+      <p class="eyebrow">Ваш отзыв</p>
+      <h2 class="section-title">Расскажите, как прошла ваша поездка</h2>
+      <p class="lede">
+        Мне важно каждое слово — и оно помогает другим путешественникам сделать
+        выбор. Займёт пару минут.
+      </p>
+    </header>
+
+    <form
+      class="rf-form reveal"
+      id="reviewForm"
+      action={formAction || undefined}
+      method="POST"
+    >
+      <input type="hidden" name="_subject" value="Новый отзыв с сайта santorinigid.com" />
+
+      <div class="rf-row">
+        <label class="field">
+          <span>Как вас зовут? <b aria-hidden="true">*</b></span>
+          <input
+            type="text"
+            name="author"
+            required
+            autocomplete="name"
+            placeholder="Имя и фамилия"
+          />
+        </label>
+
+        <label class="field">
+          <span>Когда были на Санторини?</span>
+          <input type="text" name="tripDate" placeholder="Например: июль 2026" />
+        </label>
+      </div>
+
+      <div class="rf-row">
+        <label class="field">
+          <span>С кем путешествовали?</span>
+          <input type="text" name="tripWith" placeholder="Семейная пара, 2 человека" />
+        </label>
+
+        <label class="field">
+          <span>Email или телефон <b aria-hidden="true">*</b></span>
+          <input
+            type="text"
+            name="contact"
+            required
+            placeholder="чтобы я мог поблагодарить вас"
+          />
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Ваш отзыв <b aria-hidden="true">*</b></span>
+        <textarea
+          name="text"
+          rows="6"
+          required
+          minlength="30"
+          placeholder="Что понравилось, какие места запомнились, что было полезно…"></textarea>
+        <small class="rf-hint">Минимум 30 символов. Пишите свободно — я ничего не правлю.</small>
+      </label>
+
+      <label class="rf-consent">
+        <input type="checkbox" name="consent" required />
+        <span>
+          Согласен, что Владимир опубликует мой отзыв на сайте с указанием имени
+          и месяца поездки. Контакты останутся скрытыми.
+        </span>
+      </label>
+
+      <!-- Ловушка для спам-ботов: люди это поле не видят -->
+      <input type="text" name="_gotcha" class="visually-hidden" tabindex="-1" autocomplete="off" />
+
+      <button type="submit" class="btn btn-primary btn-lg rf-submit">Отправить отзыв</button>
+
+      <p class="rf-status" id="rfStatus" role="status" aria-live="polite"></p>
+
+      <p class="rf-note">
+        Отзыв появится на сайте после того, как я его прочитаю — обычно в течение
+        суток. Так я защищаю страницу от спама, а вы видите здесь только живые
+        отзывы настоящих гостей.
+      </p>
+    </form>
+  </div>
+</section>
+
+<script define:vars={{ hasEndpoint: Boolean(formAction), PHONE: CONTACTS.phone }}>
+  const form = document.getElementById('reviewForm');
+  const status = document.getElementById('rfStatus');
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!form.reportValidity()) return;
+
+    const d = new FormData(form);
+    const author = String(d.get('author') || '').trim();
+    const text = String(d.get('text') || '').trim();
+
+    if (!hasEndpoint) {
+      // Formspree ещё не подключён — не теряем отзыв, отправляем в WhatsApp.
+      const msg = [
+        'Здравствуйте, Владимир! Хочу оставить отзыв о поездке.',
+        '',
+        `Имя: ${author}`,
+        d.get('tripDate') ? `Когда были: ${d.get('tripDate')}` : '',
+        d.get('tripWith') ? `С кем: ${d.get('tripWith')}` : '',
+        '',
+        'Отзыв:',
+        text,
+      ]
+        .filter((l) => l !== null && l !== undefined)
+        .join('\n');
+      window.open('https://wa.me/306946800255?text=' + encodeURIComponent(msg), '_blank', 'noopener');
+      status.textContent = 'Открыл WhatsApp с вашим отзывом — осталось нажать «отправить». Спасибо!';
+      status.className = 'rf-status ok';
+      return;
+    }
+
+    status.textContent = 'Отправляю…';
+    status.className = 'rf-status';
+    try {
+      const r = await fetch(form.action, {
+        method: 'POST',
+        body: d,
+        headers: { Accept: 'application/json' },
+      });
+      if (!r.ok) throw new Error('bad response');
+      form.reset();
+      status.textContent =
+        'Спасибо! Отзыв отправлен. Я прочитаю его и опубликую на сайте в течение суток.';
+      status.className = 'rf-status ok';
+    } catch {
+      status.innerHTML =
+        'Не получилось отправить. Напишите отзыв, пожалуйста, в WhatsApp на номер ' +
+        PHONE +
+        ' — так он точно дойдёт.';
+      status.className = 'rf-status err';
+    }
+  });
+</script>
+
+<style>
+  .rf-head {
+    margin-bottom: var(--sp-6);
+    text-align: center;
+  }
+
+  .rf-head .eyebrow::before {
+    display: none;
+  }
+
+  .rf-head .lede {
+    margin-inline: auto;
+  }
+
+  .rf-form {
+    display: grid;
+    gap: var(--sp-4);
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .rf-row {
+    display: grid;
+    gap: var(--sp-4);
+  }
+
+  .field {
+    display: grid;
+    gap: var(--sp-2);
+  }
+
+  .field > span {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-soft);
+  }
+
+  .field > span b {
+    color: var(--c-sunset-600);
+    font-weight: 700;
+  }
+
+  .field input,
+  .field textarea {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    font-size: var(--fs-sm);
+    transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+    resize: vertical;
+  }
+
+  .field input:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+
+  .field input::placeholder,
+  .field textarea::placeholder {
+    color: var(--text-muted);
+    opacity: 0.6;
+  }
+
+  .rf-hint {
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+  }
+
+  .rf-consent {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-3);
+    font-size: var(--fs-xs);
+    color: var(--text-soft);
+    line-height: 1.6;
+  }
+
+  .rf-consent input {
+    margin-top: 3px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    accent-color: var(--accent);
+  }
+
+  .rf-submit {
+    justify-self: start;
+  }
+
+  .rf-status {
+    font-size: var(--fs-sm);
+    min-height: 1.2em;
+  }
+
+  .rf-status.ok {
+    color: #1a9e4b;
+  }
+
+  .rf-status.err {
+    color: #c0392b;
+  }
+
+  .rf-note {
+    padding-top: var(--sp-4);
+    border-top: 1px solid var(--border);
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  @media (min-width: 660px) {
+    .rf-row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

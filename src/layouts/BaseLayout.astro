@@ -8,7 +8,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import WhatsappFab from '../components/WhatsappFab.astro';
 import ChatWidget from '../components/ChatWidget.astro';
-import { SITE_URL, SITE_NAME } from '../data/site';
+import { SITE_URL, SITE_NAME, OWNER_FULL_NAME, PROFILES } from '../data/site';
 
 interface Props {
   title: string;
@@ -49,11 +49,11 @@ const localBusiness = {
     name: 'Санторини, Греция',
   },
   availableLanguage: { '@type': 'Language', name: 'Russian', alternateName: 'ru' },
-  sameAs: [
-    'https://t.me/SANTORINI_VLADIMIR',
-    'https://www.instagram.com/vova_gid_santorini/',
-    'https://www.santorinivip.com/',
-  ],
+  // Профили на других площадках — так поисковики и ИИ понимают,
+  // что сайт, отзывы и профили относятся к одному человеку.
+  sameAs: [...PROFILES],
+  founder: { '@type': 'Person', name: OWNER_FULL_NAME },
+  employee: { '@type': 'Person', name: OWNER_FULL_NAME },
 };
 
 const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [schema]) : [])];

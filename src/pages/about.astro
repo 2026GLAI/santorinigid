@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Reviews from '../components/Reviews.astro';
-import { WHATSAPP, CONTACTS, SITE_URL } from '../data/site';
+import { WHATSAPP, CONTACTS, SITE_URL, OWNER_FULL_NAME, PROFILES } from '../data/site';
 import { GALLERY } from '../data/tours';
 import { getImg } from '../data/images';
 
@@ -22,13 +22,23 @@ const schema = [
     url: `${SITE_URL}/about`,
     mainEntity: {
       '@type': 'Person',
-      name: 'Владимир',
+      name: OWNER_FULL_NAME,
+      alternateName: 'Владимир',
       jobTitle: 'Частный русскоязычный гид на Санторини',
       description:
         '30 лет живёт на Санторини, 14 лет профессионального опыта проведения индивидуальных экскурсий.',
       knowsLanguage: ['ru', 'el'],
+      knowsAbout: [
+        'Санторини',
+        'Экскурсии по Санторини',
+        'Кальдера Санторини',
+        'Ия (Ойя)',
+        'Виноделие Санторини',
+        'Аренда яхт на Санторини',
+        'Вертолётные туры на Санторини',
+      ],
       worksFor: { '@id': `${SITE_URL}/#business` },
-      sameAs: [CONTACTS.telegram, CONTACTS.instagram],
+      sameAs: [...PROFILES],
     },
   },
   {
