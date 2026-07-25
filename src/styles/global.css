@@ -408,65 +408,80 @@
      статичную страницу. Это не мелочь: у людей бывает укачивание.
      ===================================================================== */
 
+  /*
+    СТРАХОВКА ОТ ПУСТОЙ СТРАНИЦЫ.
+    Прятать блоки можно только тогда, когда работает скрипт, который их
+    покажет. Класс js-on ставится скриптом в самом начале загрузки.
+    Без скрипта — весь текст виден сразу, как в обычном HTML.
+  */
+  .reveal,
+  .reveal-zoom,
+  .reveal-left,
+  .reveal-right,
+  .reveal-stagger > * {
+    opacity: 1;
+    transform: none;
+  }
+
   /* --- 1. Появление блока при прокрутке (основной эффект) --- */
-  .reveal {
+  .js-on .reveal {
     opacity: 0;
     transform: translateY(26px);
     transition: opacity 760ms var(--ease), transform 760ms var(--ease);
   }
 
-  .reveal.is-visible {
+  .js-on .reveal.is-visible {
     opacity: 1;
     transform: none;
   }
 
   /* Появление снизу вверх с лёгким наплывом — для крупных изображений */
-  .reveal-zoom {
+  .js-on .reveal-zoom {
     opacity: 0;
     transform: scale(1.04);
     transition: opacity 900ms var(--ease), transform 900ms var(--ease);
   }
 
-  .reveal-zoom.is-visible {
+  .js-on .reveal-zoom.is-visible {
     opacity: 1;
     transform: none;
   }
 
   /* Выезд сбоку — для парных блоков «фото + текст» */
-  .reveal-left,
-  .reveal-right {
+  .js-on .reveal-left,
+  .js-on .reveal-right {
     opacity: 0;
     transition: opacity 800ms var(--ease), transform 800ms var(--ease);
   }
 
-  .reveal-left {
+  .js-on .reveal-left {
     transform: translateX(-28px);
   }
 
-  .reveal-right {
+  .js-on .reveal-right {
     transform: translateX(28px);
   }
 
-  .reveal-left.is-visible,
-  .reveal-right.is-visible {
+  .js-on .reveal-left.is-visible,
+  .js-on .reveal-right.is-visible {
     opacity: 1;
     transform: none;
   }
 
   /* --- 2. Каскад: элементы списка появляются по очереди --- */
-  .reveal-stagger > * {
+  .js-on .reveal-stagger > * {
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 640ms var(--ease), transform 640ms var(--ease);
   }
 
-  .reveal-stagger.is-visible > * {
+  .js-on .reveal-stagger.is-visible > * {
     opacity: 1;
     transform: none;
   }
 
   /* Задержку задаём переменной --i, её проставляет BaseLayout */
-  .reveal-stagger.is-visible > * {
+  .js-on .reveal-stagger.is-visible > * {
     transition-delay: calc(var(--i, 0) * 90ms);
   }
 
@@ -540,21 +555,50 @@
     }
   }
 
-  /* --- Уважаем выбор пользователя: выключаем всё движение --- */
+  /* --- Уважаем выбор пользователя: «уменьшить движение» ---
+
+     Важное различие. Укачивание вызывает ДВИЖЕНИЕ в пространстве —
+     параллакс, выезды, сдвиги. Простое проявление (opacity) его не вызывает,
+     и рекомендации по доступности разрешают его оставлять.
+
+     Поэтому:
+      • полностью убираем всё, что двигается;
+      • мягкое проявление оставляем, но короче — страница не выглядит мёртвой.
+  */
   @media (prefers-reduced-motion: reduce) {
-    .reveal,
-    .reveal-zoom,
-    .reveal-left,
-    .reveal-right,
-    .reveal-stagger > * {
-      opacity: 1;
+    /*
+      Убираем сдвиги и масштабирование — оставляем только проявление.
+      ВАЖНО: селекторы обязаны начинаться с .js-on, как и правила выше.
+      Иначе они окажутся «слабее» и не сработают — текст останется
+      невидимым. Эта ошибка уже была допущена, повторять нельзя.
+    */
+    .js-on .reveal,
+    .js-on .reveal-zoom,
+    .js-on .reveal-left,
+    .js-on .reveal-right,
+    .js-on .reveal-stagger > * {
       transform: none;
-      transition: none;
+      transition: opacity 300ms linear;
     }
 
+    /* Показываем блок, как только он попал в кадр */
+    .js-on .reveal.is-visible,
+    .js-on .reveal-zoom.is-visible,
+    .js-on .reveal-left.is-visible,
+    .js-on .reveal-right.is-visible,
+    .js-on .reveal-stagger.is-visible > * {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* Каскад тоже убираем: ожидание раздражает, если анимации не нужны */
+    .js-on .reveal-stagger.is-visible > * {
+      transition-delay: 0ms;
+    }
+
+    /* А вот это движется по-настоящему — выключаем совсем */
     .parallax-slow,
-    .hero-depth,
-    .scroll-progress {
+    .hero-depth {
       animation: none;
     }
 

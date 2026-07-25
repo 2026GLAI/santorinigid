@@ -121,6 +121,15 @@ const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [
 
     <!-- Структурированные данные для Google и ИИ-поисковиков -->
     {schemas.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
+
+    <!--
+      Помечаем страницу как «скрипты работают» ДО отрисовки.
+      Только после этого CSS прячет блоки для анимации появления.
+      Если скрипты отключены или упали — весь текст виден сразу.
+    -->
+    <script is:inline>
+      document.documentElement.classList.add('js-on');
+    </script>
   </head>
 
   <body>
@@ -145,15 +154,11 @@ const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [
 
         Кто просил меньше движения — сразу показываем всё как есть.
       */
-      const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
       const items = document.querySelectorAll(
         '.reveal, .reveal-zoom, .reveal-left, .reveal-right, .reveal-stagger',
       );
 
-      if (calm) {
-        items.forEach((el) => el.classList.add('is-visible'));
-      } else if (items.length) {
+      if (items.length) {
         // Каскад: каждому потомку свой номер, из него CSS считает задержку
         document.querySelectorAll('.reveal-stagger').forEach((group) => {
           [...group.children].forEach((child, i) => {
@@ -173,6 +178,15 @@ const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [
           { rootMargin: '0px 0px -10% 0px', threshold: 0.05 },
         );
         items.forEach((el) => io.observe(el));
+
+        /*
+          Страховка: если по какой-то причине наблюдатель не сработал
+          (старый браузер, ошибка), через 3 секунды показываем всё.
+          Гость никогда не должен увидеть пустую страницу.
+        */
+        setTimeout(() => {
+          items.forEach((el) => el.classList.add('is-visible'));
+        }, 3000);
       }
     </script>
 
