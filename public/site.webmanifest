@@ -1,0 +1,14 @@
+{
+  "name": "Гид на Санторини — Владимир",
+  "short_name": "Санторини гид",
+  "description": "Индивидуальные экскурсии, яхты, вертолёты и лучшие отели Санторини с русскоязычным гидом.",
+  "lang": "ru",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbfaf7",
+  "theme_color": "#1b6fa8",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

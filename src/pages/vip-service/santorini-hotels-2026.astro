@@ -1,0 +1,261 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { WHATSAPP, SITE_URL } from '../../data/site';
+import { HOTELS } from '../../data/hotels';
+import { getImg } from '../../data/images';
+
+import heroHotel from '../../assets/img/contacts-hero.jpg';
+
+const title = 'Лучшие отели Санторини 5 звёзд | Вид на Кальдеру 2026';
+const description =
+  'Лучшие отели Санторини с видом на Кальдеру. Ия, Имеровигли, Фиростефани. Бронирование картами РФ и зарубежными. Только проверенные объекты.';
+
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Лучшие отели Санторини с видом на Кальдеру',
+    numberOfItems: HOTELS.length,
+    itemListElement: HOTELS.map((h, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'Hotel',
+        name: h.name,
+        description: h.description,
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: h.area,
+          addressRegion: 'Санторини',
+          addressCountry: 'GR',
+        },
+      },
+    })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'VIP услуги', item: `${SITE_URL}/vip-service` },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: 'Отели',
+        item: `${SITE_URL}/vip-service/santorini-hotels-2026`,
+      },
+    ],
+  },
+];
+---
+
+<BaseLayout title={title} description={description} schema={schema}>
+  <Hero
+    image={heroHotel}
+    alt="Инфинити-бассейн отеля на Санторини на фоне заката над кальдерой"
+    eyebrow="VIP услуги"
+    title="Лучшие отели Санторини: мой выбор"
+    text="Я отобрал для вас отели, за которые мне не будет стыдно перед вами."
+  />
+
+  <section class="section">
+    <div class="container container-narrow reveal">
+      <p class="lede text-center">
+        Безупречный сервис, лучшие виды на Кальдеру и проверенное качество. Доступно моментальное
+        бронирование любыми картами мира (включая карты РФ и UnionPay).
+      </p>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="container">
+      <div class="hotels">
+        {
+          HOTELS.map((h, i) => (
+            <article class="card hotel reveal">
+              <div class="hotel-media">
+                <Image
+                  src={getImg(h.image)}
+                  alt={`Отель ${h.name} на Санторини, ${h.area}`}
+                  widths={[420, 640, 900]}
+                  sizes="(min-width: 900px) 440px, 92vw"
+                  quality={80}
+                />
+                <span class="hotel-num">{String(i + 1).padStart(2, '0')}</span>
+                <span class="hotel-area">{h.area}</span>
+              </div>
+              <div class="hotel-body">
+                <h2 class="hotel-name">{h.name}</h2>
+                <p class="hotel-desc">{h.description}</p>
+                <a
+                  href={h.link}
+                  class="btn btn-primary hotel-cta"
+                  target="_blank"
+                  rel="noopener sponsored"
+                >
+                  Смотреть на Ostrovok.ru →
+                </a>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Философия + честное раскрытие -->
+  <section class="section">
+    <div class="container container-narrow">
+      <div class="freedom reveal">
+        <h2 class="section-title">Ваш выбор — ваша свобода</h2>
+        <p>
+          На Санторини сотни прекрасных отелей, и каждый из них по-своему уникален. В этом гиде
+          я собрал лишь часть из них — те объекты, которые мне особенно близки по эстетике и
+          уровню сервиса. Моя цель — не ограничить ваш выбор, а предложить удобные и надежные
+          способы бронирования через проверенные глобальные сервисы. Я ценю ваше доверие и
+          стремлюсь к тому, чтобы процесс организации отдыха был таким же прозрачным и приятным,
+          как и само путешествие по нашему острову.
+        </p>
+      </div>
+
+      <aside class="disclosure reveal">
+        <h3>Честно о моей работе</h3>
+        <p>
+          Я создал эту страницу как бесплатный навигатор для путешественников. Чтобы поддерживать
+          проект, я использую партнерские ссылки: если вы забронируете отель, перейдя по ним, я
+          могу получить комиссионное вознаграждение. Это не увеличивает стоимость вашего
+          бронирования, но позволяет мне оставаться независимым гидом и делиться с вами личным
+          опытом. Я благодарю вас за поддержку и всегда выступаю за открытость в отношениях с
+          моими гостями.
+        </p>
+      </aside>
+    </div>
+  </section>
+
+  <CtaBand
+    title="Не знаете, какой отель выбрать?"
+    text="Напишите мне даты, бюджет и пожелания — подскажу, что подойдёт именно вам. Это бесплатно."
+    waLink={WHATSAPP.hotel}
+  />
+</BaseLayout>
+
+<style>
+  .hotels {
+    display: grid;
+    gap: var(--sp-6);
+  }
+
+  .hotel {
+    display: grid;
+    scroll-margin-top: 90px;
+  }
+
+  .hotel-media {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hotel-media :global(img) {
+    width: 100%;
+    height: 100%;
+    min-height: 250px;
+    object-fit: cover;
+    transition: transform 700ms var(--ease);
+  }
+
+  .hotel:hover .hotel-media :global(img) {
+    transform: scale(1.05);
+  }
+
+  .hotel-num {
+    position: absolute;
+    top: var(--sp-3);
+    left: var(--sp-3);
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--surface) 90%, transparent);
+    backdrop-filter: blur(6px);
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .hotel-area {
+    position: absolute;
+    bottom: var(--sp-3);
+    left: var(--sp-3);
+    padding: 0.28rem 0.75rem;
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--c-aegean-900) 78%, transparent);
+    backdrop-filter: blur(6px);
+    color: #fff;
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .hotel-body {
+    padding: var(--sp-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+
+  .hotel-name {
+    font-size: var(--fs-xl);
+  }
+
+  .hotel-desc {
+    color: var(--text-soft);
+    font-size: var(--fs-sm);
+    line-height: 1.7;
+  }
+
+  .hotel-cta {
+    margin-top: auto;
+    align-self: flex-start;
+  }
+
+  /* --- философия --- */
+  .freedom p {
+    margin-top: var(--sp-4);
+    color: var(--text-soft);
+  }
+
+  .disclosure {
+    margin-top: var(--sp-6);
+    padding: var(--sp-5);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--c-sunset-500);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    background: var(--bg-alt);
+  }
+
+  .disclosure h3 {
+    font-family: var(--font-body);
+    font-size: var(--fs-base);
+    color: var(--c-sunset-600);
+    margin-bottom: var(--sp-3);
+  }
+
+  .disclosure p {
+    font-size: var(--fs-sm);
+    color: var(--text-soft);
+    line-height: 1.7;
+  }
+
+  @media (min-width: 860px) {
+    .hotel {
+      grid-template-columns: 42% 1fr;
+    }
+    .hotel:nth-child(even) .hotel-media {
+      order: 2;
+    }
+  }
+</style>

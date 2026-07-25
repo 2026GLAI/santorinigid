@@ -1,0 +1,269 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { WHATSAPP, SITE_URL } from '../../data/site';
+import { getImg } from '../../data/images';
+
+import heroHeli from '../../assets/img/helicopters-01.jpg';
+
+const title = 'Вертолетные прогулки на Санторини | VIP трансферы в Греции';
+const description =
+  'Вертолётные прогулки над Кальдерой Санторини. Robinson R44 и Airbus H125. Обзорные туры 20–60 мин, трансферы на Миконос и Крит. Лицензированные пилоты.';
+
+/**
+ * Борта: подтверждены разметкой страницы и alt-текстами фото на сайте.
+ * Точные ТТХ (число мест) на странице не указаны — не выдумываем,
+ * пишем только то, что подтверждено.
+ */
+const FLEET = [
+  {
+    name: 'Robinson R44',
+    image: 'helicopters-02.jpg',
+    text: 'Классика частных обзорных полётов над Кальдерой. Панорамный обзор и манёвренность — идеально для короткой прогулки над Ией и вулканом.',
+  },
+  {
+    name: 'Airbus H125',
+    image: 'helicopters-03.jpg',
+    text: 'Мощная и устойчивая машина для межостровных перелётов. Уверенно держится в эгейских ветрах, комфортна на длинных маршрутах.',
+  },
+  {
+    name: 'Свадебные полёты и съёмка',
+    image: 'helicopters-04.jpg',
+    text: 'Эффектное появление на свадьбе, предложение руки и сердца в полёте, аэрофотосъёмка в труднодоступных локациях острова.',
+  },
+];
+
+const ROUTES = [
+  { from: 'Обзор Кальдеры', time: '20 / 30 / 60 минут' },
+  { from: 'Санторини — Крит', time: '45 минут' },
+  { from: 'Санторини — Миконос', time: '45 минут' },
+  { from: 'Санторини — Афины', time: '75 минут' },
+];
+
+const ADVANTAGES = [
+  { title: 'Лицензированные пилоты', text: 'Гарантия вашей безопасности и профессионализма.' },
+  { title: 'Частные площадки', text: 'Вылет без очередей и суеты аэропорта.' },
+  { title: 'Конфиденциальность', text: 'Полная приватность вашего перелета.' },
+];
+
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: 'Вертолётные прогулки и VIP-трансферы на Санторини',
+    serviceType: 'Аренда вертолёта, обзорные полёты, VIP-трансферы',
+    provider: { '@id': `${SITE_URL}/#business` },
+    areaServed: { '@type': 'Place', name: 'Санторини и острова Греции' },
+    url: `${SITE_URL}/vip-service/helicopter-tours`,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'VIP услуги', item: `${SITE_URL}/vip-service` },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: 'Вертолётные туры',
+        item: `${SITE_URL}/vip-service/helicopter-tours`,
+      },
+    ],
+  },
+];
+---
+
+<BaseLayout title={title} description={description} schema={schema}>
+  <Hero
+    image={heroHeli}
+    alt="Вертолёт над деревней Ия и кальдерой Санторини на закате"
+    eyebrow="VIP услуги"
+    title="Вертолетные прогулки и VIP-трансферы на Санторини"
+    text="Испытайте незабываемые эмоции, взглянув на Кальдеру с высоты птичьего полета, или доберитесь до соседних островов за считанные минуты."
+  >
+    <a href={WHATSAPP.helicopter} class="btn btn-whatsapp btn-lg" target="_blank" rel="noopener">
+      Узнать стоимость
+    </a>
+  </Hero>
+
+  <section class="section">
+    <div class="container container-narrow reveal">
+      <p class="lede text-center">
+        Я предлагаю эксклюзивный сервис частных авиаперелетов по всей Греции. Наша команда
+        профессиональных пилотов обеспечит вашу безопасность и комфорт, а современный авиапарк
+        позволит подобрать идеальное решение — от короткой прогулки над живописной Ией (Oia) до
+        VIP-трансфера на Миконос или Крит.
+      </p>
+    </div>
+  </section>
+
+  <!-- Авиапарк -->
+  <section class="section section-alt">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="eyebrow">Наш авиапарк</p>
+        <h2 class="section-title">Борта и форматы полётов</h2>
+      </header>
+      <div class="grid-auto">
+        {
+          FLEET.map((f) => (
+            <article class="card heli reveal">
+              <div class="heli-media">
+                <Image
+                  src={getImg(f.image)}
+                  alt={f.name}
+                  widths={[380, 560, 780]}
+                  sizes="(min-width: 1000px) 360px, 92vw"
+                  quality={80}
+                />
+              </div>
+              <div class="card-body">
+                <h3 class="card-title">{f.name}</h3>
+                <p class="card-text">{f.text}</p>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Маршруты и преимущества -->
+  <section class="section">
+    <div class="container two-panel">
+      <div class="panel reveal">
+        <h2 class="panel-title">Маршруты и время</h2>
+        <ul class="routes">
+          {
+            ROUTES.map((r) => (
+              <li>
+                <span class="route-name">{r.from}</span>
+                <span class="route-dots" aria-hidden="true" />
+                <span class="route-time">{r.time}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="panel reveal">
+        <h2 class="panel-title">Ваши преимущества</h2>
+        <ul class="advantages">
+          {
+            ADVANTAGES.map((a) => (
+              <li>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+                <div>
+                  <strong>{a.title}</strong>
+                  <p>{a.text}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand
+    title="Полетим над Кальдерой?"
+    text="Стоимость зависит от борта, маршрута и даты. Напишите мне — подберу вариант и назову точную цену."
+    waLink={WHATSAPP.helicopter}
+  />
+</BaseLayout>
+
+<style>
+  .section-head {
+    max-width: 60ch;
+    margin-bottom: var(--sp-7);
+  }
+
+  .heli-media :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+  }
+
+  .two-panel {
+    display: grid;
+    gap: var(--sp-6);
+  }
+
+  .panel {
+    padding: var(--sp-6);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .panel-title {
+    font-size: var(--fs-xl);
+    margin-bottom: var(--sp-5);
+  }
+
+  .routes {
+    display: grid;
+    gap: var(--sp-3);
+  }
+
+  .routes li {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    font-size: var(--fs-sm);
+  }
+
+  .route-name {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .route-dots {
+    flex: 1;
+    border-bottom: 1px dotted var(--border);
+    min-width: 20px;
+  }
+
+  .route-time {
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .advantages {
+    display: grid;
+    gap: var(--sp-4);
+  }
+
+  .advantages li {
+    display: flex;
+    gap: var(--sp-3);
+  }
+
+  .advantages svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--accent);
+  }
+
+  .advantages strong {
+    display: block;
+    font-size: var(--fs-sm);
+  }
+
+  .advantages p {
+    font-size: var(--fs-sm);
+    color: var(--text-soft);
+  }
+
+  @media (min-width: 860px) {
+    .two-panel {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,390 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { WHATSAPP, CONTACTS, SITE_URL } from '../data/site';
+import { REVIEWS, GALLERY } from '../data/tours';
+import { getImg } from '../data/images';
+
+import portrait from '../assets/img/vladimir-portrait.jpg';
+
+const title = 'Обо мне — Владимир, гид на Санторини | 30 лет на острове';
+const description =
+  'Владимир — русскоязычный гид на Санторини. 30 лет жизни на острове, 14 лет профессионального опыта. Честные рекомендации, маршруты, проверенные временем.';
+
+const gallery = GALLERY.map((f) => getImg(f));
+
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    url: `${SITE_URL}/about`,
+    mainEntity: {
+      '@type': 'Person',
+      name: 'Владимир',
+      jobTitle: 'Частный русскоязычный гид на Санторини',
+      description:
+        '30 лет живёт на Санторини, 14 лет профессионального опыта проведения индивидуальных экскурсий.',
+      knowsLanguage: ['ru', 'el'],
+      worksFor: { '@id': `${SITE_URL}/#business` },
+      sameAs: [CONTACTS.telegram, CONTACTS.instagram],
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Обо мне', item: `${SITE_URL}/about` },
+    ],
+  },
+];
+
+const principles = [
+  {
+    title: 'Честные рекомендации',
+    text: 'Я советую то, что действительно стоит вашего времени и денег. Если место переоценено — я скажу об этом прямо.',
+  },
+  {
+    title: 'Только ваша компания',
+    text: 'Никаких сборных групп и чужих людей рядом. Экскурсия проходит только для вас и ваших близких.',
+  },
+  {
+    title: 'Гибкость до последней минуты',
+    text: 'Программа корректируется под вас даже в день экскурсии. Устали — отдохнём, понравилось место — задержимся.',
+  },
+  {
+    title: 'Ответственность за впечатления',
+    text: 'Организация отдыха для меня — это прежде всего ответственность за то, каким вы запомните остров.',
+  },
+];
+
+const timeline = [
+  { n: '~1996', label: 'Переезд на Санторини', text: 'Моя история с островом началась три десятилетия назад.' },
+  { n: '~2012', label: 'Начало работы гидом', text: '14 лет профессионального опыта индивидуальных экскурсий.' },
+  { n: 'Сегодня', label: 'Полный сервис', text: 'Экскурсии, яхты, вертолёты, отели и фотосессии — под ключ.' },
+];
+---
+
+<BaseLayout title={title} description={description} schema={schema}>
+  <section class="section intro-section">
+    <div class="container intro">
+      <div class="intro-photo reveal">
+        <Image
+          src={portrait}
+          alt="Владимир — русскоязычный гид на Санторини"
+          widths={[420, 620, 840]}
+          sizes="(min-width: 900px) 460px, 92vw"
+          quality={84}
+          loading="eager"
+        />
+      </div>
+      <div class="intro-text reveal">
+        <p class="eyebrow">Обо мне</p>
+        <h1>Рад встрече! Меня зовут Владимир</h1>
+        <p class="lede">
+          Моя история с Санторини началась три десятилетия назад, и за эти годы я изучил каждый
+          его секрет.
+        </p>
+        <p>
+          Организация отдыха для меня — это прежде всего ответственность за ваши впечатления.
+          Я здесь, чтобы избавить вас от организационных забот, предложить честные рекомендации
+          и провести по маршрутам, проверенным временем. Если вы ищете надежного проводника и
+          спокойную, дружескую атмосферу — нам по пути.
+        </p>
+        <div class="intro-actions">
+          <a href={WHATSAPP.general} class="btn btn-whatsapp" target="_blank" rel="noopener">
+            Написать мне
+          </a>
+          <a href="/tours" class="btn btn-ghost">Мои экскурсии</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Путь -->
+  <section class="section section-alt">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="eyebrow">Мой путь</p>
+        <h2 class="section-title">30 лет на одном острове</h2>
+      </header>
+      <ol class="timeline">
+        {
+          timeline.map((t) => (
+            <li class="tl-item reveal">
+              <span class="tl-year">{t.n}</span>
+              <h3>{t.label}</h3>
+              <p>{t.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- Принципы -->
+  <section class="section">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="eyebrow">Мой подход</p>
+        <h2 class="section-title">Как я работаю</h2>
+      </header>
+      <div class="grid-auto">
+        {
+          principles.map((p) => (
+            <article class="principle reveal">
+              <h3>{p.title}</h3>
+              <p>{p.text}</p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Отзывы -->
+  <section class="section section-alt" id="reviews">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="eyebrow">Отзывы</p>
+        <h2 class="section-title">Отзывы и счастливые моменты моих гостей</h2>
+        <p class="lede">
+          Для меня каждая экскурсия — это не просто маршрут, а новая история. Я благодарен моим
+          гостям за доверие и те улыбки, которые делают мою работу лучшей в мире!
+        </p>
+      </header>
+
+      <div class="grid-auto">
+        {
+          REVIEWS.map((r) => (
+            <figure class="card review reveal">
+              <div class="card-body">
+                <div class="stars" aria-label="Оценка 5 из 5">
+                  {[1, 2, 3, 4, 5].map(() => (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z" />
+                    </svg>
+                  ))}
+                </div>
+                <blockquote>{r.text}</blockquote>
+                <figcaption>
+                  <strong>{r.author}</strong>
+                  <span>{r.date}</span>
+                </figcaption>
+              </div>
+            </figure>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Галерея -->
+  <section class="section">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="eyebrow">Фотографии</p>
+        <h2 class="section-title">Мои гости на острове</h2>
+      </header>
+      <div class="gallery reveal">
+        {
+          gallery.map((g, i) => (
+            <figure class="gal-item">
+              <Image
+                src={g}
+                alt={`Гости Владимира на Санторини, фото ${i + 1}`}
+                widths={[300, 500, 700]}
+                sizes="(min-width: 1000px) 280px, (min-width: 640px) 45vw, 90vw"
+                quality={76}
+              />
+            </figure>
+          ))
+        }
+      </div>
+      <p class="ig-link reveal">
+        <a href={CONTACTS.instagram} class="btn btn-ghost" target="_blank" rel="noopener">
+          Больше фото в Instagram ↗
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .intro-section {
+    padding-top: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .intro {
+    display: grid;
+    gap: var(--sp-7);
+    align-items: center;
+  }
+
+  .intro-photo {
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .intro-photo :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+
+  .intro-text > * + * {
+    margin-top: var(--sp-4);
+  }
+
+  .intro-text h1 {
+    font-size: var(--fs-3xl);
+  }
+
+  .intro-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+    margin-top: var(--sp-6);
+  }
+
+  .section-head {
+    max-width: 62ch;
+    margin-bottom: var(--sp-7);
+  }
+
+  /* --- таймлайн --- */
+  .timeline {
+    display: grid;
+    gap: var(--sp-5);
+  }
+
+  .tl-item {
+    position: relative;
+    padding: var(--sp-5);
+    padding-left: var(--sp-6);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: var(--sp-5);
+    bottom: var(--sp-5);
+    width: 3px;
+    border-radius: 3px;
+    background: var(--accent);
+  }
+
+  .tl-year {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    color: var(--accent);
+  }
+
+  .tl-item h3 {
+    margin-top: var(--sp-2);
+    font-family: var(--font-body);
+    font-size: var(--fs-base);
+  }
+
+  .tl-item p {
+    margin-top: var(--sp-2);
+    font-size: var(--fs-sm);
+    color: var(--text-soft);
+  }
+
+  /* --- принципы --- */
+  .principle {
+    padding: var(--sp-5);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .principle h3 {
+    font-family: var(--font-body);
+    font-size: var(--fs-base);
+    color: var(--accent);
+    margin-bottom: var(--sp-2);
+  }
+
+  .principle p {
+    font-size: var(--fs-sm);
+    color: var(--text-soft);
+  }
+
+  /* --- отзывы --- */
+  .stars {
+    display: flex;
+    gap: 2px;
+    color: var(--c-sunset-500);
+  }
+
+  .review blockquote {
+    font-size: var(--fs-sm);
+    color: var(--text-soft);
+    line-height: 1.7;
+  }
+
+  .review figcaption {
+    margin-top: auto;
+    padding-top: var(--sp-3);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--sp-2);
+    font-size: var(--fs-sm);
+  }
+
+  .review figcaption span {
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  /* --- галерея --- */
+  .gallery {
+    display: grid;
+    gap: var(--sp-3);
+    grid-template-columns: repeat(auto-fill, minmax(min(230px, 100%), 1fr));
+  }
+
+  .gal-item {
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .gal-item :global(img) {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    transition: transform 600ms var(--ease);
+  }
+
+  .gal-item:hover :global(img) {
+    transform: scale(1.07);
+  }
+
+  .ig-link {
+    margin-top: var(--sp-6);
+    text-align: center;
+  }
+
+  @media (min-width: 900px) {
+    .intro {
+      grid-template-columns: 440px 1fr;
+    }
+    .timeline {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

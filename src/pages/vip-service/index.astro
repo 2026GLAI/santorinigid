@@ -1,0 +1,149 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { WHATSAPP, EXTERNAL, SITE_URL } from '../../data/site';
+import { getImg } from '../../data/images';
+
+import heroVip from '../../assets/img/yachts-03.jpg';
+
+const title = 'VIP услуги на Санторини | Яхты, вертолёты, отели — 2026';
+const description =
+  'VIP-сервис на Санторини: аренда яхт и катамаранов, вертолётные прогулки, подбор лучших отелей с видом на Кальдеру и профессиональные фотосессии.';
+
+const SERVICES = [
+  {
+    href: '/vip-service/yacht-rent-santorini',
+    image: 'yachts-02.jpg',
+    title: 'Яхты',
+    text: 'Морские прогулки: от групповых круизов на закате до аренды приватных яхт',
+    external: false,
+  },
+  {
+    href: '/vip-service/helicopter-tours',
+    image: 'helicopters-01.jpg',
+    title: 'Вертолеты',
+    text: 'Полеты над островом: обзорные туры и VIP-трансферы на другие острова Греции',
+    external: false,
+  },
+  {
+    href: '/vip-service/santorini-hotels-2026',
+    image: 'hotels-04.jpg',
+    title: 'Отели',
+    text: 'Откройте для себя коллекцию лучших отелей острова. Уединение, роскошь и закаты, меняющие представление о красоте.',
+    external: false,
+  },
+  {
+    href: EXTERNAL.flyingDress,
+    image: 'tours-03.webp',
+    title: 'Фотосессии',
+    text: 'Оставьте в памяти не только впечатления, но и безупречные снимки. Профессиональная съемка на фоне белоснежной Ии, закатов Кальдеры или знаменитая фотосессия в «летящем платье».',
+    external: true,
+  },
+];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE_URL },
+    { '@type': 'ListItem', position: 2, name: 'VIP услуги', item: `${SITE_URL}/vip-service` },
+  ],
+};
+---
+
+<BaseLayout title={title} description={description} schema={schema}>
+  <Hero
+    image={heroVip}
+    alt="Скоростная яхта в бирюзовом море у берегов Санторини"
+    eyebrow="Услуги"
+    title="Аренда яхт для незабываемых моментов"
+    text="Санторини — это не только прогулки по узким улочкам. Это свобода в небе, комфорт на воде и уют в лучших отелях острова. Я позабочусь о каждой детали вашего отдыха"
+  >
+    <a href={WHATSAPP.general} class="btn btn-whatsapp btn-lg" target="_blank" rel="noopener">
+      Написать в WhatsApp
+    </a>
+  </Hero>
+
+  <section class="section">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="eyebrow">Услуги</p>
+        <h2 class="section-title">Четыре направления</h2>
+      </header>
+
+      <div class="services">
+        {
+          SERVICES.map((s) => (
+            <a
+              href={s.href}
+              class="card svc reveal"
+              target={s.external ? '_blank' : undefined}
+              rel={s.external ? 'noopener' : undefined}
+            >
+              <div class="svc-media">
+                <Image
+                  src={getImg(s.image)}
+                  alt={s.title}
+                  widths={[420, 640, 900]}
+                  sizes="(min-width: 900px) 46vw, 92vw"
+                  quality={80}
+                />
+              </div>
+              <div class="card-body">
+                <h3 class="card-title">{s.title}</h3>
+                <p class="card-text">{s.text}</p>
+                <span class="card-more">
+                  Подробнее {s.external ? '↗' : '→'}
+                </span>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .section-head {
+    max-width: 60ch;
+    margin-bottom: var(--sp-7);
+  }
+
+  .services {
+    display: grid;
+    gap: var(--sp-5);
+  }
+
+  .svc-media {
+    overflow: hidden;
+  }
+
+  .svc-media :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    transition: transform 700ms var(--ease);
+  }
+
+  .svc:hover .svc-media :global(img) {
+    transform: scale(1.05);
+  }
+
+  .card-more {
+    margin-top: auto;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  @media (min-width: 760px) {
+    .services {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

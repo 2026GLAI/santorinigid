@@ -1,0 +1,395 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Faq from '../components/Faq.astro';
+import { WHATSAPP, SITE_URL } from '../data/site';
+import { TOUR_STOPS, TOUR_DETAILS, REVIEWS, FAQ, GALLERY } from '../data/tours';
+import { getImg } from '../data/images';
+
+import heroTour from '../assets/img/tours-01.jpg';
+
+const title = 'Индивидуальная экскурсия по Санторини | Гид Владимир 2026';
+const description =
+  'Индивидуальная экскурсия по Санторини с русскоязычным гидом. Ия, Имеровигли, скрытые локации без толп. 14 лет опыта. Цена 2026 года.';
+
+/** Галерея: фото гостей. */
+const gallery = GALLERY.map((f) => getImg(f));
+
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'TouristTrip',
+    name: 'Индивидуальная обзорная экскурсия по Санторини на автомобиле',
+    description:
+      'Обзорная экскурсия по Санторини с русскоязычным гидом: Ия, гора Пророка Ильи, церковь Панагия Эпископи и винный музей Кутсуяннопулос с дегустацией.',
+    url: `${SITE_URL}/tours`,
+    provider: { '@id': `${SITE_URL}/#business` },
+    inLanguage: 'ru',
+    touristType: ['Индивидуальные путешественники', 'Пассажиры круизных лайнеров', 'Семьи'],
+    itinerary: {
+      '@type': 'ItemList',
+      numberOfItems: TOUR_STOPS.length,
+      itemListElement: TOUR_STOPS.map((s, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        item: { '@type': 'TouristAttraction', name: s.title, description: s.text },
+      })),
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQ.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Экскурсии', item: `${SITE_URL}/tours` },
+    ],
+  },
+];
+---
+
+<BaseLayout title={title} description={description} schema={schema}>
+  <Hero
+    image={heroTour}
+    alt="Гости на обзорной экскурсии по Санторини с видом на кальдеру"
+    eyebrow="Экскурсии"
+    title="Индивидуальная обзорная экскурсия по Санторини на автомобиле"
+    text="Весь остров за один день: от синих куполов Санторини до красных пляжей Акротири"
+  >
+    <a href={WHATSAPP.tour} class="btn btn-whatsapp btn-lg" target="_blank" rel="noopener">
+      Обсудить экскурсию
+    </a>
+  </Hero>
+
+  <section class="section">
+    <div class="container container-narrow text-block reveal">
+      <p class="lede">
+        Привет! Если вы хотите увидеть Санторини без суеты и толп, обзорная экскурсия — это
+        лучший выбор. Как ваш персональный гид, я не просто покажу вам «визитные карточки»
+        острова, а адаптирую маршрут под ваши интересы и темп.
+      </p>
+    </div>
+  </section>
+
+  <!-- Формат -->
+  <section class="section section-alt">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="eyebrow">Формат</p>
+        <h2 class="section-title">Сердце острова Санторини за 4,5 часа</h2>
+      </header>
+      <div class="two-col reveal">
+        <p>
+          Забудьте о стандартных маршрутах и тесных туристических автобусах. Я приглашаю вас в
+          путешествие, где сценарий пишете вы сами. Это индивидуальный формат, созданный для
+          тех, кто ценит комфорт, приватность и свободу выбора. Мы не следуем графику — мы
+          следуем за вашим вдохновением.
+        </p>
+        <p>
+          Забудьте о скучных групповых турах и строгих расписаниях! Я приглашаю вас в
+          персональное путешествие по Санторини – туда, где каждый поворот дороги открывает
+          новую легенду, а каждый миг становится частью вашей уникальной истории.
+        </p>
+      </div>
+
+      <dl class="details reveal">
+        {
+          TOUR_DETAILS.map((d) => (
+            <div class="detail">
+              <dt>{d.label}</dt>
+              <dd>{d.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <!-- Маршрут -->
+  <section class="section">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="eyebrow">Маршрут</p>
+        <h2 class="section-title">Что мы увидим</h2>
+        <p class="lede">
+          Помимо главных достопримечательностей, наш маршрут пройдет через несколько особенных
+          локаций с захватывающими видами.
+        </p>
+      </header>
+
+      <ol class="stops">
+        {
+          TOUR_STOPS.map((s, i) => (
+            <li class="stop reveal">
+              <div class="stop-media">
+                <Image
+                  src={getImg(s.image)}
+                  alt={`${s.title} — ${s.subtitle}`}
+                  widths={[420, 640, 880]}
+                  sizes="(min-width: 900px) 480px, 92vw"
+                  quality={80}
+                />
+                <span class="stop-num">{String(i + 1).padStart(2, '0')}</span>
+              </div>
+              <div class="stop-text">
+                <h3>{s.title}</h3>
+                <p class="stop-sub">{s.subtitle}</p>
+                <p>{s.text}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- Галерея -->
+  <section class="section section-alt">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="eyebrow">Фотографии</p>
+        <h2 class="section-title">Отзывы и счастливые моменты моих гостей</h2>
+        <p class="lede">
+          Для меня каждая экскурсия — это не просто маршрут, а новая история. Я благодарен моим
+          гостям за доверие и те улыбки, которые делают мою работу лучшей в мире!
+        </p>
+      </header>
+
+      <div class="gallery reveal">
+        {
+          gallery.map((g, i) => (
+            <figure class="gal-item">
+              <Image
+                src={g}
+                alt={`Гости Владимира на экскурсии по Санторини, фото ${i + 1}`}
+                widths={[300, 500, 700]}
+                sizes="(min-width: 1000px) 280px, (min-width: 640px) 45vw, 90vw"
+                quality={76}
+              />
+            </figure>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Отзывы -->
+  <section class="section">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="eyebrow">Отзывы</p>
+        <h2 class="section-title">Слова моих гостей</h2>
+      </header>
+      <div class="grid-auto">
+        {
+          REVIEWS.map((r) => (
+            <figure class="card review reveal">
+              <div class="card-body">
+                <div class="stars" aria-label="Оценка 5 из 5">
+                  {[1, 2, 3, 4, 5].map(() => (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z" />
+                    </svg>
+                  ))}
+                </div>
+                <blockquote>{r.text}</blockquote>
+                <figcaption>
+                  <strong>{r.author}</strong>
+                  <span>{r.date}</span>
+                </figcaption>
+              </div>
+            </figure>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <Faq items={FAQ} />
+
+  <CtaBand
+    title="Составим вашу программу?"
+    text="Напишите даты и число гостей — предложу маршрут и назову цену."
+    waLink={WHATSAPP.tour}
+  />
+</BaseLayout>
+
+<style>
+  .section-head {
+    max-width: 62ch;
+    margin-bottom: var(--sp-7);
+  }
+
+  .text-block .lede {
+    font-size: var(--fs-xl);
+    font-family: var(--font-display);
+    line-height: 1.5;
+    color: var(--text);
+    text-align: center;
+  }
+
+  .two-col {
+    display: grid;
+    gap: var(--sp-5);
+    color: var(--text-soft);
+  }
+
+  .details {
+    display: grid;
+    gap: var(--sp-4);
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    margin-top: var(--sp-7);
+    padding-top: var(--sp-6);
+    border-top: 1px solid var(--border);
+  }
+
+  .detail dt {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: var(--sp-1);
+  }
+
+  .detail dd {
+    font-size: var(--fs-sm);
+    color: var(--text-soft);
+  }
+
+  /* --- точки маршрута --- */
+  .stops {
+    display: grid;
+    gap: var(--sp-8);
+  }
+
+  .stop {
+    display: grid;
+    gap: var(--sp-5);
+    align-items: center;
+  }
+
+  .stop-media {
+    position: relative;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .stop-media :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .stop-num {
+    position: absolute;
+    top: var(--sp-4);
+    left: var(--sp-4);
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter: blur(6px);
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .stop-text h3 {
+    font-size: var(--fs-2xl);
+  }
+
+  .stop-sub {
+    margin-top: var(--sp-1);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--fs-lg);
+    color: var(--accent);
+  }
+
+  .stop-text p:last-child {
+    margin-top: var(--sp-4);
+    color: var(--text-soft);
+  }
+
+  /* --- галерея --- */
+  .gallery {
+    display: grid;
+    gap: var(--sp-3);
+    grid-template-columns: repeat(auto-fill, minmax(min(230px, 100%), 1fr));
+  }
+
+  .gal-item {
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .gal-item :global(img) {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    transition: transform 600ms var(--ease);
+  }
+
+  .gal-item:hover :global(img) {
+    transform: scale(1.07);
+  }
+
+  /* --- отзывы --- */
+  .stars {
+    display: flex;
+    gap: 2px;
+    color: var(--c-sunset-500);
+  }
+
+  .review blockquote {
+    font-size: var(--fs-sm);
+    color: var(--text-soft);
+    line-height: 1.7;
+  }
+
+  .review figcaption {
+    margin-top: auto;
+    padding-top: var(--sp-3);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--sp-2);
+    font-size: var(--fs-sm);
+  }
+
+  .review figcaption span {
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  @media (min-width: 860px) {
+    .two-col {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-6);
+    }
+    .stop {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-7);
+    }
+    .stop:nth-child(even) .stop-media {
+      order: 2;
+    }
+  }
+</style>

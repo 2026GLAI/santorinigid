@@ -1,0 +1,294 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Faq from '../components/Faq.astro';
+import { WHATSAPP, EXTERNAL, SITE_URL } from '../data/site';
+import { getImg } from '../data/images';
+
+import heroIsland from '../assets/img/hero-oia.jpg';
+
+const title = 'О Санторини: достопримечательности, районы и советы гида 2026';
+const description =
+  'Всё о Санторини от гида, живущего на острове 30 лет: главные достопримечательности, районы Ия и Имеровигли, как добраться, когда ехать и что посмотреть.';
+
+/**
+ * ВАЖНО: все факты ниже подтверждены текстами с santorinivip.com
+ * (снято 2026-07-25) — высота горы Пророка Ильи, год постройки Панагии
+ * Эпископи, цены подъёма из порта, число ступеней, время в пути паромов.
+ * Ничего не додумано. Источник: docs/harvest/verbatim-content.md
+ */
+const SIGHTS = [
+  {
+    name: 'Ия (Ойя)',
+    tag: 'Открыточный вид',
+    image: 'tours-07.jpg',
+    text: 'Белоснежные домики, синие купола, извилистые улочки, словно сошедшие с картины, и бескрайнее Эгейское море, сливающееся с небом. Это не просто деревня, это живая мечта, вдохновляющая художников и фотографов со всего мира. Здесь же — руины Венецианского замка и знаменитые закаты.',
+  },
+  {
+    name: 'Гора Пророка Ильи',
+    tag: '567 метров',
+    image: 'tours-08.jpg',
+    text: 'Самая высокая точка острова со старинным мужским монастырём XVIII века. С вершины открывается панорамный вид на весь архипелаг, а в ясный день отсюда можно увидеть даже очертания далёкого Крита.',
+  },
+  {
+    name: 'Панагия Эпископи',
+    tag: '1118 год',
+    image: 'tours-09.jpg',
+    text: 'Старейшая церковь острова в селении Эксо Гония, возведённая по указу византийского императора. Пережила землетрясения и пожары. Внутри — уникальный мраморный иконостас и чудотворная икона Божьей Матери «Сладкое лобзание».',
+  },
+  {
+    name: 'Музей вина Кутсуяннопулос',
+    tag: 'Дегустация',
+    image: 'tours-11.jpg',
+    text: 'Уникальный подземный музей семьи Кутсуяннопулос. Здесь, на глубине, раскрываются секреты производства вина на вулканической почве, а кульминацией становится дегустация четырёх элитных сортов, включая легендарное десертное Vinsanto.',
+  },
+  {
+    name: 'Имеровигли',
+    tag: '«Балкон Санторини»',
+    image: 'hotels-01.jpg',
+    text: 'Самый тихий и высокий район Кальдеры. Панорамный вид на вулкан и закаты — без туристической суеты Ии. Отсюда открывается лучшая перспектива на всю дугу острова.',
+  },
+  {
+    name: 'Фиростефани',
+    tag: 'Тишина у Фиры',
+    image: 'hotels-02.jpg',
+    text: 'Живописный район, где близость к центру Фиры сочетается с абсолютной тишиной частных террас. Традиционный кикладский стиль и лучшие виды на Кальдеру в спокойной атмосфере.',
+  },
+];
+
+const ARRIVAL = [
+  {
+    title: 'С Крита на пароме',
+    text: 'Скоростные катамараны (например, SeaJets) идут из Ираклиона или Ретимно около 2–2,5 часов. Билеты лучше брать заранее: в сезон места на утренние рейсы разлетаются быстро. Паром приходит в главный порт острова — Афиньос.',
+  },
+  {
+    title: 'На круизном лайнере',
+    text: 'Крупные суда швартуются на рейде, до берега везут катера-тендеры. Номерок на тендер стоит получить заранее — так вы попадёте на первый поток и не потеряете время в очереди.',
+  },
+  {
+    title: 'Из Старого порта в Фиру',
+    text: 'Три варианта подъёма: фуникулёр (10 евро, самый быстрый и с панорамными видами), ослики (10 евро) и 588 ступеней пешком. Последний вариант в жару — сомнительное удовольствие.',
+  },
+];
+
+const FAQ_ISLAND = [
+  {
+    q: 'Сколько дней нужно на Санторини?',
+    a: 'Главные локации острова — Ия, гора Пророка Ильи, Панагия Эпископи и винный музей — можно увидеть за одну обзорную экскурсию продолжительностью 4,5 часа. Если вы приехали на несколько дней, добавьте морскую прогулку на яхте и закат в Ии.',
+  },
+  {
+    q: 'Можно ли успеть посмотреть остров за один день с круиза?',
+    a: 'Да. Я специализируюсь на экскурсиях для гостей круизных лайнеров с учётом времени стоянки и гарантированным возвращением к отправлению.',
+  },
+  {
+    q: 'Где самые красивые закаты?',
+    a: 'Классика — Ия, где закат наблюдают у руин Венецианского замка. Более спокойная альтернатива с не менее эффектным видом — Имеровигли, «балкон Санторини». С воды закат виден иначе: закатный круиз проходит прямо под скалами Ии.',
+  },
+  {
+    q: 'Что попробовать из местного?',
+    a: 'Вина с вулканической почвы — в первую очередь десертное Vinsanto. Дегустация четырёх элитных сортов входит в программу посещения подземного музея виноделия Кутсуяннопулос.',
+  },
+  {
+    q: 'Нужен ли гид, если можно взять машину напрокат?',
+    a: 'Машина даёт свободу передвижения, но не даёт контекста и знания острова. Со мной вы не тратите время на парковки и поиск точек съёмки, слышите историю каждого места и получаете маршрут, скорректированный под вас прямо в день экскурсии.',
+  },
+];
+
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Главные достопримечательности Санторини',
+    numberOfItems: SIGHTS.length,
+    itemListElement: SIGHTS.map((s, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'TouristAttraction',
+        name: s.name,
+        description: s.text,
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: 'Санторини',
+          addressCountry: 'GR',
+        },
+      },
+    })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQ_ISLAND.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'О Санторини', item: `${SITE_URL}/santorini` },
+    ],
+  },
+];
+---
+
+<BaseLayout title={title} description={description} schema={schema}>
+  <Hero
+    image={heroIsland}
+    alt="Панорама Санторини: белые дома и синие купола на фоне Эгейского моря"
+    eyebrow="Об острове"
+    title="Санторини: остров, который я знаю 30 лет"
+    text="Главные достопримечательности, районы и практические советы — от человека, который живёт здесь каждый день."
+  >
+    <a href="#sights" class="btn btn-primary btn-lg">Достопримечательности</a>
+  </Hero>
+
+  <section class="section">
+    <div class="container container-narrow reveal">
+      <p class="lede text-center">
+        Санторини — это вулканический остров в Эгейском море, чья кальдера образовалась после
+        одного из крупнейших извержений в истории. Сегодня это белоснежные деревни на краю
+        обрыва, чёрные и красные пляжи, вино с вулканической почвы и закаты, ради которых сюда
+        едут со всего мира.
+      </p>
+    </div>
+  </section>
+
+  <!-- Достопримечательности -->
+  <section class="section section-alt" id="sights">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="eyebrow">Что посмотреть</p>
+        <h2 class="section-title">Главные места острова</h2>
+        <p class="lede">
+          Эти локации входят в мою обзорную экскурсию. Маршрут корректируется под ваши интересы —
+          можно углубиться в одно место или охватить больше.
+        </p>
+      </header>
+
+      <div class="grid-auto">
+        {
+          SIGHTS.map((s) => (
+            <article class="card sight reveal">
+              <div class="sight-media">
+                <Image
+                  src={getImg(s.image)}
+                  alt={s.name}
+                  widths={[380, 580, 800]}
+                  sizes="(min-width: 1000px) 360px, (min-width: 700px) 45vw, 92vw"
+                  quality={80}
+                />
+                <span class="sight-tag">{s.tag}</span>
+              </div>
+              <div class="card-body">
+                <h3 class="card-title">{s.name}</h3>
+                <p class="card-text">{s.text}</p>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Как добраться -->
+  <section class="section">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="eyebrow">Практика</p>
+        <h2 class="section-title">Как попасть на остров</h2>
+      </header>
+
+      <div class="grid-auto">
+        {
+          ARRIVAL.map((a) => (
+            <article class="arrival reveal">
+              <h3>{a.title}</h3>
+              <p>{a.text}</p>
+            </article>
+          ))
+        }
+      </div>
+
+      <p class="ferry-link reveal">
+        <a href={EXTERNAL.ferries} class="btn btn-ghost" target="_blank" rel="noopener">
+          Расписание паромов ↗
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <Faq items={FAQ_ISLAND} title="Частые вопросы об острове" eyebrow="Вопросы и ответы" />
+
+  <CtaBand
+    title="Хотите увидеть всё это вживую?"
+    text="Составлю маршрут под ваши даты, интересы и темп. Напишите — обсудим."
+    waLink={WHATSAPP.tour}
+  />
+</BaseLayout>
+
+<style>
+  .section-head {
+    max-width: 62ch;
+    margin-bottom: var(--sp-7);
+  }
+
+  .sight-media {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sight-media :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    transition: transform 700ms var(--ease);
+  }
+
+  .sight:hover .sight-media :global(img) {
+    transform: scale(1.06);
+  }
+
+  .sight-tag {
+    position: absolute;
+    top: var(--sp-3);
+    left: var(--sp-3);
+    padding: 0.28rem 0.75rem;
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--surface) 90%, transparent);
+    backdrop-filter: blur(6px);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .arrival {
+    padding: var(--sp-5);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .arrival h3 {
+    font-family: var(--font-body);
+    font-size: var(--fs-base);
+    color: var(--accent);
+    margin-bottom: var(--sp-2);
+  }
+
+  .arrival p {
+    font-size: var(--fs-sm);
+    color: var(--text-soft);
+    line-height: 1.7;
+  }
+
+  .ferry-link {
+    margin-top: var(--sp-6);
+    text-align: center;
+  }
+</style>

@@ -1,0 +1,379 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { WHATSAPP, SITE_URL } from '../../data/site';
+import { YACHTS, YACHT_PROGRAMS, YACHT_INCLUDED } from '../../data/yachts';
+import { getImg } from '../../data/images';
+
+import heroYacht from '../../assets/img/yachts-01.jpg';
+
+const title = 'Аренда яхт на Санторини 2026: Катамараны | Гид Владимир';
+const description =
+  'Аренда яхт и катамаранов на Санторини: дневные и закатные круизы, Full Day. 8 судов, цены 2026, всё включено — трансфер, бар, обед на борту.';
+
+const minPrice = Math.min(...YACHTS.map((y) => y.low.day));
+
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: 'Аренда яхт и катамаранов на Санторини',
+    serviceType: 'Аренда яхты с экипажем',
+    provider: { '@id': `${SITE_URL}/#business` },
+    areaServed: { '@type': 'Place', name: 'Санторини, Греция' },
+    url: `${SITE_URL}/vip-service/yacht-rent-santorini`,
+    offers: {
+      '@type': 'AggregateOffer',
+      priceCurrency: 'EUR',
+      lowPrice: minPrice,
+      highPrice: Math.max(...YACHTS.map((y) => y.high.full)),
+      offerCount: YACHTS.length,
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'VIP услуги', item: `${SITE_URL}/vip-service` },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: 'Аренда яхт',
+        item: `${SITE_URL}/vip-service/yacht-rent-santorini`,
+      },
+    ],
+  },
+];
+
+const eur = (n: number) => '€' + n.toLocaleString('ru-RU').replace(/,/g, ' ');
+---
+
+<BaseLayout title={title} description={description} schema={schema}>
+  <Hero
+    image={heroYacht}
+    alt="Яхта на закате у берегов Санторини, бокалы и фрукты на палубе"
+    eyebrow="VIP услуги"
+    title="Аренда яхт и катамаранов на Санторини"
+    text="В мою коллекцию попали только лучшие суда острова: и роскошные катамараны, и мощные скоростные яхты."
+  >
+    <a href={WHATSAPP.yacht} class="btn btn-whatsapp btn-lg" target="_blank" rel="noopener">
+      Обсудить в WhatsApp
+    </a>
+  </Hero>
+
+  <section class="section">
+    <div class="container container-narrow reveal">
+      <p class="lede text-center">
+        Для меня важно, чтобы ваш отдых был безупречным, поэтому я работаю только с теми
+        капитанами и экипажами, которые соответствуют моим высоким стандартам сервиса.
+      </p>
+    </div>
+  </section>
+
+  <!-- Программы -->
+  <section class="section section-alt">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="eyebrow">Форматы</p>
+        <h2 class="section-title">Стандартные программы</h2>
+      </header>
+      <div class="grid-auto">
+        {
+          YACHT_PROGRAMS.map((p) => (
+            <article class="card program reveal">
+              <div class="card-body">
+                <span class="program-time">{p.time}</span>
+                <h3 class="card-title">{p.title}</h3>
+                <p class="card-text">{p.text}</p>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Флот -->
+  <section class="section">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="eyebrow">Флот</p>
+        <h2 class="section-title">{YACHTS.length} судов на выбор</h2>
+        <p class="lede">
+          Цены указаны за судно целиком, а не за человека. Низкий и высокий сезон отличаются —
+          уточните ваши даты, и я назову точную стоимость.
+        </p>
+      </header>
+
+      <div class="fleet">
+        {
+          YACHTS.map((y) => (
+            <article class="card yacht reveal" id={y.slug}>
+              <div class="yacht-media">
+                <Image
+                  src={getImg(y.image)}
+                  alt={`${y.name} — аренда на Санторини`}
+                  widths={[420, 640, 900]}
+                  sizes="(min-width: 900px) 460px, 92vw"
+                  quality={80}
+                />
+                {y.badge && <span class="yacht-badge">{y.badge}</span>}
+              </div>
+
+              <div class="yacht-body">
+                <h3 class="yacht-name">{y.name}</h3>
+                {y.guests && <p class="yacht-guests">до {y.guests} гостей</p>}
+                <p class="yacht-desc">{y.description}</p>
+
+                <table class="prices">
+                  <caption class="visually-hidden">Цены на аренду {y.name}</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Программа</th>
+                      <th scope="col">Низкий сезон</th>
+                      <th scope="col">Высокий сезон</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th scope="row">Дневной тур (5 ч)</th>
+                      <td>{eur(y.low.day)}</td>
+                      <td>{eur(y.high.day)}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Вечерний с закатом (5 ч)</th>
+                      <td>{eur(y.low.sunset)}</td>
+                      <td>{eur(y.high.sunset)}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Весь день (10 ч)</th>
+                      <td>{eur(y.low.full)}</td>
+                      <td>{eur(y.high.full)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <div class="yacht-perks" aria-label="Включено в стоимость">
+                  <span title="Вино и напитки">🍷 Бар</span>
+                  <span title="Обед или ужин на борту">🥗 Еда</span>
+                  <span title="Трансфер из отеля">🚐 Трансфер</span>
+                </div>
+
+                <a
+                  href={WHATSAPP.yacht}
+                  class="btn btn-whatsapp"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  Обсудить в WhatsApp
+                </a>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Что включено -->
+  <section class="section section-alt">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="eyebrow">Всё включено</p>
+        <h2 class="section-title">Что входит в стоимость</h2>
+      </header>
+      <div class="grid-auto">
+        {
+          YACHT_INCLUDED.map((i) => (
+            <div class="included reveal">
+              <h3>{i.title}</h3>
+              <p>{i.text}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <CtaBand
+    title="Не нашли то, что искали?"
+    text="Нужна яхта для особого события или сложный маршрут для большой группы? Свяжитесь со мной напрямую. Зная все нюансы местного флота, я найду лучшее решение под ваш бюджет."
+    waLink={WHATSAPP.yacht}
+  />
+</BaseLayout>
+
+<style>
+  .section-head {
+    max-width: 62ch;
+    margin-bottom: var(--sp-7);
+  }
+
+  .program-time {
+    display: inline-block;
+    padding: 0.28rem 0.75rem;
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--accent);
+    width: fit-content;
+  }
+
+  /* --- флот --- */
+  .fleet {
+    display: grid;
+    gap: var(--sp-6);
+  }
+
+  .yacht {
+    display: grid;
+    gap: 0;
+    scroll-margin-top: 90px;
+  }
+
+  .yacht-media {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .yacht-media :global(img) {
+    width: 100%;
+    height: 100%;
+    min-height: 240px;
+    object-fit: cover;
+  }
+
+  .yacht-badge {
+    position: absolute;
+    top: var(--sp-3);
+    left: var(--sp-3);
+    padding: 0.3rem 0.8rem;
+    border-radius: var(--radius-full);
+    background: var(--c-sunset-500);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .yacht-body {
+    padding: var(--sp-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+
+  .yacht-name {
+    font-size: var(--fs-xl);
+  }
+
+  .yacht-guests {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .yacht-desc {
+    color: var(--text-soft);
+    font-size: var(--fs-sm);
+  }
+
+  /* --- таблица цен --- */
+  .prices {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-sm);
+  }
+
+  .prices thead th {
+    padding: var(--sp-2) var(--sp-2);
+    text-align: right;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .prices thead th:first-child {
+    text-align: left;
+  }
+
+  .prices tbody th {
+    padding: var(--sp-3) var(--sp-2);
+    text-align: left;
+    font-weight: 500;
+    color: var(--text-soft);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .prices tbody td {
+    padding: var(--sp-3) var(--sp-2);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .prices tbody tr:last-child th,
+  .prices tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .prices tbody td:last-child {
+    color: var(--accent);
+  }
+
+  .yacht-perks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    font-size: 0.82rem;
+    color: var(--text-soft);
+  }
+
+  .yacht-perks span {
+    padding: 0.25rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+  }
+
+  .yacht .btn {
+    margin-top: auto;
+    align-self: flex-start;
+  }
+
+  /* --- включено --- */
+  .included {
+    padding: var(--sp-5);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .included h3 {
+    font-family: var(--font-body);
+    font-size: var(--fs-base);
+    color: var(--accent);
+    margin-bottom: var(--sp-2);
+  }
+
+  .included p {
+    font-size: var(--fs-sm);
+    color: var(--text-soft);
+  }
+
+  @media (min-width: 820px) {
+    .yacht {
+      grid-template-columns: 45% 1fr;
+    }
+  }
+</style>
