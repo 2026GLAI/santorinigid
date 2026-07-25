@@ -27,7 +27,7 @@ const {
 ---
 
 <section class:list={['hero', `hero-${size}`]}>
-  <div class="hero-media">
+  <div class="hero-media parallax-slow">
     <Image
       src={image}
       alt={alt}
@@ -41,7 +41,7 @@ const {
     <div class="hero-scrim"></div>
   </div>
 
-  <div class="container hero-content">
+  <div class="container hero-content hero-depth">
     {eyebrow && <p class="hero-eyebrow">{eyebrow}</p>}
     <h1 class="hero-title">{title}</h1>
     {subtitle && <p class="hero-subtitle">{subtitle}</p>}
@@ -87,16 +87,25 @@ const {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* Лёгкий «кен-бёрнс»: изображение медленно приближается */
-    animation: kenburns 24s var(--ease) infinite alternate;
   }
 
-  @keyframes kenburns {
-    from {
-      transform: scale(1);
+  /*
+    «Кен-бёрнс» — медленный наплыв на фото. Включаем только там, где НЕТ
+    параллакса при прокрутке: иначе две анимации будут бороться за transform
+    и картинка задёргается. Где параллакс есть — он и создаёт движение.
+  */
+  @supports not (animation-timeline: view()) {
+    .hero-media :global(img) {
+      animation: kenburns 24s var(--ease) infinite alternate;
     }
-    to {
-      transform: scale(1.07);
+
+    @keyframes kenburns {
+      from {
+        transform: scale(1);
+      }
+      to {
+        transform: scale(1.07);
+      }
     }
   }
 

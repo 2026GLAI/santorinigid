@@ -125,6 +125,8 @@ const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [
 
   <body>
     <a href="#main" class="skip-link">Перейти к содержимому</a>
+    {/* Тонкая полоска прогресса чтения. Чисто CSS, без скриптов. */}
+    <div class="scroll-progress" aria-hidden="true"></div>
     <Header />
     <main id="main">
       <slot />
@@ -134,9 +136,31 @@ const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [
     <ChatWidget />
 
     <script>
-      // Плавное появление блоков при прокрутке — без библиотек.
-      const items = document.querySelectorAll('.reveal');
-      if (items.length) {
+      /*
+        Появление блоков при прокрутке.
+
+        Одна маленькая функция вместо библиотеки анимаций: браузер сам
+        сообщает, когда блок попал в кадр, мы лишь вешаем класс. Дальше
+        всё делает CSS. Это почти ничего не стоит по скорости.
+
+        Кто просил меньше движения — сразу показываем всё как есть.
+      */
+      const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const items = document.querySelectorAll(
+        '.reveal, .reveal-zoom, .reveal-left, .reveal-right, .reveal-stagger',
+      );
+
+      if (calm) {
+        items.forEach((el) => el.classList.add('is-visible'));
+      } else if (items.length) {
+        // Каскад: каждому потомку свой номер, из него CSS считает задержку
+        document.querySelectorAll('.reveal-stagger').forEach((group) => {
+          [...group.children].forEach((child, i) => {
+            child.style.setProperty('--i', String(Math.min(i, 8)));
+          });
+        });
+
         const io = new IntersectionObserver(
           (entries) => {
             for (const e of entries) {

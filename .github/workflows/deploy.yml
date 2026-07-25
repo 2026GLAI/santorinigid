@@ -1,0 +1,68 @@
+# Автоматическая публикация сайта на GitHub Pages
+#
+# Что делает: при каждом изменении файлов в ветке main GitHub сам собирает
+# сайт и выкладывает его в интернет. Ничего запускать вручную не нужно.
+#
+# Это же и есть механизм публикации отзывов: когда Worker дописывает
+# одобренный отзыв в src/data/reviews.ts, срабатывает этот файл и сайт
+# пересобирается — через 2–3 минуты отзыв виден гостям.
+#
+# Настроить один раз: в репозитории Settings → Pages → Source: GitHub Actions
+
+name: Сборка и публикация сайта
+
+on:
+  push:
+    branches: [main]
+  # Кнопка «запустить вручную» на вкладке Actions — на случай если нужно
+  # пересобрать сайт без изменений в файлах
+  workflow_dispatch:
+
+# Права, нужные для публикации на Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Если пришло несколько изменений подряд — доводим до конца текущую сборку,
+# лишние отменяем. Так отзывы не потеряются при быстрых нажатиях.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Собрать сайт
+    runs-on: ubuntu-latest
+    steps:
+      - name: Забрать файлы проекта
+        uses: actions/checkout@v4
+
+      - name: Установить Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Установить зависимости
+        run: npm ci
+
+      - name: Собрать сайт
+        run: npm run build
+
+      - name: Подготовить к публикации
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    name: Опубликовать
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Выложить в интернет
+        id: deployment
+        uses: actions/deploy-pages@v4

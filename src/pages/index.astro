@@ -111,7 +111,7 @@ const facts = [
   <!-- Знакомство -->
   <section class="section" id="content">
     <div class="container about-grid">
-      <div class="about-photo reveal">
+      <div class="about-photo reveal-zoom">
         <Image
           src={portrait}
           alt="Владимир — русскоязычный гид на Санторини, на борту яхты"
@@ -165,10 +165,10 @@ const facts = [
         </p>
       </header>
 
-      <div class="grid-auto">
+      <div class="grid-auto reveal-stagger">
         {
           services.map((s) => (
-            <a href={s.href} class="card service-card reveal">
+            <a href={s.href} class="card service-card">
               <div class="service-media">
                 <Image
                   src={s.img}
@@ -194,7 +194,7 @@ const facts = [
   <!-- С Крита -->
   <section class="section">
     <div class="container split">
-      <div class="split-media reveal">
+      <div class="split-media reveal-left">
         <Image
           src={ferry}
           alt="Скоростной паром SeaJets на фоне кальдеры Санторини"
@@ -203,7 +203,7 @@ const facts = [
           quality={80}
         />
       </div>
-      <div class="split-text reveal">
+      <div class="split-text reveal-right">
         <p class="eyebrow">Однодневная поездка</p>
         <h2 class="section-title">С Крита на Санторини: без очередей и суеты</h2>
         <p>
@@ -237,7 +237,7 @@ const facts = [
   <!-- Круизным пассажирам -->
   <section class="section section-alt">
     <div class="container split split-reverse">
-      <div class="split-media reveal">
+      <div class="split-media reveal-left">
         <Image
           src={cruise}
           alt="Круизный лайнер и тендерные лодки у кальдеры Санторини"
@@ -246,7 +246,7 @@ const facts = [
           quality={80}
         />
       </div>
-      <div class="split-text reveal">
+      <div class="split-text reveal-right">
         <p class="eyebrow">Для пассажиров лайнеров</p>
         <h2 class="section-title">Ваша высадка на берег: как не испортить начало дня</h2>
         <p>
