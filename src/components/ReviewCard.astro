@@ -25,42 +25,45 @@ const initials = r.author
   .map((w) => w[0]?.toUpperCase() ?? '')
   .join('');
 
-/** Длинные отзывы сворачиваем, но текст целиком остаётся в разметке. */
-const LONG = 420;
-const isLong = r.text.length > LONG;
-/** Обрезаем по границе слова, чтобы не рвать посреди слова. */
-const teaser = isLong ? r.text.slice(0, r.text.lastIndexOf(' ', LONG)) : r.text;
+/**
+ * Длинные отзывы визуально подрезаем через CSS (line-clamp), а НЕ обрезаем
+ * в разметке. Текст в HTML ровно один раз и всегда целиком: так его видят
+ * поисковики и ИИ, и так в коде нет дублей.
+ */
+const isLong = r.text.length > 420;
+
+/** Месяц поездки + состав компании — это честная замена звёздам. */
+const context = [r.tripDate, r.tripWith].filter(Boolean).join(' · ');
 ---
 
 <li class:list={['rv-item', { reveal }]} id={`review-${r.id}`}>
-  <article class="rv-card">
+  <article class:list={['rv-card', { 'rv-card-answered': r.reply }]}>
     <header class="rv-card-head">
       <span class="rv-avatar" aria-hidden="true">{initials}</span>
       <span class="rv-who">
         <strong>{r.author}</strong>
-        {
-          r.tripDate && (
-            <span class="rv-trip">
-              Поездка: {r.tripDate}
-              {r.tripWith && ` · ${r.tripWith}`}
-            </span>
-          )
-        }
+        {context && <span class="rv-trip">{context}</span>}
       </span>
     </header>
 
-    <blockquote class="rv-text">
+    <blockquote class:list={['rv-text', { 'rv-text-long': isLong }]}>
       {
-        isLong ? (
-          <details class="rv-details">
-            <summary>
-              <span class="rv-teaser">{teaser}…</span>
-              <span class="rv-expand">Читать полностью</span>
-            </summary>
-            <p class="rv-full">{r.text}</p>
-          </details>
-        ) : (
-          <p>{r.text}</p>
+        isLong && (
+          <input
+            type="checkbox"
+            id={`more-${r.id}`}
+            class="rv-unclamp"
+            aria-label={`Показать отзыв целиком: ${r.author}`}
+          />
+        )
+      }
+      <p>{r.text}</p>
+      {
+        isLong && (
+          <label for={`more-${r.id}`} class="rv-expand">
+            <span class="rv-expand-open">Читать целиком</span>
+            <span class="rv-expand-close">Свернуть</span>
+          </label>
         )
       }
     </blockquote>
@@ -68,16 +71,25 @@ const teaser = isLong ? r.text.slice(0, r.text.lastIndexOf(' ', LONG)) : r.text;
     {
       r.reply && (
         <div class="rv-reply">
-          <span class="rv-reply-label">Ответ Владимира</span>
+          <span class="rv-reply-label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 14L4 9l5-5" />
+              <path d="M4 9h11a5 5 0 015 5v6" />
+            </svg>
+            Ответ Владимира
+          </span>
           <p>{r.reply}</p>
         </div>
       )
     }
 
     <footer class="rv-card-foot">
-      <time datetime={r.datePublished}>Опубликован {r.published}</time>
+      <time datetime={r.datePublished}>{r.published}</time>
       <a href={r.sourceUrl} target="_blank" rel="noopener nofollow" class="rv-src">
-        Оригинал на {r.source} ↗
+        {r.source}
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 17L17 7M9 7h8v8" />
+        </svg>
       </a>
     </footer>
   </article>
@@ -138,73 +150,128 @@ const teaser = isLong ? r.text.slice(0, r.text.lastIndexOf(' ', LONG)) : r.text;
   }
 
   .rv-text {
-    flex: 1;
-    padding-left: var(--sp-4);
-    border-left: 3px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    position: relative;
     font-size: var(--fs-sm);
     line-height: 1.75;
     color: var(--text-soft);
   }
 
-  /* --- разворачивание длинных отзывов, без скриптов --- */
-  .rv-details summary {
-    cursor: pointer;
-    list-style: none;
+  /* Открывающая кавычка вместо рамки — тише и уместнее в гостевой книге */
+  .rv-text > p::before {
+    content: '«';
+    color: color-mix(in srgb, var(--accent) 55%, transparent);
+    font-family: var(--font-display);
+    font-size: 1.15em;
   }
 
-  .rv-details summary::-webkit-details-marker {
-    display: none;
+  .rv-text > p::after {
+    content: '»';
+    color: color-mix(in srgb, var(--accent) 55%, transparent);
+    font-family: var(--font-display);
+    font-size: 1.15em;
+  }
+
+  /*
+    Длинные отзывы: подрезаем ПОКАЗ, а не текст. Сам текст лежит в HTML
+    целиком и один раз — его видят поисковики и ИИ.
+  */
+  .rv-unclamp {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .rv-text-long > p {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 8;
+    line-clamp: 8;
+    overflow: hidden;
+  }
+
+  .rv-unclamp:checked ~ p {
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    display: block;
   }
 
   .rv-expand {
-    display: block;
+    display: inline-block;
     margin-top: var(--sp-2);
+    font-size: var(--fs-xs);
     font-weight: 600;
     color: var(--accent);
-    font-size: var(--fs-xs);
+    cursor: pointer;
+    border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    transition: border-color var(--dur) var(--ease);
   }
 
-  .rv-expand::after {
-    content: ' ▾';
+  .rv-expand:hover {
+    border-bottom-color: var(--accent);
   }
 
-  .rv-details[open] summary {
+  .rv-expand-close {
     display: none;
   }
 
-  .rv-full {
-    animation: rvOpen 300ms var(--ease);
+  .rv-unclamp:checked ~ .rv-expand .rv-expand-open {
+    display: none;
   }
 
-  @keyframes rvOpen {
-    from {
-      opacity: 0;
-    }
+  .rv-unclamp:checked ~ .rv-expand .rv-expand-close {
+    display: inline;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .rv-full {
-      animation: none;
-    }
+  .rv-unclamp:focus-visible ~ .rv-expand {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
   }
 
-  /* --- ответ Владимира --- */
+  /*
+    Ответ Владимира — то, чего нет у конкурентов: живой диалог с гостем.
+    Оформлен как переписка: с отступом, тише голосом гостя, но заметно.
+  */
   .rv-reply {
+    position: relative;
+    margin-left: var(--sp-5);
     padding: var(--sp-3) var(--sp-4);
-    background: color-mix(in srgb, var(--accent) 7%, transparent);
-    border-radius: var(--radius);
-    font-size: var(--fs-sm);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    border-radius: var(--radius) var(--radius) var(--radius) 4px;
+    font-size: 0.86rem;
+    line-height: 1.65;
     color: var(--text-soft);
   }
 
+  /* Хвостик реплики — как в мессенджере */
+  .rv-reply::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    bottom: 0;
+    width: 12px;
+    height: 12px;
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  }
+
   .rv-reply-label {
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     margin-bottom: var(--sp-1);
-    font-size: var(--fs-xs);
+    font-size: 0.68rem;
     font-weight: 700;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.07em;
     text-transform: uppercase;
     color: var(--accent);
+  }
+
+  /* Карточка с ответом чуть заметнее — на неё стоит посмотреть */
+  .rv-card-answered {
+    border-color: color-mix(in srgb, var(--accent) 28%, var(--border));
   }
 
   .rv-card-foot {
@@ -212,7 +279,8 @@ const teaser = isLong ? r.text.slice(0, r.text.lastIndexOf(' ', LONG)) : r.text;
     flex-wrap: wrap;
     gap: var(--sp-2) var(--sp-4);
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
+    margin-top: auto;
     padding-top: var(--sp-3);
     border-top: 1px solid var(--border);
     font-size: var(--fs-xs);
@@ -220,12 +288,16 @@ const teaser = isLong ? r.text.slice(0, r.text.lastIndexOf(' ', LONG)) : r.text;
   }
 
   .rv-src {
-    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-muted);
     font-weight: 600;
     white-space: nowrap;
+    transition: color var(--dur) var(--ease);
   }
 
   .rv-src:hover {
-    text-decoration: underline;
+    color: var(--accent);
   }
 </style>

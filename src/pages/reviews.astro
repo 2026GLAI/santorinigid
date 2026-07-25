@@ -10,6 +10,20 @@ const title = `Отзывы о гиде Владимире Лунгу на Са�
 const description = `Реальные отзывы туристов об экскурсиях с русскоязычным гидом Владимиром Лунгу на Санторини за ${REVIEW_YEARS.from}–${REVIEW_YEARS.to} годы. Каждый отзыв со ссылкой на оригинал на площадке-источнике.`;
 
 /**
+ * Самый свежий отзыв выносим в шапку: пусть страницу открывает живой голос
+ * гостя, а не декоративная картинка. Длинный текст подрезаем по границе
+ * предложения — в шапке нужен фрагмент, целиком он ниже в общем списке.
+ */
+const latest = REVIEWS[0];
+const MAX_EXCERPT = 260;
+const latestExcerpt = (() => {
+  if (!latest || latest.text.length <= MAX_EXCERPT) return latest?.text ?? '';
+  const cut = latest.text.slice(0, MAX_EXCERPT);
+  const lastStop = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('! '), cut.lastIndexOf('? '));
+  return lastStop > 120 ? cut.slice(0, lastStop + 1) : `${cut.slice(0, cut.lastIndexOf(' '))}…`;
+})();
+
+/**
  * Разметка отзывов для поисковиков и ИИ.
  *
  * ⚠️ Сознательно БЕЗ reviewRating и без aggregateRating:
@@ -66,31 +80,44 @@ const schema = [
 
 <BaseLayout title={title} description={description} schema={schema}>
   <section class="section rv-hero">
-    <div class="container container-narrow text-center">
-      <p class="eyebrow mx-auto">Отзывы</p>
-      <h1>Что говорят мои гости</h1>
-      <p class="lede mx-auto">
-        {REVIEWS.length} отзывов от настоящих путешественников, которые провели день
-        на Санторини вместе со мной, за {REVIEW_YEARS.from}–{REVIEW_YEARS.to} годы.
-        Все они опубликованы на площадках {REVIEW_SOURCES.map((s) => s.name).join(' и ')} —
-        у каждого отзыва есть прямая ссылка на оригинал, и вы можете проверить любой.
-      </p>
-      <div class="rv-hero-actions">
-        <a href="#review-form" class="btn btn-primary">Оставить свой отзыв</a>
-        <a href={WHATSAPP.tour} class="btn btn-whatsapp" target="_blank" rel="noopener">
-          Обсудить экскурсию
-        </a>
+    <div class="container rv-hero-grid">
+      <div class="rv-hero-text">
+        <p class="eyebrow">Отзывы</p>
+        <h1>Что говорят мои гости</h1>
+        <p class="lede">
+          {REVIEWS.length} отзывов от людей, которые провели день на Санторини вместе
+          со мной — с {REVIEW_YEARS.from} по {REVIEW_YEARS.to} год. Каждый оставлен на
+          площадке {REVIEW_SOURCES.map((s) => s.name).join(' или ')}, и у каждого есть
+          прямая ссылка на оригинал: можете проверить любой.
+        </p>
+        <div class="rv-hero-actions">
+          <a href="#review-form" class="btn btn-primary">Оставить свой отзыв</a>
+          <a href={WHATSAPP.tour} class="btn btn-whatsapp" target="_blank" rel="noopener">
+            Обсудить экскурсию
+          </a>
+        </div>
       </div>
+
+      {/* Самый свежий отзыв — вместо декоративной картинки говорит гость */}
+      {
+        latest && (
+          <figure class="rv-hero-quote">
+            <blockquote>{latestExcerpt}</blockquote>
+            <figcaption>
+              <strong>{latest.author}</strong>
+              <span>
+                {latest.tripDate || latest.published}
+                {latest.tripWith && ` · ${latest.tripWith}`}
+              </span>
+            </figcaption>
+          </figure>
+        )
+      }
     </div>
   </section>
 
-  <Reviews
-    title="Все отзывы"
-    eyebrow=""
-    lede=""
-    visible={6}
-    showForm={false}
-  />
+  {/* На странице отзывов показываем все сразу: прятать их тут незачем */}
+  <Reviews title="Все отзывы" eyebrow="" lede="" visible={REVIEWS.length} showForm={false} />
 
   <ReviewForm />
 
@@ -100,6 +127,18 @@ const schema = [
 <style>
   .rv-hero {
     padding-bottom: 0;
+    background:
+      radial-gradient(
+        90% 120% at 88% 0%,
+        color-mix(in srgb, var(--accent) 10%, transparent),
+        transparent 60%
+      );
+  }
+
+  .rv-hero-grid {
+    display: grid;
+    gap: var(--sp-7);
+    align-items: center;
   }
 
   .rv-hero h1 {
@@ -109,6 +148,69 @@ const schema = [
 
   .rv-hero .lede {
     margin-top: var(--sp-4);
+  }
+
+  .rv-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+    margin-top: var(--sp-6);
+  }
+
+  /* Свежий отзыв в шапке: крупная цитата вместо картинки */
+  .rv-hero-quote {
+    position: relative;
+    padding: var(--sp-6);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+  }
+
+  .rv-hero-quote::before {
+    content: '”';
+    position: absolute;
+    top: -0.35em;
+    left: var(--sp-5);
+    font-family: var(--font-display);
+    font-size: 5rem;
+    line-height: 1;
+    color: color-mix(in srgb, var(--accent) 22%, transparent);
+  }
+
+  .rv-hero-quote blockquote {
+    position: relative;
+    font-family: var(--font-display);
+    font-size: var(--fs-lg);
+    font-style: italic;
+    line-height: 1.6;
+    color: var(--text);
+    text-wrap: pretty;
+  }
+
+  .rv-hero-quote figcaption {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: var(--sp-4);
+    padding-top: var(--sp-4);
+    border-top: 1px solid var(--border);
+  }
+
+  .rv-hero-quote figcaption strong {
+    font-size: var(--fs-sm);
+  }
+
+  .rv-hero-quote figcaption span {
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+  }
+
+  @media (min-width: 960px) {
+    .rv-hero-grid {
+      grid-template-columns: 1.15fr 1fr;
+      gap: var(--sp-8);
+    }
   }
 
   .rv-hero-actions {

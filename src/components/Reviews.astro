@@ -36,8 +36,21 @@ const {
 const shown = REVIEWS.slice(0, visible);
 const hidden = REVIEWS.slice(visible);
 
-/** Годы, за которые есть отзывы — честный показатель «нас читают давно». */
-const yearsSpan = `${REVIEW_YEARS.from}–${REVIEW_YEARS.to}`;
+/**
+ * Показатели под заголовком.
+ *
+ * ВАЖНО: здесь могут стоять ТОЛЬКО те числа, которые можно пересчитать по
+ * данным. Лозунги вроде «100% реальные люди» рядом с настоящими цифрами
+ * выглядят как цифра и занимают чужое место — такого здесь быть не должно.
+ */
+const stats = [
+  { n: String(REVIEWS.length), label: 'отзывов гостей' },
+  { n: `${REVIEW_YEARS.from}–${REVIEW_YEARS.to}`, label: 'годы отзывов' },
+  {
+    n: String(REVIEWS.filter((r) => r.reply).length),
+    label: 'с моим ответом',
+  },
+];
 
 /** Сколько отзывов с какой площадки — показываем открыто. */
 const bySource = REVIEW_SOURCES.map((s) => ({
@@ -53,20 +66,16 @@ const bySource = REVIEW_SOURCES.map((s) => ({
       <h2 class="section-title">{title}</h2>
       {lede && <p class="lede">{lede}</p>}
 
-      <div class="rv-stats">
-        <div class="rv-stat">
-          <strong>{REVIEWS.length}</strong>
-          <span>отзывов</span>
-        </div>
-        <div class="rv-stat">
-          <strong>{yearsSpan}</strong>
-          <span>годы поездок</span>
-        </div>
-        <div class="rv-stat">
-          <strong>100%</strong>
-          <span>реальные люди</span>
-        </div>
-      </div>
+      <dl class="rv-stats">
+        {
+          stats.map((s) => (
+            <div class="rv-stat">
+              <dt>{s.n}</dt>
+              <dd>{s.label}</dd>
+            </div>
+          ))
+        }
+      </dl>
 
       <p class="rv-source">
         Отзывы оставлены на площадках
@@ -81,8 +90,8 @@ const bySource = REVIEW_SOURCES.map((s) => ({
             </>
           ))
         }
-        — у каждого отзыва есть прямая ссылка на оригинал, вы можете проверить любой.
-        Оценок в звёздах на этих площадках нет, поэтому мы их не показываем.
+        — у каждого есть прямая ссылка на оригинал, вы можете проверить любой.
+        Оценок в звёздах эти площадки не используют, поэтому их здесь нет.
       </p>
     </header>
 
@@ -93,16 +102,25 @@ const bySource = REVIEW_SOURCES.map((s) => ({
     {
       hidden.length > 0 && (
         <div class="rv-more-wrap">
-          {/* Чекбокс + CSS — отзывы уже в HTML, скрипт не нужен */}
+          {/*
+            Скрытые отзывы физически лежат в HTML — их видят поисковики и ИИ.
+            Разворачивание на чекбоксе, без единой строчки скрипта.
+          */}
           <input type="checkbox" id="rv-toggle" class="rv-toggle" />
 
           <ol class="rv-list rv-hidden-list">
             {hidden.map((r) => <ReviewCard review={r} />)}
           </ol>
 
-          <label for="rv-toggle" class="btn btn-ghost rv-more-btn">
-            <span class="rv-more-open">Показать все отзывы ({REVIEWS.length})</span>
-            <span class="rv-more-close">Свернуть отзывы</span>
+          <label for="rv-toggle" class="rv-more-btn">
+            <span class="rv-more-open">
+              Ещё {hidden.length}{' '}
+              {hidden.length % 10 === 1 && hidden.length % 100 !== 11 ? 'отзыв' : 'отзывов'}
+            </span>
+            <span class="rv-more-close">Свернуть</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
           </label>
         </div>
       )
@@ -142,50 +160,83 @@ const bySource = REVIEW_SOURCES.map((s) => ({
     margin-bottom: var(--sp-7);
   }
 
+  /* Показатели: разделены тонкими линиями, цифра — акцентным шрифтом. */
   .rv-stats {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--sp-6);
+    gap: var(--sp-5) var(--sp-7);
     margin-top: var(--sp-5);
-    padding-block: var(--sp-4);
+    padding-block: var(--sp-5);
     border-block: 1px solid var(--border);
   }
 
   .rv-stat {
     display: flex;
     flex-direction: column;
-    line-height: 1.15;
+    gap: 2px;
+    line-height: 1.1;
   }
 
-  .rv-stat strong {
+  .rv-stat dt {
     font-family: var(--font-display);
-    font-size: 1.7rem;
+    font-size: clamp(1.5rem, 1.2rem + 1.1vw, 2rem);
+    font-weight: 600;
     color: var(--accent);
+    font-variant-numeric: tabular-nums;
   }
 
-  .rv-stat span {
+  .rv-stat dd {
     font-size: var(--fs-xs);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
     color: var(--text-muted);
-    margin-top: 3px;
   }
 
   .rv-source {
     margin-top: var(--sp-4);
+    max-width: 68ch;
     font-size: var(--fs-sm);
     color: var(--text-muted);
+    line-height: 1.7;
   }
 
   .rv-source a {
     color: var(--accent);
+    font-weight: 600;
     text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
-  /* --- список --- */
+  /*
+    Кладка (masonry) на колонках.
+
+    Почему так, а не сетка одинаковых карточек: отзывы очень разной длины —
+    от 121 до 2250 символов. В сетке короткий отзыв превратился бы в пустую
+    коробку, а длинный пришлось бы обрезать. В кладке разная высота работает
+    на нас: страница выглядит как живая гостевая книга, а не как шаблон.
+  */
   .rv-list {
-    display: grid;
-    gap: var(--sp-4);
-    grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
-    align-items: start;
+    columns: 1;
+    column-gap: var(--sp-4);
+  }
+
+  .rv-list > :global(.rv-item) {
+    /* Карточку нельзя разрывать между колонками */
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: var(--sp-4);
+  }
+
+  @media (min-width: 680px) {
+    .rv-list {
+      columns: 2;
+    }
+  }
+
+  @media (min-width: 1120px) {
+    .rv-list {
+      columns: 3;
+    }
   }
 
 
@@ -200,70 +251,66 @@ const bySource = REVIEW_SOURCES.map((s) => ({
 
 
 
-  /* --- «показать ещё» на чистом CSS --- */
+  /*
+    «Показать ещё» — один механизм, без скриптов.
+    Свёрнутый список ограничен по высоте и притушён снизу градиентом;
+    текст при этом остаётся в потоке и доступен поисковикам.
+  */
   .rv-toggle {
     position: absolute;
+    width: 1px;
+    height: 1px;
     opacity: 0;
     pointer-events: none;
   }
 
-  .rv-hidden-list {
-    /* Отзывы ЕСТЬ в HTML — просто визуально свёрнуты.
-       grid-template-rows: 0fr даёт плавное раскрытие без скриптов. */
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 420ms var(--ease), margin-top 420ms var(--ease);
-    margin-top: 0;
-  }
-
-  .rv-hidden-list > * {
-    overflow: hidden;
-    min-height: 0;
-  }
-
-  .rv-toggle:checked ~ .rv-hidden-list {
-    grid-template-rows: 1fr;
-    margin-top: var(--sp-4);
-  }
-
-  /* Внутри раскрывающегося контейнера возвращаем сетку карточек */
-  .rv-toggle:checked ~ .rv-hidden-list {
-    display: grid;
-    gap: var(--sp-4);
-    grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
-    grid-template-rows: none;
-  }
-
-  .rv-hidden-list .rv-item {
-    display: none;
-  }
-
-  .rv-toggle:checked ~ .rv-hidden-list .rv-item {
-    display: block;
-    animation: rvIn 380ms var(--ease) both;
-  }
-
-  @keyframes rvIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .rv-toggle:checked ~ .rv-hidden-list .rv-item {
-      animation: none;
-    }
-  }
-
   .rv-more-wrap {
+    position: relative;
+  }
+
+  .rv-hidden-list {
+    /* Та же кладка, что и у видимой части — колонки задаёт .rv-list выше */
+    max-height: 0;
+    overflow: hidden;
+    margin-top: 0;
+    /* Плавно, но без «прыжка» при большом списке */
+    transition: max-height 500ms var(--ease), margin-top 500ms var(--ease),
+      opacity 320ms var(--ease);
+    opacity: 0;
+  }
+
+  .rv-toggle:checked ~ .rv-hidden-list {
+    /* Запас на самый длинный набор отзывов */
+    max-height: 900rem;
     margin-top: var(--sp-4);
+    opacity: 1;
   }
 
   .rv-more-btn {
     display: inline-flex;
-    margin-top: var(--sp-5);
+    align-items: center;
+    gap: var(--sp-2);
+    margin-top: var(--sp-6);
+    padding: 0.8em 1.7em;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-full);
+    background: var(--surface);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--text);
     cursor: pointer;
+    transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease),
+      transform var(--dur) var(--ease);
+  }
+
+  .rv-more-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .rv-more-btn svg {
+    transition: transform var(--dur) var(--ease);
   }
 
   .rv-more-close {
@@ -278,25 +325,39 @@ const bySource = REVIEW_SOURCES.map((s) => ({
     display: inline;
   }
 
+  .rv-toggle:checked ~ .rv-more-btn svg {
+    transform: rotate(180deg);
+  }
+
   .rv-toggle:focus-visible ~ .rv-more-btn {
     outline: 3px solid var(--accent);
     outline-offset: 3px;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .rv-hidden-list {
+      transition: none;
+    }
+  }
+
   /* --- призыв оставить отзыв --- */
   .rv-cta {
     margin-top: var(--sp-8);
-    padding: clamp(1.5rem, 4vw, 2.5rem);
+    padding: clamp(1.75rem, 5vw, 3rem);
     text-align: center;
     background:
-      radial-gradient(120% 140% at 50% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 60%),
+      radial-gradient(
+        120% 140% at 50% 0%,
+        color-mix(in srgb, var(--accent) 12%, transparent),
+        transparent 60%
+      ),
       var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
   }
 
   .rv-cta h3 {
-    font-size: var(--fs-xl);
+    font-size: var(--fs-2xl);
   }
 
   .rv-cta p {
