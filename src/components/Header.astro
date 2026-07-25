@@ -68,7 +68,7 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
             d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.86 9.86 0 004.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0012.04 2zm0 18.13h-.01a8.2 8.2 0 01-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.22 8.22 0 01-1.26-4.36c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.19 8.19 0 012.41 5.83c0 4.54-3.7 8.24-8.24 8.24z"
           />
         </svg>
-        WhatsApp
+        <span class="wa-label">WhatsApp</span>
       </a>
 
       <button
@@ -371,11 +371,67 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
     }
   }
 
+  /*
+    Узкие телефоны (до 420px).
+    Здесь дорог каждый пиксель: шапка не должна выезжать за край.
+    Убираем подпись под названием и текст на кнопке WhatsApp —
+    иконка понятна и без слова.
+  */
   @media (max-width: 420px) {
+    .header-inner {
+      gap: var(--sp-2);
+      min-height: 62px;
+    }
+
     .brand-text span {
       display: none;
     }
-    .btn-whatsapp span {
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+    }
+
+    .brand-text strong {
+      font-size: 0.95rem;
+    }
+
+    /* Кнопка становится круглой — остаётся только значок */
+    .btn-whatsapp.btn-sm {
+      padding: 0;
+      width: 42px;
+      height: 42px;
+      min-width: 42px;
+      border-radius: var(--radius-full);
+    }
+
+    .wa-label {
+      /* Прячем текст от глаз, но оставляем для чтения с экрана */
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .header-actions {
+      gap: var(--sp-2);
+    }
+
+    .burger {
+      width: 40px;
+      padding: 0 8px;
+    }
+
+    .nav-mobile {
+      inset-block-start: 62px;
+    }
+  }
+
+  /* Совсем узкие экраны (от 320px) — прячем текст кнопки полностью */
+  @media (max-width: 360px) {
+    .brand-text {
       display: none;
     }
   }

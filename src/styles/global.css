@@ -116,14 +116,23 @@
     --font-display: 'Playfair Display', 'Georgia', 'Times New Roman', serif;
     --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
-    --fs-xs: clamp(0.78rem, 0.76rem + 0.1vw, 0.84rem);
-    --fs-sm: clamp(0.88rem, 0.85rem + 0.15vw, 0.95rem);
-    --fs-base: clamp(1rem, 0.96rem + 0.2vw, 1.09rem);
-    --fs-lg: clamp(1.13rem, 1.05rem + 0.4vw, 1.3rem);
-    --fs-xl: clamp(1.35rem, 1.2rem + 0.7vw, 1.7rem);
-    --fs-2xl: clamp(1.7rem, 1.4rem + 1.4vw, 2.4rem);
-    --fs-3xl: clamp(2.1rem, 1.6rem + 2.4vw, 3.4rem);
-    --fs-4xl: clamp(2.5rem, 1.7rem + 3.6vw, 4.6rem);
+    /* ---- Размеры шрифта ------------------------------------------------
+       Считаются от ширины экрана: на телефоне мельче, на большом мониторе
+       крупнее. Нижняя граница подобрана так, чтобы текст читался на 320px,
+       верхняя — чтобы на 3440px заголовки выглядели внушительно, но не
+       разъезжались.
+
+       Расчёт ведём в rem: если человек увеличил шрифт в настройках
+       браузера, сайт это учтёт (в отличие от жёстких пикселей).
+    */
+    --fs-xs: clamp(0.78rem, 0.75rem + 0.12vw, 0.88rem);
+    --fs-sm: clamp(0.88rem, 0.84rem + 0.18vw, 1rem);
+    --fs-base: clamp(1rem, 0.95rem + 0.24vw, 1.18rem);
+    --fs-lg: clamp(1.12rem, 1.02rem + 0.45vw, 1.42rem);
+    --fs-xl: clamp(1.32rem, 1.14rem + 0.8vw, 1.9rem);
+    --fs-2xl: clamp(1.65rem, 1.32rem + 1.5vw, 2.75rem);
+    --fs-3xl: clamp(2rem, 1.5rem + 2.3vw, 3.9rem);
+    --fs-4xl: clamp(2.4rem, 1.6rem + 3.6vw, 5.4rem);
 
     /* Ритм */
     --sp-1: 0.25rem;
@@ -147,8 +156,21 @@
     --shadow: 0 4px 12px rgb(10 47 77 / 0.07), 0 12px 28px rgb(10 47 77 / 0.07);
     --shadow-lg: 0 10px 24px rgb(10 47 77 / 0.1), 0 28px 60px rgb(10 47 77 / 0.12);
 
-    --container: 1200px;
-    --container-narrow: 780px;
+    /* ---- Ширины контента ----------------------------------------------
+       Сайт должен одинаково хорошо выглядеть и на телефоне 320px, и на
+       сверхшироком мониторе 3440px. Раньше контент упирался в 1200px —
+       на широком экране это оставляло по краям огромные пустые поля.
+
+       Теперь ширина растёт вместе с экраном, но не бесконечно: текст шире
+       ~90 символов читать неудобно, поэтому есть разумный предел.
+    */
+    --container: 1240px;
+    --container-narrow: 760px;
+    /* Для широкоформатных блоков (галереи, карточки) — больше простора */
+    --container-wide: 1600px;
+
+    /* Внутренние отступы страницы: растут плавно вместе с экраном */
+    --gutter: clamp(1rem, 3.5vw, 3rem);
 
     --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
     --dur: 260ms;
@@ -202,6 +224,47 @@
     overflow-x: hidden;
   }
 
+  /*
+    Страховка от горизонтальной прокрутки на телефонах.
+    Длинные слова и адреса (например, ссылки) переносятся, а не
+    растягивают страницу вбок.
+  */
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  li,
+  dd,
+  dt,
+  blockquote,
+  figcaption,
+  summary,
+  label,
+  a {
+    overflow-wrap: break-word;
+  }
+
+  /*
+    Размер кликабельных элементов.
+    Рекомендация по доступности — не меньше 44×44 точек, иначе на телефоне
+    в кнопку трудно попасть пальцем. Задаём минимум там, где элемент
+    самостоятельный (не ссылка внутри строки текста).
+  */
+  @media (pointer: coarse) {
+    .btn,
+    button:not(.rv-expand):not([class*='chip']),
+    input[type='checkbox'],
+    input[type='radio'],
+    select {
+      min-height: 44px;
+    }
+
+    .btn {
+      min-width: 44px;
+    }
+  }
+
   h1,
   h2,
   h3 {
@@ -239,15 +302,45 @@
     width: 100%;
     max-width: var(--container);
     margin-inline: auto;
-    padding-inline: clamp(1rem, 4vw, 2.5rem);
+    padding-inline: var(--gutter);
   }
 
   .container-narrow {
     max-width: var(--container-narrow);
   }
 
+  /* Для галерей и сеток карточек: шире, чем текстовый контейнер */
+  .container-wide {
+    max-width: var(--container-wide);
+  }
+
+  /*
+    На очень широких мониторах (от 1800px) даём контенту больше воздуха,
+    но не растягиваем строки текста: читать строку длиннее ~90 символов
+    неудобно — глаз теряет начало следующей.
+  */
+  @media (min-width: 1800px) {
+    .container {
+      max-width: 1400px;
+    }
+
+    .container-wide {
+      max-width: 1800px;
+    }
+  }
+
+  @media (min-width: 2400px) {
+    .container {
+      max-width: 1560px;
+    }
+
+    .container-wide {
+      max-width: 2100px;
+    }
+  }
+
   .section {
-    padding-block: clamp(3.5rem, 8vw, 7rem);
+    padding-block: clamp(3rem, 7vw, 8rem);
   }
 
   .section-alt {
@@ -258,10 +351,22 @@
     margin-top: var(--flow, var(--sp-4));
   }
 
+  /*
+    Сетка карточек. min() не даёт колонке стать шире экрана на телефоне —
+    без этого на 320px карточка вылезала за край.
+  */
   .grid-auto {
     display: grid;
-    gap: var(--sp-5);
-    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: clamp(1rem, 2vw, 1.75rem);
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  }
+
+  /* На широких экранах ограничиваем число колонок, чтобы карточки
+     не превращались в узкие полоски */
+  @media (min-width: 1800px) {
+    .grid-auto {
+      grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+    }
   }
 }
 
@@ -295,7 +400,7 @@
   .lede {
     font-size: var(--fs-lg);
     color: var(--text-soft);
-    max-width: 62ch;
+    max-width: min(62ch, 100%);
   }
 
   /* Кнопки */
@@ -540,17 +645,24 @@
 
   /* --- 4. Мягкое «дыхание» героя при прокрутке --- */
   /* Заголовок героя чуть уходит вглубь, создавая ощущение объёма */
+  /*
+    Эффект глубины включаем только на экранах шире планшета.
+    На телефоне сдвиг по вертикали заставлял блок выходить за край
+    (проверено: +29px на экране 320px), да и заметен он там мало.
+  */
   @supports (animation-timeline: view()) {
-    .hero-depth {
-      animation: heroDepth linear both;
-      animation-timeline: view();
-      animation-range: exit 0% exit 80%;
-    }
+    @media (min-width: 900px) {
+      .hero-depth {
+        animation: heroDepth linear both;
+        animation-timeline: view();
+        animation-range: exit 0% exit 80%;
+      }
 
-    @keyframes heroDepth {
-      to {
-        opacity: 0.15;
-        transform: translate3d(0, -14%, 0);
+      @keyframes heroDepth {
+        to {
+          opacity: 0.15;
+          transform: translate3d(0, -14%, 0);
+        }
       }
     }
   }
@@ -610,14 +722,24 @@
 
 /* ---------- утилиты ---------- */
 @layer utilities {
+  /*
+    Спрятать от глаз, но оставить для программ чтения с экрана.
+
+    left: 0 и top: 0 обязательны: без них элемент позиционируется от
+    последнего «якоря» на странице и при nowrap растягивает документ
+    вправо — на странице отзывов это давало горизонтальную прокрутку.
+  */
   .visually-hidden {
     position: absolute;
+    left: 0;
+    top: 0;
     width: 1px;
     height: 1px;
     padding: 0;
     margin: -1px;
     overflow: hidden;
     clip: rect(0 0 0 0);
+    clip-path: inset(50%);
     white-space: nowrap;
     border: 0;
   }

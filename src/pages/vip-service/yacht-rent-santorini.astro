@@ -227,7 +227,7 @@ const eur = (n: number) => '€' + n.toLocaleString('ru-RU').replace(/,/g, ' ');
 
 <style>
   .section-head {
-    max-width: 62ch;
+    max-width: min(62ch, 100%);
     margin-bottom: var(--sp-7);
   }
 

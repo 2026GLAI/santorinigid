@@ -156,7 +156,7 @@ const bySource = REVIEW_SOURCES.map((s) => ({
 
 <style>
   .rv-head {
-    max-width: 64ch;
+    max-width: min(64ch, 100%);
     margin-bottom: var(--sp-7);
   }
 
@@ -194,7 +194,7 @@ const bySource = REVIEW_SOURCES.map((s) => ({
 
   .rv-source {
     margin-top: var(--sp-4);
-    max-width: 68ch;
+    max-width: min(68ch, 100%);
     font-size: var(--fs-sm);
     color: var(--text-muted);
     line-height: 1.7;
@@ -216,26 +216,44 @@ const bySource = REVIEW_SOURCES.map((s) => ({
     на нас: страница выглядит как живая гостевая книга, а не как шаблон.
   */
   .rv-list {
+    /*
+      Кладка на колонках. width: 100% обязателен: без него на узких
+      экранах колонка вычислялась по содержимому и уезжала за край —
+      один отзыв получал ширину 7000+ пикселей.
+    */
+    width: 100%;
+    max-width: 100%;
     columns: 1;
-    column-gap: var(--sp-4);
+    column-gap: clamp(1rem, 2vw, 1.75rem);
   }
 
   .rv-list > :global(.rv-item) {
     /* Карточку нельзя разрывать между колонками */
     break-inside: avoid;
     page-break-inside: avoid;
-    margin-bottom: var(--sp-4);
+    margin-bottom: clamp(1rem, 2vw, 1.75rem);
+    /* Ширина строго по колонке, иначе длинный текст растягивает вёрстку */
+    width: 100%;
+    max-width: 100%;
   }
 
-  @media (min-width: 680px) {
+  @media (min-width: 700px) {
     .rv-list {
       columns: 2;
     }
   }
 
-  @media (min-width: 1120px) {
+  @media (min-width: 1200px) {
     .rv-list {
       columns: 3;
+    }
+  }
+
+  /* На сверхшироких мониторах — четыре колонки, иначе карточки
+     растягиваются в неудобные для чтения полосы */
+  @media (min-width: 1900px) {
+    .rv-list {
+      columns: 4;
     }
   }
 
@@ -268,22 +286,39 @@ const bySource = REVIEW_SOURCES.map((s) => ({
     position: relative;
   }
 
+  /*
+    Свёрнутая часть списка.
+
+    Здесь НЕ используем max-height и колонки одновременно: при нулевой
+    высоте браузер не может рассчитать колонки и раскладывает карточки
+    в строку шириной в десятки тысяч пикселей. Проверено — ломается.
+
+    Решение простое и надёжное: в свёрнутом виде блок просто не
+    отображается (display: none). Текст при этом остаётся в HTML —
+    поисковики и ИИ его видят, а это главное. Анимации раскрытия нет,
+    зато вёрстка не может сломаться ни на одном экране.
+  */
   .rv-hidden-list {
-    /* Та же кладка, что и у видимой части — колонки задаёт .rv-list выше */
-    max-height: 0;
-    overflow: hidden;
-    margin-top: 0;
-    /* Плавно, но без «прыжка» при большом списке */
-    transition: max-height 500ms var(--ease), margin-top 500ms var(--ease),
-      opacity 320ms var(--ease);
-    opacity: 0;
+    display: none;
   }
 
   .rv-toggle:checked ~ .rv-hidden-list {
-    /* Запас на самый длинный набор отзывов */
-    max-height: 900rem;
-    margin-top: var(--sp-4);
-    opacity: 1;
+    display: block;
+    margin-top: clamp(1rem, 2vw, 1.75rem);
+    animation: rvReveal 380ms var(--ease) both;
+  }
+
+  @keyframes rvReveal {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rv-toggle:checked ~ .rv-hidden-list {
+      animation: none;
+    }
   }
 
   .rv-more-btn {
@@ -361,7 +396,7 @@ const bySource = REVIEW_SOURCES.map((s) => ({
   }
 
   .rv-cta p {
-    max-width: 56ch;
+    max-width: min(56ch, 100%);
     margin: var(--sp-3) auto 0;
     color: var(--text-soft);
     font-size: var(--fs-sm);

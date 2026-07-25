@@ -198,17 +198,26 @@ const context = [r.tripDate, r.tripWith].filter(Boolean).join(' · ');
   }
 
   .rv-expand {
-    display: inline-block;
-    margin-top: var(--sp-2);
+    display: inline-flex;
+    align-items: center;
+    /* На телефоне в ссылку надо попасть пальцем — даём высоту 44px,
+       но текст при этом не «разъезжается»: отступы внутренние. */
+    min-height: 44px;
+    padding-block: var(--sp-2);
+    margin-top: var(--sp-1);
     font-size: var(--fs-xs);
     font-weight: 600;
     color: var(--accent);
     cursor: pointer;
+    transition: color var(--dur) var(--ease);
+  }
+
+  .rv-expand > span {
     border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
     transition: border-color var(--dur) var(--ease);
   }
 
-  .rv-expand:hover {
+  .rv-expand:hover > span {
     border-bottom-color: var(--accent);
   }
 

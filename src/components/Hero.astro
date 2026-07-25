@@ -69,12 +69,33 @@ const {
     overflow: hidden;
   }
 
+  /*
+    Высота шапки.
+    Считаем от высоты окна, а не жёсткими пикселями: на ноутбуке 768px
+    шапка не должна занимать весь экран, а на мониторе 1440px — выглядеть
+    узкой полоской. Верхний предел не даёт шапке стать бесконечной
+    на очень высоких экранах.
+  */
   .hero-full {
-    min-height: min(92dvh, 860px);
+    min-height: clamp(30rem, 88dvh, 68rem);
   }
 
   .hero-compact {
-    min-height: min(58dvh, 520px);
+    min-height: clamp(20rem, 56dvh, 40rem);
+  }
+
+  /*
+    Телефон в горизонтальном положении: экран низкий, шапка на весь
+    экран не оставит места контенту — уменьшаем.
+  */
+  @media (max-height: 520px) and (orientation: landscape) {
+    .hero-full {
+      min-height: 26rem;
+    }
+
+    .hero-compact {
+      min-height: 18rem;
+    }
   }
 
   .hero-media {
@@ -124,9 +145,22 @@ const {
   }
 
   .hero-content {
-    padding-block: clamp(2.5rem, 7vw, 5.5rem);
+    padding-block: clamp(2.5rem, 7vw, 6rem);
     color: #fff;
-    max-width: 62rem;
+  }
+
+  /*
+    Ограничиваем длину строки, но НЕ шире экрана.
+    min(…, 100%) обязателен: единица ch зависит от размера шрифта, а он
+    на больших экранах крупный — без ограничения по 100% заголовок
+    вылезал за край телефона на 378 пикселей.
+  */
+  .hero-content > * {
+    max-width: min(34ch, 100%);
+  }
+
+  .hero-text {
+    max-width: min(52ch, 100%);
   }
 
   .hero-eyebrow {
@@ -143,12 +177,12 @@ const {
     font-size: var(--fs-4xl);
     color: #fff;
     text-shadow: 0 2px 24px rgb(0 0 0 / 0.35);
-    max-width: 20ch;
+    max-width: min(18ch, 100%);
   }
 
   .hero-compact .hero-title {
     font-size: var(--fs-3xl);
-    max-width: 24ch;
+    max-width: min(22ch, 100%);
   }
 
   .hero-subtitle {
@@ -162,7 +196,7 @@ const {
 
   .hero-text {
     margin-top: var(--sp-4);
-    max-width: 54ch;
+    max-width: min(54ch, 100%);
     font-size: var(--fs-lg);
     color: rgb(255 255 255 / 0.9);
   }

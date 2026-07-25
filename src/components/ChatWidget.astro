@@ -423,9 +423,14 @@ import { WHATSAPP, CONTACTS } from '../data/site';
   }
 
   .chat-min {
+    display: grid;
+    place-items: center;
+    /* Кнопка «свернуть» должна ловиться пальцем — минимум 44×44 */
+    width: 44px;
+    height: 44px;
+    margin-right: -8px;
     color: #fff;
     opacity: 0.8;
-    padding: 4px;
   }
 
   .chat-min:hover {
