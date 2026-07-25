@@ -75,7 +75,7 @@ const eur = (n: number) => '€' + n.toLocaleString('ru-RU').replace(/,/g, ' ');
 
   <!-- Программы -->
   <section class="section section-alt">
-    <div class="container">
+    <div class="container container-wide">
       <header class="section-head reveal">
         <p class="eyebrow">Форматы</p>
         <h2 class="section-title">Стандартные программы</h2>
@@ -107,7 +107,7 @@ const eur = (n: number) => '€' + n.toLocaleString('ru-RU').replace(/,/g, ' ');
 
   <!-- Флот -->
   <section class="section">
-    <div class="container">
+    <div class="container container-wide">
       <header class="section-head reveal">
         <p class="eyebrow">Флот</p>
         <h2 class="section-title">{YACHTS.length} судов на выбор</h2>
@@ -137,6 +137,7 @@ const eur = (n: number) => '€' + n.toLocaleString('ru-RU').replace(/,/g, ' ');
                 {y.guests && <p class="yacht-guests">до {y.guests} гостей</p>}
                 <p class="yacht-desc">{y.description}</p>
 
+                <div class="prices-scroll">
                 <table class="prices">
                   <caption class="visually-hidden">Цены на аренду {y.name}</caption>
                   <thead>
@@ -164,6 +165,7 @@ const eur = (n: number) => '€' + n.toLocaleString('ru-RU').replace(/,/g, ' ');
                     </tr>
                   </tbody>
                 </table>
+                </div>
 
                 <div class="yacht-perks" aria-label="Включено в стоимость">
                   <span title="Вино и напитки">🍷 Бар</span>
@@ -189,7 +191,7 @@ const eur = (n: number) => '€' + n.toLocaleString('ru-RU').replace(/,/g, ' ');
 
   <!-- Что включено -->
   <section class="section section-alt">
-    <div class="container">
+    <div class="container container-wide">
       <header class="section-head reveal">
         <p class="eyebrow">Всё включено</p>
         <h2 class="section-title">Что входит в стоимость</h2>
@@ -323,8 +325,20 @@ const eur = (n: number) => '€' + n.toLocaleString('ru-RU').replace(/,/g, ' ');
   }
 
   /* --- таблица цен --- */
+  /*
+    Обёртка со своей прокруткой: если на очень узком экране таблица
+    всё же не поместится, прокрутится она сама, а не вся страница.
+  */
+  .prices-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-inline: calc(var(--sp-1) * -1);
+    padding-inline: var(--sp-1);
+  }
+
   .prices {
     width: 100%;
+    min-width: 17rem;
     border-collapse: collapse;
     font-size: var(--fs-sm);
   }
