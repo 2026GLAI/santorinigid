@@ -3,15 +3,24 @@ import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Reviews from '../components/Reviews.astro';
-import { WHATSAPP, CONTACTS, SITE_URL, OWNER_FULL_NAME, PROFILES } from '../data/site';
+import {
+  WHATSAPP,
+  CONTACTS,
+  SITE_URL,
+  OWNER_FULL_NAME,
+  PROFILES,
+  ON_ISLAND_SINCE,
+  ISLAND_YEARS_TEXT,
+  GUIDE_YEARS_TEXT,
+} from '../data/site';
 import { GALLERY } from '../data/tours';
 import { getImg } from '../data/images';
 
 import portrait from '../assets/img/vladimir-portrait.jpg';
 
-const title = 'Обо мне — Владимир, гид на Санторини | 30 лет на острове';
+const title = `Обо мне — Владимир Лунгу, гид на Санторини с ${ON_ISLAND_SINCE} года`;
 const description =
-  'Владимир — русскоязычный гид на Санторини. 30 лет жизни на острове, 14 лет профессионального опыта. Честные рекомендации, маршруты, проверенные временем.';
+  'Владимир — русскоязычный гид на Санторини. 31 год жизни на острове, 14 лет профессионального опыта. Честные рекомендации, маршруты, проверенные временем.';
 
 const gallery = GALLERY.map((f) => getImg(f));
 
@@ -26,7 +35,7 @@ const schema = [
       alternateName: 'Владимир',
       jobTitle: 'Частный русскоязычный гид на Санторини',
       description:
-        '30 лет живёт на Санторини, 14 лет профессионального опыта проведения индивидуальных экскурсий.',
+        '31 год живёт на Санторини, 14 лет профессионального опыта проведения индивидуальных экскурсий.',
       knowsLanguage: ['ru', 'el'],
       knowsAbout: [
         'Санторини',
@@ -71,19 +80,19 @@ const principles = [
 ];
 
 /**
- * Точные годы на исходном сайте не названы — указан только стаж
- * («30 лет на острове», «14 лет опыта»). Поэтому показываем стаж,
- * а не выдуманные даты.
+ * Даты подтверждены владельцем 2026-07-25: на острове с 1995 года,
+ * гидом работает около 14 лет (в профиле NeedGuide — «опыт работы с 2012 года»).
+ * Стаж не вписан цифрой, а считается от года — см. src/data/site.ts.
  */
 const timeline = [
   {
-    n: '30 лет',
-    label: 'на Санторини',
-    text: 'Моя история с островом началась три десятилетия назад — я знаю здесь каждый поворот дороги.',
+    n: String(ON_ISLAND_SINCE),
+    label: 'переехал на Санторини',
+    text: `Живу на острове с ${ON_ISLAND_SINCE} года — это уже ${ISLAND_YEARS_TEXT}. Знаю здесь каждый поворот дороги.`,
   },
   {
-    n: '14 лет',
-    label: 'работы гидом',
+    n: GUIDE_YEARS_TEXT,
+    label: 'работаю гидом',
     text: 'Профессиональный опыт индивидуальных экскурсий: маршруты, проверенные временем.',
   },
   {
@@ -111,8 +120,8 @@ const timeline = [
         <p class="eyebrow">Обо мне</p>
         <h1>Рад встрече! Меня зовут Владимир</h1>
         <p class="lede">
-          Моя история с Санторини началась три десятилетия назад, и за эти годы я изучил каждый
-          его секрет.
+          Моя история с Санторини началась в {ON_ISLAND_SINCE} году — {ISLAND_YEARS_TEXT} назад.
+          За эти годы я изучил каждый его секрет.
         </p>
         <p>
           Организация отдыха для меня — это прежде всего ответственность за ваши впечатления.
@@ -135,7 +144,7 @@ const timeline = [
     <div class="container">
       <header class="section-head reveal">
         <p class="eyebrow">Мой путь</p>
-        <h2 class="section-title">30 лет на одном острове</h2>
+        <h2 class="section-title">На одном острове с 1995 года</h2>
       </header>
       <ol class="timeline">
         {

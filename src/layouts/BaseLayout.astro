@@ -8,7 +8,13 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import WhatsappFab from '../components/WhatsappFab.astro';
 import ChatWidget from '../components/ChatWidget.astro';
-import { SITE_URL, SITE_NAME, OWNER_FULL_NAME, PROFILES } from '../data/site';
+import {
+  SITE_URL,
+  SITE_NAME,
+  OWNER_FULL_NAME,
+  PROFILES,
+  GUIDE_SINCE,
+} from '../data/site';
 
 interface Props {
   title: string;
@@ -32,12 +38,14 @@ const localBusiness = {
   '@id': `${SITE_URL}/#business`,
   name: 'Владимир — русскоязычный гид на Санторини',
   description:
-    'Индивидуальные экскурсии по Санторини с русскоязычным гидом. 30 лет жизни на острове, 14 лет профессионального опыта. Аренда яхт, вертолётные туры, подбор отелей.',
+    'Индивидуальные экскурсии по Санторини с русскоязычным гидом. 31 год жизни на острове, 14 лет профессионального опыта. Аренда яхт, вертолётные туры, подбор отелей.',
   url: SITE_URL,
   telephone: '+306946800255',
   email: 'santorinivip@gmail.com',
   image: `${SITE_URL}/og-default.jpg`,
   priceRange: '€€€',
+  // Год начала работы гидом — подтверждён владельцем и профилем NeedGuide.
+  foundingDate: String(GUIDE_SINCE),
   address: {
     '@type': 'PostalAddress',
     addressLocality: 'Санторини (Тира)',

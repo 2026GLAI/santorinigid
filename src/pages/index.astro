@@ -4,7 +4,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Reviews from '../components/Reviews.astro';
-import { WHATSAPP, EXTERNAL, SITE_URL, OWNER_FULL_NAME, PROFILES } from '../data/site';
+import {
+  WHATSAPP,
+  EXTERNAL,
+  SITE_URL,
+  OWNER_FULL_NAME,
+  PROFILES,
+  ON_ISLAND_SINCE,
+  ISLAND_YEARS_TEXT,
+  GUIDE_YEARS_TEXT,
+} from '../data/site';
 
 import heroOia from '../assets/img/hero-oia.jpg';
 import portrait from '../assets/img/vladimir-portrait.jpg';
@@ -17,7 +26,7 @@ import tourImg from '../assets/img/tour-oia-couple.jpg';
 
 const title = 'Гид на Санторини | Экскурсии, яхты, вертолёты — 2026';
 const description =
-  'Русскоязычный гид на Санторини — 30 лет на острове. Индивидуальные экскурсии, яхты, вертолёты. Для туристов с лайнеров и с Крита. Цены 2026.';
+  'Русскоязычный гид на Санторини — на острове с 1995 года. Индивидуальные экскурсии, яхты, вертолёты. Для туристов с лайнеров и с Крита. Цены 2026.';
 
 /** Разметка для поисковиков: сайт + личность гида. */
 const schema = [
@@ -38,8 +47,8 @@ const schema = [
     jobTitle: 'Частный русскоязычный гид на Санторини',
     knowsLanguage: ['ru', 'el'],
     worksFor: { '@id': `${SITE_URL}/#business` },
-    description:
-      '30 лет живёт на Санторини, 14 лет профессионального опыта проведения индивидуальных экскурсий.',
+    sameAs: [...PROFILES],
+    description: `Живёт на Санторини с ${ON_ISLAND_SINCE} года (${ISLAND_YEARS_TEXT}), ${GUIDE_YEARS_TEXT} профессионального опыта проведения индивидуальных экскурсий.`,
   },
 ];
 
@@ -75,8 +84,8 @@ const services = [
 ];
 
 const facts = [
-  { n: '30', label: 'лет на острове' },
-  { n: '14', label: 'лет как гид' },
+  { n: String(ON_ISLAND_SINCE), label: 'год переезда на остров' },
+  { n: GUIDE_YEARS_TEXT.split(' ')[0], label: 'лет как гид' },
   { n: '8', label: 'судов во флоте' },
   { n: '24/7', label: 'на связи' },
 ];
@@ -91,7 +100,7 @@ const facts = [
     eyebrow="Санторини · Греция"
     title="Индивидуальные экскурсии на Санторини"
     subtitle="Санторини. Так, как знаю его я."
-    text="30 лет жизни на острове и 14 лет опыта — для вашего безупречного дня."
+    text={`${ISLAND_YEARS_TEXT} жизни на острове и ${GUIDE_YEARS_TEXT} опыта — для вашего безупречного дня.`}
   >
     <a href="/tours" class="btn btn-primary btn-lg">Выбрать экскурсию</a>
     <a href={WHATSAPP.tour} class="btn btn-whatsapp btn-lg" target="_blank" rel="noopener">
@@ -111,7 +120,7 @@ const facts = [
           quality={82}
         />
         <div class="about-badge">
-          <strong>30 лет</strong>
+          <strong>{ISLAND_YEARS_TEXT}</strong>
           <span>на Санторини</span>
         </div>
       </div>
@@ -120,8 +129,8 @@ const facts = [
         <p class="eyebrow">Гид на Санторини</p>
         <h2 class="section-title">Рад встрече! Меня зовут Владимир</h2>
         <p class="lede">
-          Моя история с Санторини началась три десятилетия назад, и за эти годы я изучил каждый
-          его секрет.
+          Моя история с Санторини началась в {ON_ISLAND_SINCE} году — {ISLAND_YEARS_TEXT} назад.
+          За эти годы я изучил каждый его секрет.
         </p>
         <p>
           Организация отдыха для меня — это прежде всего ответственность за ваши впечатления.

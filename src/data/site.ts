@@ -15,6 +15,43 @@ export const SITE_NAME = 'Гид на Санторини — Владимир';
 export const OWNER_FULL_NAME = 'Владимир Лунгу';
 
 /**
+ * Стаж считаем от года, а не пишем цифру руками.
+ *
+ * Почему так: если вписать «31 год» текстом, через год цифра станет неверной,
+ * и никто об этом не вспомнит. Здесь она пересчитывается при каждой сборке
+ * сайта — всегда актуальна.
+ *
+ * Данные подтверждены владельцем 2026-07-25:
+ *  • на острове с 1995 года;
+ *  • гидом работает около 14 лет (совпадает с «опыт работы с 2012 года»
+ *    в профиле NeedGuide).
+ */
+export const ON_ISLAND_SINCE = 1995;
+export const GUIDE_SINCE = 2012;
+
+const CURRENT_YEAR = new Date().getFullYear();
+
+export const YEARS_ON_ISLAND = CURRENT_YEAR - ON_ISLAND_SINCE;
+export const YEARS_AS_GUIDE = CURRENT_YEAR - GUIDE_SINCE;
+
+/**
+ * Склонение: 31 год / 32 года / 35 лет.
+ * Нужно, чтобы фразы на сайте звучали по-русски правильно при любом числе.
+ */
+export function yearsWord(n: number): string {
+  const mod100 = n % 100;
+  const mod10 = n % 10;
+  if (mod100 >= 11 && mod100 <= 14) return 'лет';
+  if (mod10 === 1) return 'год';
+  if (mod10 >= 2 && mod10 <= 4) return 'года';
+  return 'лет';
+}
+
+/** Готовые строки: «31 год», «14 лет». */
+export const ISLAND_YEARS_TEXT = `${YEARS_ON_ISLAND} ${yearsWord(YEARS_ON_ISLAND)}`;
+export const GUIDE_YEARS_TEXT = `${YEARS_AS_GUIDE} ${yearsWord(YEARS_AS_GUIDE)}`;
+
+/**
  * Профили на площадках-партнёрах. Идут в JSON-LD (sameAs) — это помогает
  * поисковикам понять, что сайт, профили и отзывы относятся к одному человеку.
  */
