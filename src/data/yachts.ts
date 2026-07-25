@@ -34,7 +34,7 @@ export const YACHTS: Yacht[] = [
     name: 'Nautitech 46 Fly «IQ»',
     description:
       'Самый просторный катамаран в своем классе с уникальным флайбриджем (верхней палубой). Идеален для больших компаний до 24 человек, ценящих панорамные виды и комфорт уровня Luxury.',
-    image: 'yachts-01.jpg',
+    image: 'yacht-nautitech-46.jpg',
     guests: 24,
     low: { day: 1400, sunset: 1500, full: 2800 },
     high: { day: 1800, sunset: 2000, full: 3600 },
@@ -44,7 +44,7 @@ export const YACHTS: Yacht[] = [
     name: 'Lagoon 46 «The One»',
     description:
       'Сочетание роскошного дизайна и максимального пространства. Идеально подходит для тех, кто ищет комфорт 5-звездочного отеля в открытом море.',
-    image: 'yachts-02.jpg',
+    image: 'yacht-lagoon-46.jpg',
     low: { day: 1300, sunset: 1400, full: 2500 },
     high: { day: 1800, sunset: 1900, full: 3500 },
   },
@@ -53,7 +53,7 @@ export const YACHTS: Yacht[] = [
     name: 'Targa 46 «Escape»',
     description:
       'Легендарный «морской внедорожник» для тех, кто ценит время и эксклюзивность. Мощная, маневренная и невероятно комфортная яхта. Идеальный выбор для индивидуальных маршрутов и доступа к самым потаенным пляжам Санторини, куда не зайдут большие суда.',
-    image: 'yachts-03.jpg',
+    image: 'yacht-targa-46.jpg',
     low: { day: 1600, sunset: 1700, full: 3200 },
     high: { day: 2200, sunset: 2300, full: 4400 },
   },
@@ -63,7 +63,7 @@ export const YACHTS: Yacht[] = [
     badge: 'Brand New',
     description:
       'Абсолютная новинка флота. Excess 11 — это сочетание спортивного азарта и домашнего комфорта. Идеально подходит для тех, кто хочет почувствовать настоящий драйв под парусами на фоне Кальдеры.',
-    image: 'yachts-04.jpg',
+    image: 'yacht-excess-11.jpg',
     low: { day: 1200, sunset: 1300, full: 2400 },
     high: { day: 1500, sunset: 1600, full: 3000 },
   },
@@ -72,7 +72,7 @@ export const YACHTS: Yacht[] = [
     name: 'Lagoon 42',
     description:
       'Золотой стандарт комфорта на Санторини. Просторный флайбридж, уютные каюты и великолепная устойчивость. Идеальное решение как для семейного отдыха, так и для шумной компании друзей.',
-    image: 'yachts-05.jpg',
+    image: 'yacht-lagoon-42.avif',
     low: { day: 1200, sunset: 1300, full: 2400 },
     high: { day: 1500, sunset: 1600, full: 3000 },
   },
@@ -81,7 +81,7 @@ export const YACHTS: Yacht[] = [
     name: 'Fountaine Pajot Isla 40',
     description:
       'Воплощение французского стиля и инноваций. Этот катамаран отличается невероятной освещенностью салона и плавностью хода. Идеально подходит для романтических круизов на закате.',
-    image: 'yachts-06.jpg',
+    image: 'yacht-fountaine-pajot.jpg',
     low: { day: 1200, sunset: 1300, full: 2400 },
     high: { day: 1500, sunset: 1600, full: 3000 },
   },
@@ -90,7 +90,7 @@ export const YACHTS: Yacht[] = [
     name: 'Tesoro T40',
     description:
       'Испанская эстетика и мощь. Эта яхта сочетает в себе элегантность и невероятную скорость (до 46 узлов). Идеальна для тех, кто хочет быстро и с максимальным комфортом перемещаться между пляжами Санторини.',
-    image: 'yachts-07.jpg',
+    image: 'yacht-tesoro-t40.jpg',
     low: { day: 1800, sunset: 1900, full: 3600 },
     high: { day: 2200, sunset: 2300, full: 4400 },
   },
@@ -99,7 +99,7 @@ export const YACHTS: Yacht[] = [
     name: 'Black Swan',
     description:
       'Черный лебедь Эгейского моря. Мощный двигатель в 450 л.с. и спортивный характер. Лучший выбор для приватных прогулок, доступ к пещерам в районе Белого и Красного пляжей.',
-    image: 'yachts-09.jpg',
+    image: 'yacht-black-swan.jpg',
     low: { day: 1500, sunset: 1600, full: 3000 },
     high: { day: 1800, sunset: 1900, full: 3600 },
   },

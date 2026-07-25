@@ -11,3 +11,8 @@ Thumbs.db
 # среда
 .env
 .env.production
+
+# Оригиналы, скачанные с Wix — рабочий архив, в репозиторий не кладём.
+# Всё нужное уже лежит в src/assets/img (оттуда Astro их сжимает).
+# Перечень исходных URL сохранён в docs/harvest/image-urls.txt
+docs/harvest/images/

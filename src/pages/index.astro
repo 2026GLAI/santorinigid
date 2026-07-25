@@ -3,17 +3,17 @@ import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import CtaBand from '../components/CtaBand.astro';
+import Reviews from '../components/Reviews.astro';
 import { WHATSAPP, EXTERNAL, SITE_URL } from '../data/site';
-import { REVIEWS } from '../data/tours';
 
 import heroOia from '../assets/img/hero-oia.jpg';
 import portrait from '../assets/img/vladimir-portrait.jpg';
 import ferry from '../assets/img/ferry-seajets.jpg';
 import cruise from '../assets/img/cruise-tender.jpg';
-import yachtImg from '../assets/img/yachts-01.jpg';
-import heliImg from '../assets/img/helicopters-01.jpg';
-import hotelImg from '../assets/img/hotels-04.jpg';
-import tourImg from '../assets/img/tours-07.jpg';
+import yachtImg from '../assets/img/yacht-nautitech-46.jpg';
+import heliImg from '../assets/img/heli-hero.jpg';
+import hotelImg from '../assets/img/hotel-perivolas.webp';
+import tourImg from '../assets/img/tour-oia-couple.jpg';
 
 const title = 'Гид на Санторини | Экскурсии, яхты, вертолёты — 2026';
 const description =
@@ -272,40 +272,7 @@ const facts = [
     </div>
   </section>
 
-  <!-- Отзывы -->
-  <section class="section">
-    <div class="container">
-      <header class="section-head reveal">
-        <p class="eyebrow">Отзывы</p>
-        <h2 class="section-title">Что говорят мои гости</h2>
-      </header>
-      <div class="grid-auto">
-        {
-          REVIEWS.map((r) => (
-            <figure class="card review reveal">
-              <div class="card-body">
-                <div class="stars" aria-label="Оценка 5 из 5">
-                  {[1, 2, 3, 4, 5].map(() => (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                      <path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z" />
-                    </svg>
-                  ))}
-                </div>
-                <blockquote>{r.text}</blockquote>
-                <figcaption>
-                  <strong>{r.author}</strong>
-                  <span>{r.date}</span>
-                </figcaption>
-              </div>
-            </figure>
-          ))
-        }
-      </div>
-      <p class="reviews-more reveal">
-        <a href="/about#reviews" class="btn btn-ghost">Все отзывы и моя история</a>
-      </p>
-    </div>
-  </section>
+  <Reviews title="Что говорят мои гости" lede="" />
 
   <CtaBand />
 </BaseLayout>
