@@ -2,23 +2,25 @@
 /**
  * Форма «оставить отзыв».
  *
- * Как это работает и почему именно так:
- *  Сайт статический — своей базы данных у него нет, и это сознательно
- *  (ноль платежей, полная независимость). Поэтому отзыв не публикуется
- *  автоматически, а приходит Владимиру: он читает, подтверждает и добавляет
- *  на сайт. Плюсы такого порядка:
- *   • на сайт физически невозможно накидать спам;
- *   • каждый опубликованный отзыв — настоящий, а не бот;
- *   • отзыв попадает прямо в HTML и его видят поисковики и ИИ.
- *  Минус честно называем гостю: отзыв появляется не мгновенно.
+ * ПОРЯДОК ПУБЛИКАЦИИ (полный контроль у владельца):
+ *  1. Гость заполняет форму — регистрация не нужна.
+ *  2. Отзыв уходит на Worker, тот шлёт Владимиру письмо с текстом,
+ *     фотографиями и двумя кнопками: «Опубликовать» и «Удалить».
+ *  3. Владимир жмёт «Опубликовать» → отзыв сам появляется на сайте
+ *     через 2–3 минуты. Жмёт «Удалить» → отзыв стирается навсегда.
  *
- * Пока не подключён Formspree — форма открывает WhatsApp с готовым текстом,
- * так отзыв точно не потеряется.
+ *  Без нажатия Владимира на сайт не попадает НИЧЕГО. Конкурент физически
+ *  не может ничего опубликовать — максимум прислать письмо, которое
+ *  Владимир удалит одной кнопкой.
+ *
+ * ПОКА WORKER НЕ ПОДКЛЮЧЁН форма открывает WhatsApp с готовым текстом —
+ * так отзыв не потеряется. Чтобы включить основной путь, впишите адрес
+ * Worker в REVIEW_API ниже. Инструкция: docs/setup-reviews.md
  */
 import { CONTACTS } from '../data/site';
 
-const FORMSPREE_ID = '';
-const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
+/** Адрес Worker. Пустая строка = запасной путь через WhatsApp. */
+const REVIEW_API = '';
 ---
 
 <section class="section section-alt" id="review-form">
@@ -32,13 +34,7 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
       </p>
     </header>
 
-    <form
-      class="rf-form reveal"
-      id="reviewForm"
-      action={formAction || undefined}
-      method="POST"
-    >
-      <input type="hidden" name="_subject" value="Новый отзыв с сайта santorinigid.com" />
+    <form class="rf-form reveal" id="reviewForm" novalidate>
 
       <div class="rf-row">
         <label class="field">
@@ -135,7 +131,7 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
   </div>
 </section>
 
-<script define:vars={{ hasEndpoint: Boolean(formAction), PHONE: CONTACTS.phone }}>
+<script define:vars={{ hasEndpoint: Boolean(REVIEW_API), REVIEW_API, PHONE: CONTACTS.phone }}>
   const form = document.getElementById('reviewForm');
   const status = document.getElementById('rfStatus');
 
@@ -217,6 +213,15 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
     }
   });
 
+  /** Файл → строка base64, чтобы отправить фото вместе с отзывом. */
+  const toBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('Не удалось прочитать файл'));
+      reader.readAsDataURL(file);
+    });
+
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!form.reportValidity()) return;
@@ -226,7 +231,7 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
     const text = String(d.get('text') || '').trim();
 
     if (!hasEndpoint) {
-      // Formspree ещё не подключён — не теряем отзыв, отправляем в WhatsApp.
+      // Worker ещё не подключён — не теряем отзыв, отправляем в WhatsApp.
       const msg = [
         'Здравствуйте, Владимир! Хочу оставить отзыв о поездке.',
         '',
@@ -248,27 +253,55 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
       return;
     }
 
-    status.textContent = 'Отправляю…';
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    status.textContent = photos.length ? 'Отправляю отзыв и фотографии…' : 'Отправляю…';
     status.className = 'rf-status';
+
     try {
-      const r = await fetch(form.action, {
+      const encoded = await Promise.all(photos.map(toBase64));
+      const r = await fetch(REVIEW_API, {
         method: 'POST',
-        body: d,
-        headers: { Accept: 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          author,
+          text,
+          contact: String(d.get('contact') || '').trim(),
+          tripDate: String(d.get('tripDate') || '').trim(),
+          tripWith: String(d.get('tripWith') || '').trim(),
+          photos: encoded,
+          _gotcha: String(d.get('_gotcha') || ''),
+        }),
       });
-      if (!r.ok) throw new Error('bad response');
+
+      const result = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(result.error || 'Сервер не принял отзыв');
+
       form.reset();
+      photos = [];
+      syncInput();
+      renderPreviews();
       status.textContent =
-        'Спасибо! Отзыв отправлен. Я прочитаю его и опубликую на сайте в течение суток.';
+        'Спасибо! Отзыв отправлен Владимиру. Он прочитает его и опубликует на сайте — обычно в течение суток.';
       status.className = 'rf-status ok';
-    } catch {
+    } catch (err) {
       status.innerHTML =
-        'Не получилось отправить. Напишите отзыв, пожалуйста, в WhatsApp на номер ' +
+        (err.message ? esc(err.message) + '. ' : 'Не получилось отправить. ') +
+        'Напишите отзыв, пожалуйста, в WhatsApp на номер ' +
         PHONE +
         ' — так он точно дойдёт.';
       status.className = 'rf-status err';
+    } finally {
+      submitBtn.disabled = false;
     }
   });
+
+  /** Экранируем текст ошибки, прежде чем показать его через innerHTML. */
+  function esc(s) {
+    const d = document.createElement('div');
+    d.textContent = String(s);
+    return d.innerHTML;
+  }
 </script>
 
 <style>
