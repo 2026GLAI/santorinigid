@@ -86,11 +86,35 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
         <small class="rf-hint">Минимум 30 символов. Пишите свободно — я ничего не правлю.</small>
       </label>
 
+      <div class="field">
+        <span class="field-label">Фотографии с поездки — до 3 штук</span>
+        <label class="rf-drop" for="rfPhotos">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="14" rx="2.5" />
+            <circle cx="8.5" cy="10" r="1.6" />
+            <path d="M21 15.5l-4.5-4.5L7 20" />
+          </svg>
+          <span class="rf-drop-text">
+            <strong>Выберите фото</strong>
+            <small>JPG или PNG, до 5 МБ каждое. Необязательно, но приятно.</small>
+          </span>
+        </label>
+        <input
+          type="file"
+          id="rfPhotos"
+          name="photos"
+          accept="image/jpeg,image/png,image/webp"
+          multiple
+          class="visually-hidden"
+        />
+        <ul class="rf-previews" id="rfPreviews" aria-live="polite"></ul>
+      </div>
+
       <label class="rf-consent">
         <input type="checkbox" name="consent" required />
         <span>
-          Согласен, что Владимир опубликует мой отзыв на сайте с указанием имени
-          и месяца поездки. Контакты останутся скрытыми.
+          Согласен, что Владимир опубликует мой отзыв и приложенные фотографии на
+          сайте с указанием имени и месяца поездки. Контакты останутся скрытыми.
         </span>
       </label>
 
@@ -102,9 +126,10 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
       <p class="rf-status" id="rfStatus" role="status" aria-live="polite"></p>
 
       <p class="rf-note">
-        Отзыв появится на сайте после того, как я его прочитаю — обычно в течение
-        суток. Так я защищаю страницу от спама, а вы видите здесь только живые
-        отзывы настоящих гостей.
+        Отзыв и фотографии появятся на сайте после того, как я их прочитаю и
+        одобрю — обычно в течение суток. Никакой отзыв не публикуется
+        автоматически: так на страницу невозможно накидать спам, и вы видите
+        здесь только живые отзывы настоящих гостей.
       </p>
     </form>
   </div>
@@ -113,6 +138,84 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
 <script define:vars={{ hasEndpoint: Boolean(formAction), PHONE: CONTACTS.phone }}>
   const form = document.getElementById('reviewForm');
   const status = document.getElementById('rfStatus');
+
+  // --- фотографии: не больше 3, не тяжелее 5 МБ ---
+  const MAX_PHOTOS = 3;
+  const MAX_SIZE = 5 * 1024 * 1024;
+  const photoInput = document.getElementById('rfPhotos');
+  const previews = document.getElementById('rfPreviews');
+  /** Отобранные файлы. Держим отдельно от input, чтобы можно было удалять по одному. */
+  let photos = [];
+
+  function renderPreviews() {
+    previews.innerHTML = '';
+    photos.forEach((file, i) => {
+      const li = document.createElement('li');
+      li.className = 'rf-preview';
+
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.alt = '';
+      img.onload = () => URL.revokeObjectURL(img.src);
+
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'rf-preview-del';
+      del.setAttribute('aria-label', `Убрать фото ${i + 1}`);
+      del.textContent = '×';
+      del.addEventListener('click', () => {
+        photos.splice(i, 1);
+        syncInput();
+        renderPreviews();
+      });
+
+      li.append(img, del);
+      previews.appendChild(li);
+    });
+
+    if (photos.length) {
+      const hint = document.createElement('li');
+      hint.className = 'rf-preview-count';
+      hint.textContent = `${photos.length} из ${MAX_PHOTOS}`;
+      previews.appendChild(hint);
+    }
+  }
+
+  /** Возвращаем отобранные файлы обратно в input — иначе они не уйдут с формой. */
+  function syncInput() {
+    const dt = new DataTransfer();
+    photos.forEach((f) => dt.items.add(f));
+    photoInput.files = dt.files;
+  }
+
+  photoInput?.addEventListener('change', () => {
+    const incoming = [...photoInput.files];
+    const errors = [];
+
+    for (const file of incoming) {
+      if (photos.length >= MAX_PHOTOS) {
+        errors.push(`Можно приложить не больше ${MAX_PHOTOS} фото.`);
+        break;
+      }
+      if (file.size > MAX_SIZE) {
+        errors.push(`«${file.name}» тяжелее 5 МБ — уменьшите или выберите другое.`);
+        continue;
+      }
+      if (photos.some((p) => p.name === file.name && p.size === file.size)) continue;
+      photos.push(file);
+    }
+
+    syncInput();
+    renderPreviews();
+
+    if (errors.length) {
+      status.textContent = errors[0];
+      status.className = 'rf-status err';
+    } else if (status.className.includes('err')) {
+      status.textContent = '';
+      status.className = 'rf-status';
+    }
+  });
 
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -133,11 +236,14 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
         '',
         'Отзыв:',
         text,
+        photos.length ? `\nПриложу ${photos.length} фото следующим сообщением.` : '',
       ]
-        .filter((l) => l !== null && l !== undefined)
+        .filter(Boolean)
         .join('\n');
       window.open('https://wa.me/306946800255?text=' + encodeURIComponent(msg), '_blank', 'noopener');
-      status.textContent = 'Открыл WhatsApp с вашим отзывом — осталось нажать «отправить». Спасибо!';
+      status.textContent = photos.length
+        ? 'Открыл WhatsApp с вашим отзывом — нажмите «отправить» и следом прикрепите фото.'
+        : 'Открыл WhatsApp с вашим отзывом — осталось нажать «отправить». Спасибо!';
       status.className = 'rf-status ok';
       return;
     }
@@ -237,6 +343,117 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
   }
 
   .rf-hint {
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+  }
+
+  /* --- загрузка фотографий --- */
+  .field-label {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-soft);
+  }
+
+  .rf-drop {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    padding: var(--sp-4) var(--sp-5);
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: border-color var(--dur) var(--ease), background-color var(--dur) var(--ease),
+      color var(--dur) var(--ease);
+  }
+
+  .rf-drop:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 5%, var(--bg));
+  }
+
+  /* Клавиатурная навигация: подсвечиваем область, когда фокус на input */
+  #rfPhotos:focus-visible + .rf-previews,
+  .field:focus-within .rf-drop {
+    border-color: var(--accent);
+  }
+
+  .rf-drop svg {
+    flex-shrink: 0;
+  }
+
+  .rf-drop-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .rf-drop-text strong {
+    font-size: var(--fs-sm);
+    color: var(--text);
+  }
+
+  .rf-drop:hover .rf-drop-text strong {
+    color: var(--accent);
+  }
+
+  .rf-drop-text small {
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+  }
+
+  .rf-previews {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-3);
+    list-style: none;
+  }
+
+  .rf-previews:empty {
+    display: none;
+  }
+
+  .rf-preview {
+    position: relative;
+    width: 84px;
+    height: 84px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .rf-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .rf-preview-del {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--c-ink) 72%, transparent);
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1;
+    backdrop-filter: blur(4px);
+    transition: background-color var(--dur) var(--ease);
+  }
+
+  .rf-preview-del:hover {
+    background: #c0392b;
+  }
+
+  .rf-preview-count {
     font-size: var(--fs-xs);
     color: var(--text-muted);
   }

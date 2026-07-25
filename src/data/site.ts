@@ -31,14 +31,14 @@ export const GUIDE_SINCE = 2012;
 
 const CURRENT_YEAR = new Date().getFullYear();
 
-export const YEARS_ON_ISLAND = CURRENT_YEAR - ON_ISLAND_SINCE;
-export const YEARS_AS_GUIDE = CURRENT_YEAR - GUIDE_SINCE;
+const YEARS_ON_ISLAND = CURRENT_YEAR - ON_ISLAND_SINCE;
+const YEARS_AS_GUIDE = CURRENT_YEAR - GUIDE_SINCE;
 
 /**
  * Склонение: 31 год / 32 года / 35 лет.
  * Нужно, чтобы фразы на сайте звучали по-русски правильно при любом числе.
  */
-export function yearsWord(n: number): string {
+function yearsWord(n: number): string {
   const mod100 = n % 100;
   const mod10 = n % 10;
   if (mod100 >= 11 && mod100 <= 14) return 'лет';

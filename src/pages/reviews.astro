@@ -4,10 +4,10 @@ import Reviews from '../components/Reviews.astro';
 import ReviewForm from '../components/ReviewForm.astro';
 import CtaBand from '../components/CtaBand.astro';
 import { SITE_URL, WHATSAPP } from '../data/site';
-import { REVIEWS, REVIEWS_SOURCE } from '../data/reviews';
+import { REVIEWS, REVIEW_SOURCES, REVIEW_YEARS } from '../data/reviews';
 
-const title = 'Отзывы о гиде Владимире на Санторини — 15 отзывов туристов';
-const description = `Реальные отзывы туристов об экскурсиях с русскоязычным гидом Владимиром Лунгу на Санторини за ${REVIEWS[REVIEWS.length - 1].datePublished.slice(0, 4)}–${REVIEWS[0].datePublished.slice(0, 4)} годы. Каждый отзыв со ссылкой на оригинал.`;
+const title = `Отзывы о гиде Владимире Лунгу на Санторини — ${REVIEWS.length} отзывов туристов`;
+const description = `Реальные отзывы туристов об экскурсиях с русскоязычным гидом Владимиром Лунгу на Санторини за ${REVIEW_YEARS.from}–${REVIEW_YEARS.to} годы. Каждый отзыв со ссылкой на оригинал на площадке-источнике.`;
 
 /**
  * Разметка отзывов для поисковиков и ИИ.
@@ -47,7 +47,8 @@ const schema = [
           name: 'Индивидуальная экскурсия по Санторини с гидом Владимиром',
           provider: { '@id': `${SITE_URL}/#business` },
         },
-        publisher: { '@type': 'Organization', name: REVIEWS_SOURCE.name },
+        // Площадка указывается для КАЖДОГО отзыва своя — они собраны с разных.
+        publisher: { '@type': 'Organization', name: r.source },
         url: r.sourceUrl,
       },
     })),
@@ -70,9 +71,9 @@ const schema = [
       <h1>Что говорят мои гости</h1>
       <p class="lede mx-auto">
         {REVIEWS.length} отзывов от настоящих путешественников, которые провели день
-        на Санторини вместе со мной. Все они опубликованы на площадке
-        {' '}{REVIEWS_SOURCE.name} — у каждого отзыва есть ссылка на оригинал,
-        и вы можете проверить любой.
+        на Санторини вместе со мной, за {REVIEW_YEARS.from}–{REVIEW_YEARS.to} годы.
+        Все они опубликованы на площадках {REVIEW_SOURCES.map((s) => s.name).join(' и ')} —
+        у каждого отзыва есть прямая ссылка на оригинал, и вы можете проверить любой.
       </p>
       <div class="rv-hero-actions">
         <a href="#review-form" class="btn btn-primary">Оставить свой отзыв</a>

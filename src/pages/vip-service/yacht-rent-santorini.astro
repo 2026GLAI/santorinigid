@@ -84,8 +84,17 @@ const eur = (n: number) => '€' + n.toLocaleString('ru-RU').replace(/,/g, ' ');
         {
           YACHT_PROGRAMS.map((p) => (
             <article class="card program reveal">
-              <div class="card-body">
+              <div class="program-media">
+                <Image
+                  src={getImg(p.image)}
+                  alt={`${p.title} на Санторини — ${p.time}`}
+                  widths={[380, 560, 760]}
+                  sizes="(min-width: 1100px) 360px, (min-width: 700px) 45vw, 92vw"
+                  quality={78}
+                />
                 <span class="program-time">{p.time}</span>
+              </div>
+              <div class="card-body">
                 <h3 class="card-title">{p.title}</h3>
                 <p class="card-text">{p.text}</p>
               </div>
@@ -188,10 +197,21 @@ const eur = (n: number) => '€' + n.toLocaleString('ru-RU').replace(/,/g, ' ');
       <div class="grid-auto">
         {
           YACHT_INCLUDED.map((i) => (
-            <div class="included reveal">
-              <h3>{i.title}</h3>
-              <p>{i.text}</p>
-            </div>
+            <article class="included reveal">
+              <div class="included-media">
+                <Image
+                  src={getImg(i.image)}
+                  alt={`${i.title} — что входит в аренду яхты на Санторини`}
+                  widths={[300, 460, 620]}
+                  sizes="(min-width: 1100px) 280px, (min-width: 700px) 45vw, 92vw"
+                  quality={78}
+                />
+              </div>
+              <div class="included-body">
+                <h3>{i.title}</h3>
+                <p>{i.text}</p>
+              </div>
+            </article>
           ))
         }
       </div>
@@ -211,15 +231,33 @@ const eur = (n: number) => '€' + n.toLocaleString('ru-RU').replace(/,/g, ' ');
     margin-bottom: var(--sp-7);
   }
 
+  .program-media {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .program-media :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    transition: transform 600ms var(--ease);
+  }
+
+  .program:hover .program-media :global(img) {
+    transform: scale(1.05);
+  }
+
   .program-time {
-    display: inline-block;
-    padding: 0.28rem 0.75rem;
+    position: absolute;
+    left: var(--sp-3);
+    bottom: var(--sp-3);
+    padding: 0.3rem 0.8rem;
     border-radius: var(--radius-full);
-    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter: blur(6px);
     font-size: 0.78rem;
     font-weight: 600;
     color: var(--accent);
-    width: fit-content;
   }
 
   /* --- флот --- */
@@ -353,10 +391,38 @@ const eur = (n: number) => '€' + n.toLocaleString('ru-RU').replace(/,/g, ' ');
 
   /* --- включено --- */
   .included {
-    padding: var(--sp-5);
+    display: flex;
+    flex-direction: column;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  }
+
+  .included:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+  }
+
+  .included-media {
+    overflow: hidden;
+  }
+
+  .included-media :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    transition: transform 600ms var(--ease);
+  }
+
+  .included:hover .included-media :global(img) {
+    transform: scale(1.05);
+  }
+
+  .included-body {
+    padding: var(--sp-4) var(--sp-5) var(--sp-5);
   }
 
   .included h3 {

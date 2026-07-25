@@ -10,7 +10,8 @@
  *     физически присутствуют в HTML и индексируются.
  *  3. Оценок в звёздах нет — их нет и в источнике. См. src/data/reviews.ts.
  */
-import { REVIEWS, REVIEWS_SOURCE, REVIEWS_VISIBLE } from '../data/reviews';
+import ReviewCard from './ReviewCard.astro';
+import { REVIEWS, REVIEW_SOURCES, REVIEWS_VISIBLE, LEAVE_REVIEW_URL, REVIEW_YEARS } from '../data/reviews';
 
 interface Props {
   title?: string;
@@ -35,17 +36,14 @@ const {
 const shown = REVIEWS.slice(0, visible);
 const hidden = REVIEWS.slice(visible);
 
-/** Первые буквы имени для аватарки-заглушки (фото авторов у нас нет). */
-const initials = (name: string) =>
-  name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? '')
-    .join('');
-
 /** Годы, за которые есть отзывы — честный показатель «нас читают давно». */
-const years = [...new Set(REVIEWS.map((r) => r.datePublished.slice(0, 4)))].sort();
-const yearsSpan = years.length > 1 ? `${years[0]}–${years[years.length - 1]}` : years[0];
+const yearsSpan = `${REVIEW_YEARS.from}–${REVIEW_YEARS.to}`;
+
+/** Сколько отзывов с какой площадки — показываем открыто. */
+const bySource = REVIEW_SOURCES.map((s) => ({
+  ...s,
+  count: REVIEWS.filter((r) => r.source === s.name).length,
+})).filter((s) => s.count > 0);
 ---
 
 <section class:list={['section', { 'section-alt': alt }]} id="reviews">
@@ -71,48 +69,25 @@ const yearsSpan = years.length > 1 ? `${years[0]}–${years[years.length - 1]}` 
       </div>
 
       <p class="rv-source">
-        Все отзывы оставлены на площадке
-        <a href={REVIEWS_SOURCE.profileUrl} target="_blank" rel="noopener nofollow">
-          {REVIEWS_SOURCE.name}
-        </a>
-        — у каждого есть ссылка на оригинал, вы можете проверить любой.
+        Отзывы оставлены на площадках
+        {
+          bySource.map((s, i) => (
+            <>
+              {i > 0 && ' и '}
+              <a href={s.url} target="_blank" rel="noopener nofollow">
+                {s.name}
+              </a>
+              {' '}({s.count})
+            </>
+          ))
+        }
+        — у каждого отзыва есть прямая ссылка на оригинал, вы можете проверить любой.
+        Оценок в звёздах на этих площадках нет, поэтому мы их не показываем.
       </p>
     </header>
 
     <ol class="rv-list">
-      {
-        shown.map((r) => (
-          <li class="rv-item reveal" id={`review-${r.id}`}>
-            <article class="rv-card">
-              <header class="rv-card-head">
-                <span class="rv-avatar" aria-hidden="true">
-                  {initials(r.author)}
-                </span>
-                <span class="rv-who">
-                  <strong>{r.author}</strong>
-                  {r.tripDate && (
-                    <span class="rv-trip">
-                      Поездка: {r.tripDate}
-                      {r.tripWith && ` · ${r.tripWith}`}
-                    </span>
-                  )}
-                </span>
-              </header>
-
-              <blockquote class="rv-text">
-                <p>{r.text}</p>
-              </blockquote>
-
-              <footer class="rv-card-foot">
-                <time datetime={r.datePublished}>Опубликован {r.published}</time>
-                <a href={r.sourceUrl} target="_blank" rel="noopener nofollow" class="rv-src">
-                  Оригинал на {REVIEWS_SOURCE.name} ↗
-                </a>
-              </footer>
-            </article>
-          </li>
-        ))
-      }
+      {shown.map((r) => <ReviewCard review={r} reveal />)}
     </ol>
 
     {
@@ -122,37 +97,7 @@ const yearsSpan = years.length > 1 ? `${years[0]}–${years[years.length - 1]}` 
           <input type="checkbox" id="rv-toggle" class="rv-toggle" />
 
           <ol class="rv-list rv-hidden-list">
-            {hidden.map((r) => (
-              <li class="rv-item" id={`review-${r.id}`}>
-                <article class="rv-card">
-                  <header class="rv-card-head">
-                    <span class="rv-avatar" aria-hidden="true">
-                      {initials(r.author)}
-                    </span>
-                    <span class="rv-who">
-                      <strong>{r.author}</strong>
-                      {r.tripDate && (
-                        <span class="rv-trip">
-                          Поездка: {r.tripDate}
-                          {r.tripWith && ` · ${r.tripWith}`}
-                        </span>
-                      )}
-                    </span>
-                  </header>
-
-                  <blockquote class="rv-text">
-                    <p>{r.text}</p>
-                  </blockquote>
-
-                  <footer class="rv-card-foot">
-                    <time datetime={r.datePublished}>Опубликован {r.published}</time>
-                    <a href={r.sourceUrl} target="_blank" rel="noopener nofollow" class="rv-src">
-                      Оригинал на {REVIEWS_SOURCE.name} ↗
-                    </a>
-                  </footer>
-                </article>
-              </li>
-            ))}
+            {hidden.map((r) => <ReviewCard review={r} />)}
           </ol>
 
           <label for="rv-toggle" class="btn btn-ghost rv-more-btn">
@@ -243,94 +188,17 @@ const yearsSpan = years.length > 1 ? `${years[0]}–${years[years.length - 1]}` 
     align-items: start;
   }
 
-  .rv-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-3);
-    height: 100%;
-    padding: var(--sp-5);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-    transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
-  }
 
-  .rv-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow);
-  }
 
-  .rv-card-head {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-3);
-  }
 
-  .rv-avatar {
-    display: grid;
-    place-items: center;
-    width: 46px;
-    height: 46px;
-    flex-shrink: 0;
-    border-radius: var(--radius-full);
-    background: linear-gradient(135deg, var(--c-aegean-400), var(--c-aegean-800));
-    color: #fff;
-    font-weight: 600;
-    font-size: 0.95rem;
-    letter-spacing: 0.02em;
-  }
 
-  .rv-who {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.3;
-    min-width: 0;
-  }
 
-  .rv-who strong {
-    font-size: var(--fs-base);
-  }
 
-  .rv-trip {
-    font-size: var(--fs-xs);
-    color: var(--text-muted);
-  }
 
-  .rv-text {
-    flex: 1;
-    position: relative;
-    padding-left: var(--sp-4);
-    border-left: 3px solid color-mix(in srgb, var(--accent) 35%, transparent);
-  }
 
-  .rv-text p {
-    font-size: var(--fs-sm);
-    line-height: 1.75;
-    color: var(--text-soft);
-  }
 
-  .rv-card-foot {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-2) var(--sp-4);
-    justify-content: space-between;
-    align-items: baseline;
-    padding-top: var(--sp-3);
-    border-top: 1px solid var(--border);
-    font-size: var(--fs-xs);
-    color: var(--text-muted);
-  }
 
-  .rv-src {
-    color: var(--accent);
-    font-weight: 600;
-    white-space: nowrap;
-  }
 
-  .rv-src:hover {
-    text-decoration: underline;
-  }
 
   /* --- «показать ещё» на чистом CSS --- */
   .rv-toggle {

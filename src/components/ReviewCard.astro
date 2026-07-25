@@ -1,0 +1,231 @@
+---
+/**
+ * Карточка одного отзыва.
+ *
+ * Честность в деталях:
+ *  • у каждой карточки — своя площадка-источник и прямая ссылка на оригинал;
+ *  • ответ Владимира показываем ТОЛЬКО там, где он реально его написал;
+ *  • оценок в звёздах нет — площадки их не используют;
+ *  • длинные отзывы разворачиваются на CSS (<details>), текст целиком
+ *    остаётся в HTML и виден поисковикам и ИИ.
+ */
+import type { Review } from '../data/reviews';
+
+interface Props {
+  review: Review;
+  reveal?: boolean;
+}
+
+const { review: r, reveal = false } = Astro.props;
+
+/** Инициалы для аватарки-заглушки — фото авторов у нас нет. */
+const initials = r.author
+  .split(/\s+/)
+  .slice(0, 2)
+  .map((w) => w[0]?.toUpperCase() ?? '')
+  .join('');
+
+/** Длинные отзывы сворачиваем, но текст целиком остаётся в разметке. */
+const LONG = 420;
+const isLong = r.text.length > LONG;
+/** Обрезаем по границе слова, чтобы не рвать посреди слова. */
+const teaser = isLong ? r.text.slice(0, r.text.lastIndexOf(' ', LONG)) : r.text;
+---
+
+<li class:list={['rv-item', { reveal }]} id={`review-${r.id}`}>
+  <article class="rv-card">
+    <header class="rv-card-head">
+      <span class="rv-avatar" aria-hidden="true">{initials}</span>
+      <span class="rv-who">
+        <strong>{r.author}</strong>
+        {
+          r.tripDate && (
+            <span class="rv-trip">
+              Поездка: {r.tripDate}
+              {r.tripWith && ` · ${r.tripWith}`}
+            </span>
+          )
+        }
+      </span>
+    </header>
+
+    <blockquote class="rv-text">
+      {
+        isLong ? (
+          <details class="rv-details">
+            <summary>
+              <span class="rv-teaser">{teaser}…</span>
+              <span class="rv-expand">Читать полностью</span>
+            </summary>
+            <p class="rv-full">{r.text}</p>
+          </details>
+        ) : (
+          <p>{r.text}</p>
+        )
+      }
+    </blockquote>
+
+    {
+      r.reply && (
+        <div class="rv-reply">
+          <span class="rv-reply-label">Ответ Владимира</span>
+          <p>{r.reply}</p>
+        </div>
+      )
+    }
+
+    <footer class="rv-card-foot">
+      <time datetime={r.datePublished}>Опубликован {r.published}</time>
+      <a href={r.sourceUrl} target="_blank" rel="noopener nofollow" class="rv-src">
+        Оригинал на {r.source} ↗
+      </a>
+    </footer>
+  </article>
+</li>
+
+<style>
+  .rv-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    height: 100%;
+    padding: var(--sp-5);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+
+  .rv-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+  }
+
+  .rv-card-head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+
+  .rv-avatar {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, var(--c-aegean-400), var(--c-aegean-800));
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .rv-who {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+    min-width: 0;
+  }
+
+  .rv-who strong {
+    font-size: var(--fs-base);
+  }
+
+  .rv-trip {
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+  }
+
+  .rv-text {
+    flex: 1;
+    padding-left: var(--sp-4);
+    border-left: 3px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    font-size: var(--fs-sm);
+    line-height: 1.75;
+    color: var(--text-soft);
+  }
+
+  /* --- разворачивание длинных отзывов, без скриптов --- */
+  .rv-details summary {
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .rv-details summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .rv-expand {
+    display: block;
+    margin-top: var(--sp-2);
+    font-weight: 600;
+    color: var(--accent);
+    font-size: var(--fs-xs);
+  }
+
+  .rv-expand::after {
+    content: ' ▾';
+  }
+
+  .rv-details[open] summary {
+    display: none;
+  }
+
+  .rv-full {
+    animation: rvOpen 300ms var(--ease);
+  }
+
+  @keyframes rvOpen {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rv-full {
+      animation: none;
+    }
+  }
+
+  /* --- ответ Владимира --- */
+  .rv-reply {
+    padding: var(--sp-3) var(--sp-4);
+    background: color-mix(in srgb, var(--accent) 7%, transparent);
+    border-radius: var(--radius);
+    font-size: var(--fs-sm);
+    color: var(--text-soft);
+  }
+
+  .rv-reply-label {
+    display: block;
+    margin-bottom: var(--sp-1);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .rv-card-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2) var(--sp-4);
+    justify-content: space-between;
+    align-items: baseline;
+    padding-top: var(--sp-3);
+    border-top: 1px solid var(--border);
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+  }
+
+  .rv-src {
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .rv-src:hover {
+    text-decoration: underline;
+  }
+</style>

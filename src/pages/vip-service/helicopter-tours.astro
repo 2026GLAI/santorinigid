@@ -132,6 +132,21 @@ const schema = [
 
   <!-- Маршруты и преимущества -->
   <section class="section">
+    <div class="container">
+      <div class="routes-hero reveal">
+        <Image
+          src={getImg('heli-caldera.jpg')}
+          alt="Вертолёт над кальдерой Санторини: вид на вулкан и Эгейское море"
+          widths={[640, 960, 1320]}
+          sizes="(min-width: 1200px) 1140px, 94vw"
+          quality={80}
+        />
+        <p class="routes-hero-caption">
+          Кальдера с высоты — то, ради чего стоит подняться в воздух
+        </p>
+      </div>
+    </div>
+
     <div class="container two-panel">
       <div class="panel reveal">
         <h2 class="panel-title">Маршруты и время</h2>
@@ -186,6 +201,31 @@ const schema = [
     width: 100%;
     aspect-ratio: 16 / 10;
     object-fit: cover;
+  }
+
+  .routes-hero {
+    position: relative;
+    margin-bottom: var(--sp-6);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .routes-hero :global(img) {
+    width: 100%;
+    aspect-ratio: 21 / 9;
+    object-fit: cover;
+  }
+
+  .routes-hero-caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: var(--sp-6) var(--sp-5) var(--sp-4);
+    background: linear-gradient(to top, rgb(6 30 48 / 0.85), transparent);
+    color: #fff;
+    font-size: var(--fs-sm);
   }
 
   .two-panel {
