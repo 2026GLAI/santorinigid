@@ -41,8 +41,12 @@ import { WHATSAPP, CONTACTS } from '../data/site';
         <strong>Помощник по Санторини</strong>
         <span id="chatStatus">Отвечу на частые вопросы</span>
       </div>
-      <button class="chat-min" id="chatMin" aria-label="Свернуть чат">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 12h12" /></svg>
+      <button class="chat-min" id="chatMin" aria-label="Закрыть чат">
+        {/* Крестик — понятный знак «закрыть». Раньше была чёрточка
+            «свернуть», её принимали за оформление и не нажимали. */}
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
       </button>
     </header>
 
@@ -276,23 +280,79 @@ import { WHATSAPP, CONTACTS } from '../data/site';
     addMsg(answer || FALLBACK, 'bot');
   }
 
+  /** Телефон: чат открывается на весь экран. */
+  const isPhone = () => window.matchMedia('(max-width: 640px)').matches;
+
+  /*
+    Кнопку WhatsApp прячем напрямую из скрипта, а не правилом CSS.
+
+    Почему: стили компонентов Astro не помещаются в слои @layer, и любое
+    наше правило со слоем оказывалось слабее. Вынос правила из слоёв тоже
+    не помог — проверено замером в браузере. Прямое указание стиля
+    элементу сильнее любого правила, поэтому работает надёжно.
+  */
+  const waFab = document.querySelector('.wa-fab');
+
+  function hideWhatsapp(hide) {
+    if (!waFab) return;
+    if (hide) {
+      waFab.style.setProperty('visibility', 'hidden', 'important');
+      waFab.style.setProperty('opacity', '0', 'important');
+      waFab.style.setProperty('pointer-events', 'none', 'important');
+    } else {
+      waFab.style.removeProperty('visibility');
+      waFab.style.removeProperty('opacity');
+      waFab.style.removeProperty('pointer-events');
+    }
+  }
+
   function openChat() {
     panel.hidden = false;
     toggle.setAttribute('aria-expanded', 'true');
     toggle.classList.add('is-open');
     badge.style.display = 'none';
+    // Помечаем страницу: по этому классу прячем кнопку WhatsApp,
+    // чтобы две плавающие кнопки не спорили друг с другом.
+    document.documentElement.classList.add('chat-open');
+    hideWhatsapp(true);
+
+    if (isPhone()) {
+      // Фон не должен прокручиваться под открытым чатом
+      document.body.style.overflow = 'hidden';
+      // Окно чата — строго на весь экран, без отступов родителя
+      const root = document.querySelector('.chat-root');
+      if (root) {
+        root.style.setProperty('inset', '0', 'important');
+        root.style.setProperty('right', '0', 'important');
+        root.style.setProperty('bottom', '0', 'important');
+      }
+    }
+
     if (!started) {
       started = true;
       addMsg(GREETING, 'bot');
       renderChips();
     }
-    setTimeout(() => input.focus(), 120);
+    // На телефоне не наводим фокус сразу: иначе выскакивает клавиатура
+    // и закрывает половину и без того небольшого экрана.
+    if (!isPhone()) setTimeout(() => input.focus(), 120);
   }
 
   function closeChat() {
     panel.hidden = true;
     toggle.setAttribute('aria-expanded', 'false');
     toggle.classList.remove('is-open');
+    document.documentElement.classList.remove('chat-open');
+    document.body.style.overflow = '';
+    hideWhatsapp(false);
+
+    // Возвращаем родителю его обычные отступы от края экрана
+    const root = document.querySelector('.chat-root');
+    if (root) {
+      root.style.removeProperty('inset');
+      root.style.removeProperty('right');
+      root.style.removeProperty('bottom');
+    }
   }
 
   toggle.addEventListener('click', () => (panel.hidden ? openChat() : closeChat()));
@@ -319,6 +379,14 @@ import { WHATSAPP, CONTACTS } from '../data/site';
     right: clamp(1rem, 3vw, 1.75rem);
     bottom: clamp(1rem, 3vw, 1.75rem);
     z-index: 95;
+  }
+
+  /* Пока чат открыт на телефоне — прячем кнопку открытия:
+     на весь экран она не нужна, а место занимает. */
+  @media (max-width: 640px) {
+    :global(html.chat-open) .chat-toggle {
+      display: none;
+    }
   }
 
   .chat-toggle {
@@ -376,7 +444,35 @@ import { WHATSAPP, CONTACTS } from '../data/site';
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     overflow: hidden;
+    /* Панель должна быть ВЫШЕ кнопки WhatsApp (z-index: 90),
+       иначе зелёная кнопка перекрывает поле ввода снизу. */
+    z-index: 96;
     animation: chatIn 280ms var(--ease);
+  }
+
+  /*
+    ТЕЛЕФОН: чат открывается на весь экран.
+
+    Причина: окно 543px на экране 844px закрывало почти всё, при этом
+    само уезжало за левый край, а зелёная кнопка WhatsApp перекрывала
+    низ панели. Гость не мог ни пользоваться чатом, ни закрыть его.
+
+    На весь экран — понятнее: видно, что это отдельное окно, и крупная
+    кнопка закрытия всегда на виду.
+  */
+  @media (max-width: 640px) {
+    /* Отступы родителя обнуляются в global.css (html.chat-open .chat-root):
+       из компонента такое правило не попадает в сборку. */
+    .chat-panel {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100dvh;
+      max-height: none;
+      border: none;
+      border-radius: 0;
+      z-index: 200;
+    }
   }
 
   @keyframes chatIn {
@@ -422,19 +518,34 @@ import { WHATSAPP, CONTACTS } from '../data/site';
     opacity: 0.85;
   }
 
+  /*
+    Кнопка закрытия. Заметная и крупная: гость должен закрыть чат
+    с первого раза, не разглядывая интерфейс.
+  */
   .chat-min {
     display: grid;
     place-items: center;
-    /* Кнопка «свернуть» должна ловиться пальцем — минимум 44×44 */
     width: 44px;
     height: 44px;
-    margin-right: -8px;
+    flex-shrink: 0;
+    margin-right: -6px;
+    border-radius: var(--radius-full);
+    background: rgb(255 255 255 / 0.16);
     color: #fff;
-    opacity: 0.8;
+    transition: background-color var(--dur) var(--ease);
   }
 
-  .chat-min:hover {
-    opacity: 1;
+  .chat-min:hover,
+  .chat-min:focus-visible {
+    background: rgb(255 255 255 / 0.3);
+  }
+
+  /* На телефоне — ещё крупнее, это главная кнопка выхода */
+  @media (max-width: 640px) {
+    .chat-min {
+      width: 48px;
+      height: 48px;
+    }
   }
 
   .chat-log {
