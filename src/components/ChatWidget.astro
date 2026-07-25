@@ -555,7 +555,14 @@ import { WHATSAPP, CONTACTS } from '../data/site';
     border: 1px solid var(--border);
     border-radius: var(--radius-full);
     background: var(--surface);
-    font-size: 0.9rem;
+    /* На телефоне минимум 16px, иначе Safari сам увеличивает страницу */
+    font-size: max(16px, 0.9rem);
+  }
+
+  @media (min-width: 861px) {
+    .chat-form input {
+      font-size: 0.9rem;
+    }
   }
 
   .chat-form input:focus {

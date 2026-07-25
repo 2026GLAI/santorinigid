@@ -7,7 +7,12 @@ import { WHATSAPP, SITE_URL } from '../../data/site';
 import { HOTELS } from '../../data/hotels';
 import { getImg } from '../../data/images';
 
-import heroHotel from '../../assets/img/contacts-hero.jpg';
+/*
+  Шапка страницы отелей — панорама Katikies над морем.
+  Раньше здесь стояло то же фото, что и на странице контактов; одно
+  изображение в двух местах выглядит как недоделка.
+*/
+import heroHotel from '../../assets/img/hotel-katikies.webp';
 
 const title = 'Лучшие отели Санторини 5 звёзд | Вид на Кальдеру 2026';
 const description =
@@ -55,7 +60,7 @@ const schema = [
 <BaseLayout title={title} description={description} schema={schema}>
   <Hero
     image={heroHotel}
-    alt="Инфинити-бассейн отеля на Санторини на фоне заката над кальдерой"
+    alt="Белоснежный отель на скалах Ии с бассейном над Эгейским морем"
     eyebrow="VIP услуги"
     title="Лучшие отели Санторини: мой выбор"
     text="Я отобрал для вас отели, за которые мне не будет стыдно перед вами."

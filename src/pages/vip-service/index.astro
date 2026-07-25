@@ -6,7 +6,12 @@ import CtaBand from '../../components/CtaBand.astro';
 import { WHATSAPP, EXTERNAL, SITE_URL } from '../../data/site';
 import { getImg } from '../../data/images';
 
-import heroVip from '../../assets/img/yacht-targa-46.jpg';
+/*
+  Шапка раздела услуг — катамаран в бирюзовой воде, снятый сверху.
+  Раньше здесь стояло фото Targa 46, которое уже используется как
+  карточка судна на странице яхт: повтор выглядел небрежно.
+*/
+import heroVip from '../../assets/img/svc-yacht-aerial.webp';
 
 const title = 'VIP услуги на Санторини | Яхты, вертолёты, отели — 2026';
 const description =
@@ -20,7 +25,7 @@ const description =
 const SERVICES = [
   {
     href: '/vip-service/yacht-rent-santorini',
-    image: 'svc-yacht-aerial.webp',
+    image: 'yacht-targa-46.jpg',
     title: 'Яхты',
     text: 'Морские прогулки: от групповых круизов на закате до аренды приватных яхт',
     external: false,
@@ -61,7 +66,7 @@ const schema = {
 <BaseLayout title={title} description={description} schema={schema}>
   <Hero
     image={heroVip}
-    alt="Скоростная яхта в бирюзовом море у берегов Санторини"
+    alt="Катамаран на якоре в прозрачной бирюзовой воде у Санторини, вид сверху"
     eyebrow="Услуги"
     title="Аренда яхт для незабываемых моментов"
     text="Санторини — это не только прогулки по узким улочкам. Это свобода в небе, комфорт на воде и уют в лучших отелях острова. Я позабочусь о каждой детали вашего отдыха"
