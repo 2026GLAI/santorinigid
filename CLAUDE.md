@@ -83,6 +83,16 @@
 - ❌ **Полагаться на атрибут `hidden` без правила в CSS** — у Astro нет своего
   сброса стилей. Если компонент задаёт элементу `display`, `hidden` не работает.
   Именно так сломался чат.
+- ❌ **Чинить `package-lock.json` командой `npm install --package-lock-only`** —
+  npm берёт данные из существующего `node_modules`, а на Windows там нет
+  пакетов `@emnapi/*`, нужных Linux-сборке. В lock попадает неполное дерево,
+  и `npm ci` на GitHub падает с `Missing: @emnapi/runtime from lock file`.
+  Не помогают ни `--force`, ни `--os=linux`, ни смена версии npm (26.07 ушло
+  несколько попыток).
+  **Правильно:** `rm -rf node_modules package-lock.json && npm install`.
+  **Проверка до пуша:** `npm ci --dry-run --os=linux --cpu=x64` — без `EUSAGE`.
+  И не заменять `npm ci` на `npm install` в workflow: ошибка уйдёт, но
+  пропадёт гарантия точных версий.
 - ❌ **`prefers-reduced-motion`, выключающий opacity** — часть текста становилась невидимой навсегда. Движение выключаем, проявление оставляем.
 - ❌ **CSS-колонки + `max-height: 0`** — карточки раскладывались в строку шириной 29812px. Не совмещать.
 
