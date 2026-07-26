@@ -38,11 +38,30 @@ jobs:
       - name: Забрать файлы проекта
         uses: actions/checkout@v4
 
+      # Node 24 — как на компьютере владельца. Держать версии одинаковыми,
+      # чтобы сборка здесь и дома вела себя предсказуемо.
+      #
+      # ⚠️ ГЛАВНОЕ ПРО package-lock.json (сборка падала дважды 26.07.2026
+      # с ошибкой «Missing: @emnapi/runtime from lock file»):
+      #
+      # Файл нельзя чинить командой `npm install` поверх существующего
+      # node_modules — npm берёт данные оттуда и записывает НЕПОЛНОЕ дерево:
+      # пропадают пакеты @emnapi/*, нужные Linux-сборке. Проверено трижды.
+      #
+      # Правильно: удалить И node_modules, И package-lock.json, затем
+      # `npm install` начисто. Тогда записи появляются и `npm ci` проходит.
+      #
+      # Проверять так (обе команды должны отработать без EUSAGE):
+      #   npm ci --dry-run --os=linux --cpu=x64
       - name: Установить Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
+
+      # Печатаем версии: если сборка снова упадёт, причина видна сразу
+      - name: Показать версии Node и npm
+        run: node -v && npm -v
 
       - name: Установить зависимости
         run: npm ci
