@@ -34,6 +34,16 @@ const isLong = r.text.length > 420;
 
 /** Месяц поездки + состав компании — это честная замена звёздам. */
 const context = [r.tripDate, r.tripWith].filter(Boolean).join(' · ');
+
+/**
+ * Фотографии гостя — дело добровольное: приложил так приложил.
+ *
+ * Если их нет, в карточке НЕ должно оставаться ни пустой рамки, ни отступа,
+ * ни следа. Отзыв без фото выглядит ровно так, как выглядел всегда —
+ * будто фотографии тут и не предполагались. Поэтому весь блок целиком
+ * стоит под условием, а не прячется стилями.
+ */
+const photos = r.photos?.filter(Boolean) ?? [];
 ---
 
 <li class:list={['rv-item', { reveal }]} id={`review-${r.id}`}>
@@ -67,6 +77,30 @@ const context = [r.tripDate, r.tripWith].filter(Boolean).join(' · ');
         )
       }
     </blockquote>
+
+    {
+      photos.length > 0 && (
+        <ul class:list={['rv-photos', `rv-photos-${photos.length}`]}>
+          {photos.map((src, i) => (
+            <li>
+              {/*
+                Обычный <img>, а не компонент Astro: эти файлы приходят
+                от гостей уже после сборки сайта, поэтому обработать их
+                на сборке невозможно — Astro о них ещё не знает.
+                Размеры заданы через CSS-соотношение, поэтому вёрстка
+                не прыгает, пока фото грузится.
+              */}
+              <img
+                src={src}
+                alt={`Фотография гостя к отзыву: ${r.author}, снимок ${i + 1}`}
+                loading="lazy"
+                decoding="async"
+              />
+            </li>
+          ))}
+        </ul>
+      )
+    }
 
     {
       r.reply && (
@@ -243,6 +277,42 @@ const context = [r.tripDate, r.tripWith].filter(Boolean).join(' · ');
     Ответ Владимира — то, чего нет у конкурентов: живой диалог с гостем.
     Оформлен как переписка: с отступом, тише голосом гостя, но заметно.
   */
+  /* ---- Фотографии гостя ----
+     Блока в разметке нет вовсе, когда фото не приложены, — поэтому здесь
+     не нужно ничего прятать. Отступ появляется вместе с самим блоком.
+
+     Раскладка подстраивается под количество: одно фото шире, три — в ряд.
+     На узких экранах всегда в ряд по три: карточка отзыва и так неширокая,
+     а мелкие снимки лучше, чем один во весь экран посреди текста. */
+  .rv-photos {
+    display: grid;
+    gap: 6px;
+    margin-top: var(--sp-3);
+    list-style: none;
+  }
+
+  .rv-photos-1 {
+    grid-template-columns: minmax(0, 60%);
+  }
+
+  .rv-photos-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rv-photos-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .rv-photos img {
+    width: 100%;
+    /* Соотношение задано заранее — вёрстка не прыгает при загрузке */
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg-alt);
+  }
+
   .rv-reply {
     position: relative;
     margin-left: var(--sp-5);

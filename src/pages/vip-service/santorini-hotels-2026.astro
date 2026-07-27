@@ -93,7 +93,11 @@ const schema = [
                 <span class="hotel-area">{h.area}</span>
               </div>
               <div class="hotel-body">
-                <h2 class="hotel-name">{h.name}</h2>
+                {/* h3, а не h2: отель вложен в раздел подборки, а не равен ему.
+                    Было 18 заголовков второго уровня подряд — поисковик читал
+                    названия отелей наравне с разделами страницы.
+                    Внешний вид не меняется, он задан классом .hotel-name. */}
+                <h3 class="hotel-name">{h.name}</h3>
                 <p class="hotel-desc">{h.description}</p>
                 <a
                   href={h.link}

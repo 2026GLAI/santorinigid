@@ -3,18 +3,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Reviews from '../components/Reviews.astro';
 import ReviewForm from '../components/ReviewForm.astro';
 import CtaBand from '../components/CtaBand.astro';
-import { SITE_URL, WHATSAPP } from '../data/site';
+import { SITE_URL, WHATSAPP, plural } from '../data/site';
 import { REVIEWS, REVIEW_SOURCES, REVIEW_YEARS } from '../data/reviews';
 
 /** Правильное склонение: 1 отзыв / 2 отзыва / 5 отзывов. */
-function reviewWord(n: number): string {
-  const mod100 = n % 100;
-  const mod10 = n % 10;
-  if (mod100 >= 11 && mod100 <= 14) return 'отзывов';
-  if (mod10 === 1) return 'отзыв';
-  if (mod10 >= 2 && mod10 <= 4) return 'отзыва';
-  return 'отзывов';
-}
+const reviewWord = (n: number) => plural(n, 'отзыв', 'отзыва', 'отзывов');
 
 const title = `Отзывы о гиде Владимире Лунгу на Санторини — ${REVIEWS.length} ${reviewWord(REVIEWS.length)} туристов`;
 const description = `Реальные отзывы туристов об экскурсиях с русскоязычным гидом Владимиром Лунгу на Санторини за ${REVIEW_YEARS.from}–${REVIEW_YEARS.to} годы. Каждый отзыв со ссылкой на оригинал на площадке-источнике.`;

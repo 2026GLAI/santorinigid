@@ -71,6 +71,33 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
         <span class="wa-label">WhatsApp</span>
       </a>
 
+      {/*
+        Переключатель светлой и тёмной темы.
+
+        До него тёмная тема на сайте была, но включить её вручную было
+        нельзя — она приходила только из настроек телефона. Половина правил
+        CSS работала вслепую.
+
+        Три положения по кругу: «как на устройстве» → светлая → тёмная.
+        Первое положение — по умолчанию: сайт слушается системной настройки,
+        как раньше. Выбор человека хранится в его же браузере и на сервер
+        не уходит.
+      */}
+      <button class="theme-btn" id="themeBtn" aria-label="Тема оформления">
+        <svg class="ico-auto" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 3v18" />
+          <path d="M12 3a9 9 0 010 18" fill="currentColor" stroke="none" />
+        </svg>
+        <svg class="ico-sun" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2" />
+          <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+        </svg>
+        <svg class="ico-moon" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 14.5A8.5 8.5 0 019.5 4a8.5 8.5 0 1010.5 10.5z" />
+        </svg>
+      </button>
+
       <button
         class="burger"
         id="burger"
@@ -113,6 +140,56 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
   const burger = document.getElementById('burger');
   const mobileNav = document.getElementById('mobileNav');
   const header = document.getElementById('siteHeader');
+
+  /* ---- Переключатель темы -------------------------------------------
+     Три положения по кругу: auto → light → dark → auto.
+
+     «auto» — атрибут data-theme снимается вовсе, и работает медиазапрос
+     prefers-color-scheme, то есть настройка телефона. Это положение
+     по умолчанию, поведение как было до переключателя.
+
+     Выбор хранится в localStorage — это память самого браузера гостя.
+     На сервер ничего не уходит, у каждого своя настройка.
+     Само переключение делает BaseLayout ДО отрисовки страницы, чтобы
+     не было вспышки светлого фона у того, кто выбрал тёмную тему.
+  */
+  const themeBtn = document.getElementById('themeBtn');
+  const ORDER = ['auto', 'light', 'dark'];
+  const LABEL = {
+    auto: 'Тема: как на устройстве. Нажмите — светлая',
+    light: 'Тема: светлая. Нажмите — тёмная',
+    dark: 'Тема: тёмная. Нажмите — как на устройстве',
+  };
+
+  function applyTheme(mode) {
+    if (mode === 'auto') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', mode);
+    if (themeBtn) {
+      themeBtn.dataset.mode = mode;
+      themeBtn.setAttribute('aria-label', LABEL[mode]);
+      themeBtn.setAttribute('title', LABEL[mode]);
+    }
+  }
+
+  let mode = 'auto';
+  try {
+    const saved = localStorage.getItem('theme');
+    if (ORDER.includes(saved)) mode = saved;
+  } catch {
+    /* Приватный режим блокирует хранилище — просто работаем без памяти. */
+  }
+  applyTheme(mode);
+
+  themeBtn?.addEventListener('click', () => {
+    mode = ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length];
+    applyTheme(mode);
+    try {
+      if (mode === 'auto') localStorage.removeItem('theme');
+      else localStorage.setItem('theme', mode);
+    } catch {
+      /* Не сохранилось — тема всё равно переключилась на этой странице. */
+    }
+  });
 
   burger?.addEventListener('click', () => {
     const open = burger.getAttribute('aria-expanded') === 'true';
@@ -288,6 +365,52 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
   }
 
   /* --- бургер --- */
+  /* ---- Кнопка выбора темы ----
+     Размер 44×44 — минимальная цель нажатия пальцем по рекомендациям
+     доступности, как и у бургера рядом.
+
+     Внутри лежат сразу три значка, видим всегда ровно один — тот, что
+     соответствует текущему положению. Так кнопка показывает состояние,
+     а не просто «что-то переключает». */
+  .theme-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-sm);
+    color: var(--text-soft);
+    transition:
+      color var(--dur) var(--ease),
+      background-color var(--dur) var(--ease);
+  }
+
+  .theme-btn:hover {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+
+  .theme-btn svg {
+    display: none;
+  }
+
+  /* Пока скрипт не выставил режим, показываем значок «как на устройстве» —
+     он и есть положение по умолчанию. */
+  .theme-btn .ico-auto,
+  .theme-btn[data-mode='auto'] .ico-auto {
+    display: block;
+  }
+
+  .theme-btn[data-mode='light'] .ico-auto,
+  .theme-btn[data-mode='dark'] .ico-auto {
+    display: none;
+  }
+
+  .theme-btn[data-mode='light'] .ico-sun,
+  .theme-btn[data-mode='dark'] .ico-moon {
+    display: block;
+  }
+
   .burger {
     display: flex;
     flex-direction: column;

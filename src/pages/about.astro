@@ -19,8 +19,7 @@ import { getImg } from '../data/images';
 import portrait from '../assets/img/vladimir-portrait.jpg';
 
 const title = `Обо мне — Владимир Лунгу, гид на Санторини с ${ON_ISLAND_SINCE} года`;
-const description =
-  'Владимир — русскоязычный гид на Санторини. 31 год жизни на острове, 14 лет профессионального опыта. Честные рекомендации, маршруты, проверенные временем.';
+const description = `Владимир — русскоязычный гид на Санторини. ${ISLAND_YEARS_TEXT} жизни на острове, ${GUIDE_YEARS_TEXT} профессионального опыта. Честные рекомендации, маршруты, проверенные временем.`;
 
 const gallery = GALLERY.map((f) => getImg(f));
 
@@ -34,8 +33,7 @@ const schema = [
       name: OWNER_FULL_NAME,
       alternateName: 'Владимир',
       jobTitle: 'Частный русскоязычный гид на Санторини',
-      description:
-        '31 год живёт на Санторини, 14 лет профессионального опыта проведения индивидуальных экскурсий.',
+      description: `${ISLAND_YEARS_TEXT} живёт на Санторини, ${GUIDE_YEARS_TEXT} профессионального опыта проведения индивидуальных экскурсий.`,
       knowsLanguage: ['ru', 'el'],
       knowsAbout: [
         'Санторини',
