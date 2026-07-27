@@ -68,10 +68,27 @@ const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [
 ---
 
 <!doctype html>
-<html lang="ru" data-theme-init>
+<html lang="ru">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    {/*
+      Тема применяется ДО отрисовки страницы — этот скрипт стоит первым
+      в <head> намеренно и намеренно же обычный, не defer/async.
+
+      Иначе гость, выбравший тёмную тему, при каждом переходе видел бы
+      вспышку белого фона: страница успевает нарисоваться светлой, и лишь
+      потом скрипт из шапки её перекрашивает. Это заметно и неприятно.
+
+      Скрипт крошечный и без зависимостей, задержки не создаёт.
+    */}
+    <script is:inline>
+      try {
+        const t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch {}
+    </script>
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />

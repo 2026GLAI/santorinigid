@@ -41,6 +41,15 @@ import { WHATSAPP, CONTACTS } from '../data/site';
         <strong>Помощник по Санторини</strong>
         <span id="chatStatus">Отвечу на частые вопросы</span>
       </div>
+      {/* Очистить переписку. Показывается только когда есть что стирать —
+          пустая кнопка в шапке лишь путала бы. Переписка хранится
+          в браузере гостя, и он вправе стереть её одним нажатием. */}
+      <button class="chat-clear" id="chatClear" aria-label="Очистить переписку" title="Очистить переписку" hidden>
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
+        </svg>
+      </button>
+
       <button class="chat-min" id="chatMin" aria-label="Закрыть чат">
         {/* Крестик — понятный знак «закрыть». Раньше была чёрточка
             «свернуть», её принимали за оформление и не нажимали. */}
@@ -200,15 +209,72 @@ import { WHATSAPP, CONTACTS } from '../data/site';
   const input = $('chatInput');
   const chips = $('chatChips');
   const badge = $('chatBadge');
+  const clearBtn = $('chatClear');
   let started = false;
 
-  function addMsg(text, who) {
+  /* ---- Память переписки ----------------------------------------------
+     Переписка хранится в localStorage — это память самого браузера гостя,
+     на его устройстве. На сервер она не уходит и уйти не может: у сайта
+     нет сервера, это набор статических файлов.
+
+     Отсюда главное свойство: чужую переписку увидеть невозможно. У каждого
+     она своя, в его собственном браузере. Владелец её тоже не видит —
+     если гость хочет что-то передать, он пишет в WhatsApp.
+
+     Храним последние 50 сообщений: чтобы длинная переписка не разрасталась
+     без предела, но обычный разговор помещался целиком.
+     Ключ с номером версии (v1) — если формат когда-нибудь изменится,
+     старые записи не сломают чат, а просто перестанут читаться.        */
+  const HISTORY_KEY = 'chat-history-v1';
+  const HISTORY_MAX = 50;
+  let history = [];
+
+  function loadHistory() {
+    try {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed.slice(-HISTORY_MAX) : [];
+    } catch {
+      // Приватный режим или испорченная запись — начинаем с чистого листа.
+      return [];
+    }
+  }
+
+  function saveHistory() {
+    try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(-HISTORY_MAX)));
+    } catch {
+      // Хранилище недоступно — чат работает как раньше, просто без памяти.
+    }
+  }
+
+  /** Рисует сообщение. remember=false — для восстановленных, чтобы не дублировать. */
+  function addMsg(text, who, remember = true) {
     const el = document.createElement('div');
     el.className = `msg msg-${who}`;
     el.innerHTML = `<div class="bubble">${text}</div>`;
     log.appendChild(el);
     log.scrollTop = log.scrollHeight;
+    if (remember) {
+      history.push({ t: text, w: who });
+      saveHistory();
+      if (clearBtn) clearBtn.hidden = false;
+    }
     return el;
+  }
+
+  function clearHistory() {
+    history = [];
+    try {
+      localStorage.removeItem(HISTORY_KEY);
+    } catch {
+      /* Нечего удалять — хранилище и так недоступно. */
+    }
+    log.innerHTML = '';
+    clearBtn.hidden = true;
+    addMsg(GREETING, 'bot');
+    renderChips();
+    input.focus();
   }
 
   function typing() {
@@ -330,7 +396,15 @@ import { WHATSAPP, CONTACTS } from '../data/site';
 
     if (!started) {
       started = true;
-      addMsg(GREETING, 'bot');
+      history = loadHistory();
+      if (history.length) {
+        // Возвращаем прошлый разговор: гость продолжает с того же места,
+        // даже если открыл сайт заново или перешёл на другую страницу.
+        history.forEach((m) => addMsg(m.t, m.w, false));
+        clearBtn.hidden = false;
+      } else {
+        addMsg(GREETING, 'bot');
+      }
       renderChips();
     }
     // На телефоне не наводим фокус сразу: иначе выскакивает клавиатура
@@ -357,6 +431,7 @@ import { WHATSAPP, CONTACTS } from '../data/site';
 
   toggle.addEventListener('click', () => (panel.hidden ? openChat() : closeChat()));
   $('chatMin').addEventListener('click', closeChat);
+  clearBtn?.addEventListener('click', clearHistory);
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !panel.hidden) closeChat();
@@ -522,6 +597,26 @@ import { WHATSAPP, CONTACTS } from '../data/site';
     Кнопка закрытия. Заметная и крупная: гость должен закрыть чат
     с первого раза, не разглядывая интерфейс.
   */
+  /* Очистка переписки. Приглушённее крестика: действие нужное, но
+     не основное — закрывают чат чаще, чем стирают историю. */
+  .chat-clear {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: var(--radius-full);
+    color: rgb(255 255 255 / 0.75);
+    transition:
+      background-color var(--dur) var(--ease),
+      color var(--dur) var(--ease);
+  }
+
+  .chat-clear:hover {
+    background: rgb(255 255 255 / 0.16);
+    color: #fff;
+  }
+
   .chat-min {
     display: grid;
     place-items: center;
