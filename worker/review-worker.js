@@ -22,7 +22,9 @@
  *
  * ЧТО НУЖНО НАСТРОИТЬ (один раз, инструкция — docs/setup-reviews.md):
  *  Переменные (Settings → Variables):
- *    OWNER_EMAIL      — santorinivip@gmail.com
+ *    OWNER_EMAIL      — rusantorini@gmail.com (рабочая почта для писем
+ *                       модерации; santorinivip@gmail.com — публичная,
+ *                       она указана на сайте и здесь не используется)
  *    GITHUB_REPO      — например vladimir/santorinigid
  *    GITHUB_BRANCH    — main
  *    SITE_URL         — https://santorinigid.com
@@ -36,17 +38,42 @@
  * Цена вопроса: 0 ₽. Все сервисы в бесплатных тарифах с большим запасом.
  */
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-};
+/**
+ * Кто имеет право слать сюда отзывы.
+ *
+ * Раньше стояло '*' — принимали от кого угодно, и форму можно было дёргать
+ * с любого чужого сайта. Теперь только наши адреса: сам сайт и его версия
+ * на GitHub Pages (пока домен не привязан).
+ *
+ * Если появится ещё один адрес — дописать сюда, а не возвращать звёздочку.
+ */
+const ALLOWED_ORIGINS = [
+  'https://santorinigid.com',
+  'https://www.santorinigid.com',
+  'https://2026glai.github.io',
+];
+
+/** Заголовки доступа для конкретного просителя. Чужому — без разрешения. */
+function corsFor(request) {
+  const origin = request.headers.get('Origin') || '';
+  const allowed = ALLOWED_ORIGINS.includes(origin);
+  return {
+    'Access-Control-Allow-Origin': allowed ? origin : ALLOWED_ORIGINS[0],
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    // Ответ зависит от Origin — иначе кэш отдаст чужому разрешение нашего
+    Vary: 'Origin',
+  };
+}
 
 /** Ответ в формате JSON. */
-const json = (data, status = 200) =>
+const json = (data, status = 200, request = null) =>
   new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS },
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      ...(request ? corsFor(request) : {}),
+    },
   });
 
 /** Страница-ответ для Владимира после нажатия кнопки в письме. */
@@ -115,7 +142,7 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    if (request.method === 'OPTIONS') return new Response(null, { headers: CORS });
+    if (request.method === 'OPTIONS') return new Response(null, { headers: corsFor(request) });
 
     // --- 1. Гость отправил отзыв ---
     if (url.pathname === '/review' && request.method === 'POST') {
@@ -127,35 +154,88 @@ export default {
       return handleModerate(url, env);
     }
 
-    return json({ error: 'Not found' }, 404);
+    return json({ error: 'Not found' }, 404, request);
   },
 };
 
+/**
+ * Сколько отзывов можно прислать с одного адреса.
+ *
+ * Ловушка _gotcha останавливает простых ботов, но не того, кто задался
+ * целью: без этого ограничения можно залить тысячи записей в хранилище
+ * и завалить почту Владимира, сжёгши бесплатные лимиты Cloudflare и Resend.
+ *
+ * 3 отзыва в час с адреса — живому человеку хватает с запасом (он пишет
+ * один), а поток отсекается.
+ */
+const RATE_LIMIT = 3;
+const RATE_WINDOW_SEC = 3600;
+
+async function tooManyRequests(request, env) {
+  // Настоящий адрес гостя Cloudflare кладёт в этот заголовок
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const key = `rate:${ip}`;
+  const count = Number((await env.REVIEWS.get(key)) || 0);
+
+  if (count >= RATE_LIMIT) return true;
+
+  // Запись сама исчезнет через час — чистить вручную не нужно
+  await env.REVIEWS.put(key, String(count + 1), { expirationTtl: RATE_WINDOW_SEC });
+  return false;
+}
+
 async function handleSubmit(request, env) {
+  if (await tooManyRequests(request, env)) {
+    return json(
+      { error: 'Слишком много отзывов подряд. Попробуйте позже или напишите в WhatsApp.' },
+      429,
+      request,
+    );
+  }
+
   let data;
   try {
     data = await request.json();
   } catch {
-    return json({ error: 'Некорректные данные' }, 400);
+    return json({ error: 'Некорректные данные' }, 400, request);
   }
 
   // Ловушка для ботов: люди это поле не видят и не заполняют.
-  if (data._gotcha) return json({ ok: true });
+  if (data._gotcha) return json({ ok: true }, 200, request);
 
   const author = String(data.author || '').trim().slice(0, 80);
   const text = String(data.text || '').trim().slice(0, 5000);
   const contact = String(data.contact || '').trim().slice(0, 120);
 
-  if (author.length < 2) return json({ error: 'Укажите, как вас зовут' }, 400);
-  if (text.length < 30) return json({ error: 'Отзыв слишком короткий' }, 400);
-  if (!contact) return json({ error: 'Укажите email или телефон' }, 400);
+  if (author.length < 2) return json({ error: 'Укажите, как вас зовут' }, 400, request);
+  if (text.length < 30) return json({ error: 'Отзыв слишком короткий' }, 400, request);
+  if (!contact) return json({ error: 'Укажите email или телефон' }, 400, request);
 
-  // Фото: максимум 3, каждое до 5 МБ (в base64 объём вырастает примерно на треть)
+  /*
+    Фотографии: не больше 3, каждая до 5 МБ, и все вместе тоже до 5 МБ.
+
+    Ограничение в браузере (ReviewForm) легко обойти — запрос можно послать
+    и мимо формы. Поэтому проверяем здесь, и проверяем ОБЩИЙ объём:
+    раньше стоял только предел на одну фотографию (7 МБ строки base64),
+    и три штуки давали 21 МБ в одном запросе.
+
+    5 МБ файла → примерно 6,8 МБ в виде строки base64: кодирование
+    увеличивает объём на треть.
+  */
+  const MAX_ONE = 6_800_000;
+  const MAX_ALL = 6_800_000;
   const photos = Array.isArray(data.photos) ? data.photos.slice(0, 3) : [];
+  let totalSize = 0;
+
   for (const p of photos) {
-    if (typeof p !== 'string' || p.length > 7_000_000) {
-      return json({ error: 'Фотография слишком большая' }, 400);
+    if (typeof p !== 'string' || p.length > MAX_ONE) {
+      return json({ error: 'Фотография слишком большая — уменьшите её' }, 400, request);
     }
+    totalSize += p.length;
+  }
+
+  if (totalSize > MAX_ALL) {
+    return json({ error: 'Фотографии вместе весят слишком много' }, 400, request);
   }
 
   const now = new Date();
@@ -179,7 +259,7 @@ async function handleSubmit(request, env) {
   });
 
   await sendEmail(review, env);
-  return json({ ok: true });
+  return json({ ok: true }, 200, request);
 }
 
 async function sendEmail(review, env) {
