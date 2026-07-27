@@ -212,7 +212,12 @@ import logo from '../assets/img/logo-dome.png';
     flex-wrap: wrap;
     gap: var(--sp-3);
     justify-content: space-between;
-    padding-block: var(--sp-5);
+    /* Нижний отступ учитывает «безопасную зону»: в viewport стоит
+       viewport-fit=cover, поэтому страница доходит до самого края
+       экрана, и без этой добавки последняя строка подвала (ссылка
+       на политику конфиденциальности) уходила бы под жестовую
+       панель Android и полоску-домой iPhone. */
+    padding-block: var(--sp-5) calc(var(--sp-5) + env(safe-area-inset-bottom, 0px));
     border-top: 1px solid rgb(255 255 255 / 0.1);
     font-size: var(--fs-xs);
     color: #7ea8c4;

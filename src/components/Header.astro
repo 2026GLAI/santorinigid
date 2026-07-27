@@ -457,7 +457,11 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
     inset: 72px 0 0;
     background: var(--bg);
     overflow-y: auto;
-    padding-block: var(--sp-5) var(--sp-8);
+    /* Нижний отступ с добавкой «безопасной зоны»: меню раскрыто
+       до самого низа экрана, а в viewport стоит viewport-fit=cover.
+       Без добавки последние пункты меню («Контакты») попадали бы
+       под жестовую панель Android. */
+    padding-block: var(--sp-5) calc(var(--sp-8) + env(safe-area-inset-bottom, 0px));
     animation: slideIn var(--dur) var(--ease);
   }
 
