@@ -94,9 +94,28 @@ import { WHATSAPP } from '../data/site';
     }
   }
 
+  /*
+    Щадящий режим — движение убираем, но кнопку не «гасим».
+    Раньше стояло animation: none, и у тех, у кого в системе выключена
+    анимация (как у владельца в Windows), кольцо исчезало совсем.
+    Теперь оно спокойно мерцает на месте: взгляд не дёргает,
+    но видно, что кнопка живая.
+  */
   @media (prefers-reduced-motion: reduce) {
     .wa-fab::after {
-      animation: none;
+      animation: waGlow 3s ease-in-out infinite;
+    }
+  }
+
+  @keyframes waGlow {
+    0%,
+    100% {
+      opacity: 0.25;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1);
     }
   }
 
