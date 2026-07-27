@@ -33,17 +33,29 @@ import {
     а на телефоне кнопка при открытом чате и вовсе прячется. Две кнопки
     закрытия рядом только путали бы.
   */}
+  {/*
+    densities={[1, 2, 3]} — ОБЯЗАТЕЛЬНО, иначе логотип мылит.
+
+    Экран телефона умещает в одну «точку» вёрстки 2–3 настоящих пикселя.
+    Раньше здесь выдавалась картинка ровно 84×84, её растягивало на ~250
+    физических пикселей — отсюда и пропадала резкость. Исходный файл
+    256×256, качество было, оно просто выбрасывалось при сборке.
+
+    Теперь Astro делает три размера, а телефон берёт себе подходящий.
+  */}
   <button class="chat-toggle" id="chatToggle" aria-label="Открыть чат-помощника" aria-expanded="false">
-    <Image src={botLogo} alt="" width={84} height={84} loading="eager" />
+    <Image src={botLogo} alt="" width={84} height={84} densities={[1, 2, 3]} loading="eager" />
   </button>
 
   <section class="chat-panel" id="chatPanel" hidden aria-label="Чат-помощник">
     <header class="chat-head">
       <div class="chat-avatar" aria-hidden="true">
-        <Image src={botLogo} alt="" width={44} height={44} loading="lazy" />
+        {/* densities — та же причина, что и у кнопки выше: без них
+            логотип в шапке выдаётся ровно 44×44 и мылит на телефоне. */}
+        <Image src={botLogo} alt="" width={44} height={44} densities={[1, 2, 3]} loading="lazy" />
       </div>
       <div class="chat-head-text">
-        <strong>Помощник по Санторини</strong>
+        <strong>ИИ помощник Владимира</strong>
         <span id="chatStatus">Отвечу на частые вопросы</span>
       </div>
       {/* Очистить переписку. Показывается только когда есть что стирать —
@@ -65,8 +77,6 @@ import {
     </header>
 
     <div class="chat-log" id="chatLog" role="log" aria-live="polite"></div>
-
-    <div class="chat-chips" id="chatChips"></div>
 
     <form class="chat-form" id="chatForm">
       <input
@@ -229,23 +239,16 @@ import {
     },
   ];
 
-  /* Подсказки-кнопки. Взяты из рабочего чат-бота владельца
-     (проект SVIPCloudchat) — там они проверены на живых гостях.
-     «Я с круиза» отдельной кнопкой не случайно: у таких гостей
-     всего несколько часов, и это их первый вопрос. */
-  const CHIPS = [
-    { label: '🗺️ Экскурсии', ask: 'Расскажите об экскурсиях по Санторини' },
-    { label: '⛵ Яхты', ask: 'Хочу арендовать яхту' },
-    { label: '🚢 Я с круиза', ask: 'Мы с круизного лайнера, у нас несколько часов' },
-    { label: '🏨 Отели', ask: 'Посоветуйте отель с видом на кальдеру' },
-    // Про пляжи в базе фактов ответа нет — выдумывать нельзя.
-    // Взято то, что база знает: маршрут экскурсии.
-    { label: '🗺️ Маршрут', ask: 'Что входит в маршрут экскурсии?' },
-    { label: '💬 Связь', ask: 'Как связаться с Владимиром?' },
-  ];
+  /*
+    Приветствие. Решение владельца 28.07.2026: коротко и по-человечески,
+    без кнопок-подсказок и без перечисления услуг. Гость сам напишет,
+    что ему нужно.
 
-  const GREETING =
-    'Здравствуйте! 🇬🇷 Я — цифровой помощник Владимира, вашего гида на Санторини. Спрашивайте что угодно: от экскурсий до истории Греции. Договориться о поездке можно только с ним самим — я подскажу, как с ним связаться.';
+    ⚠️ ФЛАГОВ И ПРОЧИХ ЭМОДЗИ-СИМВОЛОВ ЗДЕСЬ БЫТЬ НЕ ДОЛЖНО — прямое
+    указание владельца. Раньше стояло «Здравствуйте! 🇬🇷 …».
+    Правило распространяется на все тексты чата, не только на это.
+  */
+  const GREETING = 'Рад вас видеть на нашем сайте.';
 
   const FALLBACK = `На этот вопрос у меня нет проверенного ответа — не хочу придумывать. Лучше спросите Владимира напрямую: <a href="${WA}" target="_blank" rel="noopener">WhatsApp</a> или <a href="${TG}" target="_blank" rel="noopener">Telegram</a>. Он отвечает в течение часа.`;
 
@@ -258,7 +261,6 @@ import {
   const log = $('chatLog');
   const form = $('chatForm');
   const input = $('chatInput');
-  const chips = $('chatChips');
   const clearBtn = $('chatClear');
   let started = false;
 
@@ -371,7 +373,6 @@ import {
     log.innerHTML = '';
     clearBtn.hidden = true;
     addMsg(GREETING, 'bot');
-    renderChips();
     input.focus();
   }
 
@@ -382,23 +383,6 @@ import {
     log.appendChild(el);
     log.scrollTop = log.scrollHeight;
     return el;
-  }
-
-  function renderChips() {
-    chips.innerHTML = '';
-    CHIPS.forEach((c) => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'chip';
-      // На кнопке короткая подпись, а боту уходит полный вопрос:
-      // «⛵ Яхты» он бы не понял, «Хочу арендовать яхту» — поймёт.
-      b.textContent = c.label;
-      b.addEventListener('click', () => {
-        input.value = c.ask;
-        form.requestSubmit();
-      });
-      chips.appendChild(b);
-    });
   }
 
   /*
@@ -565,7 +549,6 @@ import {
       } else {
         addMsg(GREETING, 'bot');
       }
-      renderChips();
     }
     // На телефоне не наводим фокус сразу: иначе выскакивает клавиатура
     // и закрывает половину и без того небольшого экрана.
@@ -603,7 +586,6 @@ import {
     if (!q) return;
     addMsg(q.replace(/[<>]/g, ''), 'me');
     input.value = '';
-    chips.innerHTML = '';
     respond(q);
   });
 </script>
@@ -784,7 +766,16 @@ import {
     position: absolute;
     right: 0;
     bottom: calc(100% + 12px);
-    width: min(380px, calc(100vw - 2rem));
+    /*
+      Ширина считается от 100dvw, а НЕ от 100vw.
+
+      На Android 100vw включает в себя ширину полосы прокрутки, то есть
+      оказывается чуть больше видимой области. Панель прижата к правому
+      краю экрана (родитель position: fixed), поэтому лишние пиксели
+      выталкивали её за край, и страница ездила вбок.
+      100dvw считается от реально видимой ширины.
+    */
+    width: min(380px, calc(100dvw - 2rem));
     height: min(560px, calc(100dvh - 8rem));
     display: flex;
     flex-direction: column;
@@ -867,7 +858,9 @@ import {
     place-items: center;
     width: 38px;
     height: 38px;
-    border-radius: var(--radius-full);
+    /* Логотип в шапке остаётся КВАДРАТНЫМ — прямое указание владельца
+       28.07.2026. Скругление только по углам, в круг не превращаем. */
+    border-radius: var(--radius-sm);
     /* Белая подложка: шапка чата тёмно-синяя, а логотип светлый —
        без неё края робота растворились бы в фоне. */
     background: #fff;
@@ -1027,29 +1020,6 @@ import {
     30% {
       opacity: 1;
     }
-  }
-
-  .chat-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    padding: 0 var(--sp-4);
-    background: var(--bg);
-  }
-
-  .chip {
-    padding: 0.4rem 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-full);
-    background: var(--surface);
-    font-size: 0.78rem;
-    color: var(--text-soft);
-    transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
-  }
-
-  .chip:hover {
-    border-color: var(--accent);
-    color: var(--accent);
   }
 
   .chat-form {
