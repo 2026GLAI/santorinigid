@@ -101,7 +101,20 @@ const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {/*
+      viewport-fit=cover — без него не работают отступы env(safe-area-inset-*),
+      которыми плавающие кнопки (чат, WhatsApp, «наверх») обходят полоску-домой
+      и скруглённые углы телефона.
+
+      interactive-widget=resizes-content — когда гость нажимает поле ввода
+      в чате и выезжает клавиатура, браузер сжимает страницу, а не задвигает
+      её под клавиатуру. Поле ввода остаётся видимым.
+      Старые браузеры параметр просто игнорируют.
+    */}
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+    />
 
     {/*
       Тема применяется ДО отрисовки страницы — этот скрипт стоит первым

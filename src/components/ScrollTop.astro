@@ -21,11 +21,18 @@
   .to-top {
     position: fixed;
     z-index: 94;
-    right: clamp(1rem, 3vw, 1.75rem);
+    right: max(clamp(1rem, 3vw, 1.75rem), env(safe-area-inset-right, 0px));
     /* Над кнопкой чата: её высота (68–84px) плюс просвет.
        Считается тем же clamp — если кнопка чата изменится,
-       поправить надо будет обе в одном месте. */
-    bottom: calc(clamp(1rem, 3vw, 1.75rem) + clamp(68px, 5vw, 84px) + 0.75rem);
+       поправить надо будет обе в одном месте.
+
+       Нижний отступ берётся с оглядкой на «безопасную зону» ровно так же,
+       как у кнопки чата: иначе на телефоне с полоской-домой чат поднимется,
+       а эта кнопка останется на месте — и они налезут друг на друга. */
+    bottom: calc(
+      max(clamp(1rem, 3vw, 1.75rem), env(safe-area-inset-bottom, 0px)) +
+        clamp(68px, 5vw, 84px) + 0.75rem
+    );
     display: grid;
     place-items: center;
     width: 46px;

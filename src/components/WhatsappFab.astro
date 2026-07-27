@@ -27,8 +27,11 @@ import { WHATSAPP } from '../data/site';
   */
   .wa-fab {
     position: fixed;
-    left: clamp(1rem, 3vw, 1.75rem);
-    bottom: clamp(1rem, 3vw, 1.75rem);
+    /* max(наш отступ, системный) — обходим полоску-домой и скруглённые
+       углы телефона. На обычном экране системный равен нулю.
+       Та же мысль в ChatWidget.astro и ScrollTop.astro. */
+    left: max(clamp(1rem, 3vw, 1.75rem), env(safe-area-inset-left, 0px));
+    bottom: max(clamp(1rem, 3vw, 1.75rem), env(safe-area-inset-bottom, 0px));
     z-index: 90;
     display: grid;
     place-items: center;

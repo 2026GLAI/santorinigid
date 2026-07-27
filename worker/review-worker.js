@@ -470,7 +470,7 @@ async function publishToGitHub(review, env) {
     published: ${q(review.published)},
     datePublished: ${q(review.datePublished)},
     source: ${q('santorinigid.com')},
-    sourceUrl: ${q((env.SITE_URL || 'https://santorinigid.com') + '/reviews#review-own-' + review.id.slice(0, 8))},${
+    sourceUrl: ${q((env.SITE_URL || 'https://santorinigid.com') + '/reviews/#review-own-' + review.id.slice(0, 8))},${
       photoUrls.length
         ? `
     photos: [${photoUrls.map(q).join(', ')}],`
