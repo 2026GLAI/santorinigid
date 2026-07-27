@@ -33,7 +33,6 @@ import {
     <svg class="ico-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
       <path d="M18 6L6 18M6 6l12 12" />
     </svg>
-    <span class="chat-badge" id="chatBadge">ИИ</span>
   </button>
 
   <section class="chat-panel" id="chatPanel" hidden aria-label="Чат-помощник">
@@ -225,7 +224,6 @@ import {
   const form = $('chatForm');
   const input = $('chatInput');
   const chips = $('chatChips');
-  const badge = $('chatBadge');
   const clearBtn = $('chatClear');
   let started = false;
 
@@ -463,7 +461,6 @@ import {
     panel.hidden = false;
     toggle.setAttribute('aria-expanded', 'true');
     toggle.classList.add('is-open');
-    badge.style.display = 'none';
     // Помечаем страницу: по этому классу прячем кнопку WhatsApp,
     // чтобы две плавающие кнопки не спорили друг с другом.
     document.documentElement.classList.add('chat-open');
@@ -551,21 +548,91 @@ import {
     }
   }
 
+  /*
+    Кнопка чата.
+
+    Размер плавающий: 64px на телефоне, 76px на большом мониторе.
+    Считается через clamp от ширины экрана — не медиазапросами: те
+    в этом проекте уже подводили, проигрывая в каскаде (записано
+    в истории проекта).
+
+    Логотип круглый и с собственной рамкой, поэтому кнопке не нужны
+    ни фон, ни своя рамка — только тень, чтобы кнопка отделялась
+    от страницы.
+  */
   .chat-toggle {
     position: relative;
     display: grid;
     place-items: center;
-    width: 58px;
-    height: 58px;
+    width: clamp(64px, 4.5vw, 76px);
+    height: clamp(64px, 4.5vw, 76px);
     border-radius: var(--radius-full);
-    /* Светлая подложка под логотип: сам он белый с синим, и на тёмно-синем
-       фоне сливался бы. Тонкая рамка отделяет кнопку от светлой страницы. */
     background: #fff;
-    border: 2px solid var(--c-aegean-600);
     color: #fff;
     box-shadow: var(--shadow-lg);
     transition: transform var(--dur) var(--ease);
     overflow: hidden;
+    /* Пульсация — чтобы кнопку заметили. Кольцо расходится от края,
+       сама кнопка при этом слегка «дышит». Останавливается при наведении
+       и при открытом чате: тогда она своё дело сделала. */
+    animation: chatPulse 2.6s var(--ease) infinite;
+  }
+
+  /* Расходящееся кольцо. Отдельным слоем, чтобы не трогать саму картинку. */
+  .chat-toggle::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-full);
+    box-shadow: 0 0 0 0 rgb(27 111 168 / 0.55);
+    animation: chatRing 2.6s var(--ease) infinite;
+    pointer-events: none;
+  }
+
+  @keyframes chatPulse {
+    0%,
+    70%,
+    100% {
+      transform: scale(1);
+    }
+    35% {
+      transform: scale(1.07);
+    }
+  }
+
+  @keyframes chatRing {
+    0% {
+      box-shadow: 0 0 0 0 rgb(27 111 168 / 0.55);
+    }
+    70% {
+      box-shadow: 0 0 0 18px rgb(27 111 168 / 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgb(27 111 168 / 0);
+    }
+  }
+
+  /* Наведение и открытый чат: пульсация не нужна, она уже привлекла внимание */
+  .chat-toggle:hover,
+  .chat-toggle.is-open {
+    animation: none;
+  }
+
+  .chat-toggle:hover::after,
+  .chat-toggle.is-open::after {
+    animation: none;
+  }
+
+  /*
+    Щадящий режим: если человек просил систему убрать движение
+    (укачивание, чувствительность к анимации) — пульсация выключается.
+    Кнопка остаётся видимой и рабочей, просто спокойной.
+  */
+  @media (prefers-reduced-motion: reduce) {
+    .chat-toggle,
+    .chat-toggle::after {
+      animation: none;
+    }
   }
 
   /* Логотип заполняет кнопку целиком, без полей */
@@ -596,19 +663,6 @@ import {
 
   .chat-toggle.is-open .ico-close {
     display: block;
-  }
-
-  .chat-badge {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    padding: 2px 7px;
-    border-radius: var(--radius-full);
-    background: var(--c-sunset-500);
-    color: #fff;
-    font-size: 0.62rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
   }
 
   .chat-panel {
@@ -919,10 +973,7 @@ import {
     font-weight: 600;
   }
 
-  @media (max-width: 560px) {
-    .chat-toggle {
-      width: 52px;
-      height: 52px;
-    }
-  }
+  /* Прежнее правило «на узких экранах 52px» убрано: размер теперь задан
+     через clamp в самой кнопке и подстраивается плавно от 64 до 76px.
+     Медиазапрос только конфликтовал бы с ним. */
 </style>
