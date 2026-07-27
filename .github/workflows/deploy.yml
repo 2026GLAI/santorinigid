@@ -7,7 +7,26 @@
 # одобренный отзыв в src/data/reviews.ts, срабатывает этот файл и сайт
 # пересобирается — через 2–3 минуты отзыв виден гостям.
 #
-# Настроить один раз: в репозитории Settings → Pages → Source: GitHub Actions
+# ⚠️ НАСТРОИТЬ ОДИН РАЗ, ИНАЧЕ ПУБЛИКАЦИЯ ПАДАЕТ (проверено 27.07.2026):
+#
+#   Settings → Pages → Source: GitHub Actions
+#
+# Без этого сборка проходит, а последний шаг падает с ошибкой 404
+# «Failed to create deployment … Ensure GitHub Pages has been enabled».
+# Это не ошибка кода: файлы собраны, GitHub просто не знает, что их
+# нужно публиковать.
+#
+# ⚠️ ВТОРОЕ УСЛОВИЕ — ВИДИМОСТЬ РЕПОЗИТОРИЯ.
+# На бесплатном тарифе GitHub Pages работает ТОЛЬКО из открытого
+# репозитория. Для приватного нужен GitHub Pro (~$4/мес).
+# Первоисточник: docs.github.com «GitHub's products» —
+# GitHub Free: «GitHub Pages in public repositories»;
+# Pages в приватных репозиториях перечислен только у Pro.
+#
+# Если репозиторий приватный и тариф бесплатный — публикация будет
+# падать с той же ошибкой 404, сколько её ни перезапускай.
+# Выходы: сделать репозиторий публичным, оплатить Pro, либо перейти
+# на Cloudflare Pages (там приватные репозитории бесплатны).
 
 name: Сборка и публикация сайта
 
@@ -36,7 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Забрать файлы проекта
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Node 24 — как на компьютере владельца. Держать версии одинаковыми,
       # чтобы сборка здесь и дома вела себя предсказуемо.
@@ -54,7 +73,7 @@ jobs:
       # Проверять так (обе команды должны отработать без EUSAGE):
       #   npm ci --dry-run --os=linux --cpu=x64
       - name: Установить Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
@@ -70,7 +89,7 @@ jobs:
         run: npm run build
 
       - name: Подготовить к публикации
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: ./dist
 
@@ -84,4 +103,4 @@ jobs:
     steps:
       - name: Выложить в интернет
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
