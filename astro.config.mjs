@@ -2,12 +2,34 @@
 import { defineConfig, fontProviders } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
-// Домен нового сайта. Меняется в одном месте — отсюда берутся sitemap,
-// canonical-ссылки и Open Graph.
-export const SITE = 'https://santorinigid.com';
+/*
+  ════════════════════════════════════════════════════════════════════
+  ГДЕ СЕЙЧАС ЖИВЁТ САЙТ — переключается ОДНОЙ строкой ниже.
+
+  true  — временный адрес GitHub: 2026glai.github.io/santorinigid/
+          Сайт лежит во ВЛОЖЕННОЙ ПАПКЕ, поэтому все ссылки на стили
+          и страницы должны начинаться с «/santorinigid». Без этого
+          страница откроется без оформления и со сломанными ссылками.
+
+  false — свой домен santorinigid.com (сайт в корне).
+          ПЕРЕКЛЮЧИТЬ СРАЗУ ПОСЛЕ ПОКУПКИ ДОМЕНА И ПРИВЯЗКИ.
+
+  ⚠️ Пока стоит true, в canonical и sitemap попадает адрес github.io.
+  Это правильно ровно до тех пор, пока сайт там и живёт: иначе Google
+  получит указание на домен, которого ещё нет.
+  ════════════════════════════════════════════════════════════════════
+*/
+const НА_GITHUB_ВРЕМЕННО = true;
+
+export const SITE = НА_GITHUB_ВРЕМЕННО
+  ? 'https://2026glai.github.io'
+  : 'https://santorinigid.com';
+
+const BASE = НА_GITHUB_ВРЕМЕННО ? '/santorinigid' : undefined;
 
 export default defineConfig({
   site: SITE,
+  base: BASE,
   trailingSlash: 'never',
   /*
     Каждая страница собирается папкой с index.html внутри: /tours/index.html.

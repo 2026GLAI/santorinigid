@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { url } from '../data/url';
 import Hero from '../components/Hero.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Reviews from '../components/Reviews.astro';
@@ -102,7 +103,7 @@ const facts = [
     subtitle="Санторини. Так, как знаю его я."
     text={`${ISLAND_YEARS_TEXT} жизни на острове и ${GUIDE_YEARS_TEXT} опыта — для вашего безупречного дня.`}
   >
-    <a href="/tours" class="btn btn-primary btn-lg">Выбрать экскурсию</a>
+    <a href={url('/tours')} class="btn btn-primary btn-lg">Выбрать экскурсию</a>
     <a href={WHATSAPP.tour} class="btn btn-whatsapp btn-lg" target="_blank" rel="noopener">
       Написать в WhatsApp
     </a>
@@ -148,7 +149,7 @@ const facts = [
             ))
           }
         </div>
-        <a href="/about" class="btn btn-ghost">Подробнее обо мне</a>
+        <a href={url('/about')} class="btn btn-ghost">Подробнее обо мне</a>
       </div>
     </div>
   </section>
@@ -168,7 +169,7 @@ const facts = [
       <div class="grid-auto reveal-stagger">
         {
           services.map((s) => (
-            <a href={s.href} class="card service-card">
+            <a href={url(s.href)} class="card service-card">
               <div class="service-media">
                 <Image
                   src={s.img}
@@ -277,7 +278,7 @@ const facts = [
           Я буду ожидать вас непосредственно у выхода со станции фуникулера, чтобы сразу же
           начать нашу индивидуальную программу.
         </p>
-        <a href="/tours" class="btn btn-primary">Выбрать экскурсию</a>
+        <a href={url('/tours')} class="btn btn-primary">Выбрать экскурсию</a>
       </div>
     </div>
   </section>

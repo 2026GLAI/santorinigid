@@ -1,13 +1,14 @@
 ---
 import { Image } from 'astro:assets';
 import { CONTACTS, FOOTER_NAV, COPYRIGHT, WHATSAPP, ISLAND_YEARS_TEXT } from '../data/site';
+import { url } from '../data/url';
 import logo from '../assets/img/logo-dome.png';
 ---
 
 <footer class="site-footer">
   <div class="container footer-grid">
     <div class="footer-brand">
-      <a href="/" class="brand">
+      <a href={url('/')} class="brand">
         <Image
           src={logo}
           alt="Логотип: синий купол церкви Санторини"
@@ -52,7 +53,7 @@ import logo from '../assets/img/logo-dome.png';
     <nav class="footer-nav" aria-label="Навигация в подвале">
       <h2>Разделы</h2>
       <ul>
-        {FOOTER_NAV.map((i) => <li><a href={i.href}>{i.label}</a></li>)}
+        {FOOTER_NAV.map((i) => <li><a href={url(i.href)}>{i.label}</a></li>)}
       </ul>
     </nav>
 
@@ -68,7 +69,7 @@ import logo from '../assets/img/logo-dome.png';
   <div class="container footer-bottom">
     <p>
       {COPYRIGHT}
-      <a href="/privacy" class="footer-privacy">Политика конфиденциальности</a>
+      <a href={url('/privacy')} class="footer-privacy">Политика конфиденциальности</a>
     </p>
     <p class="made">
       Сайт работает на статических файлах — без подписок и платформ.

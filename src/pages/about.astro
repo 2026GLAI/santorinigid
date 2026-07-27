@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { url } from '../data/url';
 import CtaBand from '../components/CtaBand.astro';
 import Reviews from '../components/Reviews.astro';
 import {
@@ -131,7 +132,7 @@ const timeline = [
           <a href={WHATSAPP.general} class="btn btn-whatsapp" target="_blank" rel="noopener">
             Написать мне
           </a>
-          <a href="/tours" class="btn btn-ghost">Мои экскурсии</a>
+          <a href={url('/tours')} class="btn btn-ghost">Мои экскурсии</a>
         </div>
       </div>
     </div>

@@ -4,7 +4,17 @@
  * Источник: docs/harvest/verbatim-content.md
  */
 
-export const SITE_URL = 'https://santorinigid.com';
+/**
+ * Адрес сайта. Берётся из astro.config.mjs — там он задан ОДИН раз,
+ * и там же переключается «временный GitHub ↔ свой домен».
+ *
+ * Раньше адрес был вписан здесь ещё раз, отдельно от конфига. Когда сайт
+ * временно переехал на GitHub, конфиг об этом узнал, а этот файл — нет,
+ * и canonical получился из двух половинок разных адресов:
+ * «santorinigid.com/santorinigid». Одно значение в одном месте — и такое
+ * больше не повторится.
+ */
+export const SITE_URL = import.meta.env.SITE?.replace(/\/$/, '') ?? 'https://santorinigid.com';
 export const SITE_NAME = 'Гид на Санторини — Владимир';
 
 /**

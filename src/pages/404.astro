@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { url } from '../data/url';
 import { WHATSAPP } from '../data/site';
 ---
 
@@ -17,9 +18,9 @@ import { WHATSAPP } from '../data/site';
       </p>
 
       <div class="links">
-        <a href="/" class="btn btn-primary">На главную</a>
-        <a href="/tours" class="btn btn-ghost">Экскурсии</a>
-        <a href="/vip-service" class="btn btn-ghost">VIP услуги</a>
+        <a href={url('/')} class="btn btn-primary">На главную</a>
+        <a href={url('/tours')} class="btn btn-ghost">Экскурсии</a>
+        <a href={url('/vip-service')} class="btn btn-ghost">VIP услуги</a>
         <a href={WHATSAPP.general} class="btn btn-whatsapp" target="_blank" rel="noopener">
           Написать в WhatsApp
         </a>
