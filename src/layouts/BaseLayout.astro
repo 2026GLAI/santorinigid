@@ -5,6 +5,7 @@
  */
 import '../styles/global.css';
 import Header from '../components/Header.astro';
+import { Font } from 'astro:assets';
 import Footer from '../components/Footer.astro';
 import WhatsappFab from '../components/WhatsappFab.astro';
 import ChatWidget from '../components/ChatWidget.astro';
@@ -52,6 +53,18 @@ const localBusiness = {
     addressLocality: 'Санторини (Тира)',
     addressRegion: 'Южные Эгейские острова',
     addressCountry: 'GR',
+  },
+  /*
+    Координаты острова — чтобы Google понимал, ГДЕ работает гид, и показывал
+    сайт по запросам «рядом со мной» и на картах.
+    Значения из Википедии (инфобокс статьи Santorini): 36.415 / 25.4325.
+    Это центр острова, а не точный адрес: гид работает по всему острову,
+    а не в конкретной точке.
+  */
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: 36.415,
+    longitude: 25.4325,
   },
   areaServed: {
     '@type': 'Place',
@@ -121,21 +134,14 @@ const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
-    <!-- Шрифты: подключаем локально-независимо, с fallback без сдвига вёрстки -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
-      media="print"
-      onload="this.media='all'"
-    />
-    <noscript>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
-      />
-    </noscript>
+    {/*
+      Шрифты лежат на нашем сайте — файлы скачаны у Google при сборке
+      (настройка fonts в astro.config.mjs). Никаких обращений к чужим
+      серверам при открытии страницы: сайт работает, даже если Google
+      недоступен, и адрес гостя никуда не уходит.
+    */}
+    <Font cssVariable="--font-inter" preload />
+    <Font cssVariable="--font-playfair" />
 
     <!-- Структурированные данные для Google и ИИ-поисковиков -->
     {schemas.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}

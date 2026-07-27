@@ -66,7 +66,10 @@ import logo from '../assets/img/logo-dome.png';
   </div>
 
   <div class="container footer-bottom">
-    <p>{COPYRIGHT}</p>
+    <p>
+      {COPYRIGHT}
+      <a href="/privacy" class="footer-privacy">Политика конфиденциальности</a>
+    </p>
     <p class="made">
       Сайт работает на статических файлах — без подписок и платформ.
     </p>
@@ -212,6 +215,18 @@ import logo from '../assets/img/logo-dome.png';
     border-top: 1px solid rgb(255 255 255 / 0.1);
     font-size: var(--fs-xs);
     color: #7ea8c4;
+  }
+
+  /* Контраст 11.21 на тёмном фоне подвала — проверено расчётом */
+  .footer-privacy {
+    margin-left: var(--sp-3);
+    color: #dceaf3;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .footer-privacy:hover {
+    color: #fff;
   }
 
   @media (min-width: 760px) {

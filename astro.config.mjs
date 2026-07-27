@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig, fontProviders } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 // Домен нового сайта. Меняется в одном месте — отсюда берутся sitemap,
@@ -38,4 +38,40 @@ export default defineConfig({
     // Sharp сжимает картинки при сборке — в готовый сайт попадают лёгкие AVIF/WebP.
     service: { entrypoint: 'astro/assets/services/sharp' },
   },
+
+  /*
+    Шрифты забираются у Google ОДИН РАЗ, при сборке, и кладутся в готовый
+    сайт своими файлами. Дальше сайт от Google не зависит вовсе.
+
+    Зачем: раньше шрифты грузились с fonts.googleapis.com при каждом
+    открытии страницы. Это была единственная внешняя зависимость сайта —
+    ровно то, ради избавления от чего затевался уход с Wix. Плюс адрес
+    каждого гостя уходил в Google, а сайт ведётся из ЕС, где это
+    регулируется отдельно.
+
+    Начертания перечислены ровно те, что используются: лишние утяжеляют
+    сайт, а Google отдаёт по умолчанию весь набор.
+    subsets — латиница и кириллица: тексты русские, но названия отелей
+    и яхт латинские.
+  */
+  fonts: [
+    {
+      provider: fontProviders.google(),
+      name: 'Inter',
+      cssVariable: '--font-inter',
+      weights: [400, 500, 600, 700],
+      subsets: ['latin', 'cyrillic'],
+      styles: ['normal'],
+      fallbacks: ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+    },
+    {
+      provider: fontProviders.google(),
+      name: 'Playfair Display',
+      cssVariable: '--font-playfair',
+      weights: [500, 600, 700],
+      subsets: ['latin', 'cyrillic'],
+      styles: ['normal'],
+      fallbacks: ['Georgia', 'Times New Roman', 'serif'],
+    },
+  ],
 });
