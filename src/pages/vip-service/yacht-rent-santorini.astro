@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Hero from '../../components/Hero.astro';
 import CtaBand from '../../components/CtaBand.astro';
-import { WHATSAPP, SITE_URL } from '../../data/site';
+import { WHATSAPP, SITE_URL, plural } from '../../data/site';
 import { YACHTS, YACHT_PROGRAMS, YACHT_INCLUDED } from '../../data/yachts';
 import { getImg } from '../../data/images';
 
@@ -110,7 +110,9 @@ const eur = (n: number) => '€' + n.toLocaleString('ru-RU').replace(/,/g, ' ');
     <div class="container container-wide">
       <header class="section-head reveal">
         <p class="eyebrow">Флот</p>
-        <h2 class="section-title">{YACHTS.length} судов на выбор</h2>
+        <h2 class="section-title">
+          {YACHTS.length} {plural(YACHTS.length, 'судно', 'судна', 'судов')} на выбор
+        </h2>
         <p class="lede">
           Цены указаны за судно целиком, а не за человека. Низкий и высокий сезон отличаются —
           уточните ваши даты, и я назову точную стоимость.

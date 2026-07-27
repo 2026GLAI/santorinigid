@@ -35,21 +35,30 @@ const YEARS_ON_ISLAND = CURRENT_YEAR - ON_ISLAND_SINCE;
 const YEARS_AS_GUIDE = CURRENT_YEAR - GUIDE_SINCE;
 
 /**
- * Склонение: 31 год / 32 года / 35 лет.
- * Нужно, чтобы фразы на сайте звучали по-русски правильно при любом числе.
+ * Склонение существительного по числу — общее правило русского языка.
+ *
+ *   plural(1,  'год', 'года', 'лет')     → 'год'
+ *   plural(22, 'отзыв', 'отзыва', 'отзывов') → 'отзыва'
+ *
+ * Одна функция на весь сайт вместо трёх копий в разных файлах.
+ * Копии расходились: в кнопке отзывов проверялась только единица,
+ * и «Ещё 22 отзывов» выходило вместо «22 отзыва».
+ *
+ * Исключение 11–14 обязательно: 11 оканчивается на 1, но правильно
+ * «11 лет», а не «11 год».
  */
-function yearsWord(n: number): string {
+export function plural(n: number, one: string, few: string, many: string): string {
   const mod100 = n % 100;
   const mod10 = n % 10;
-  if (mod100 >= 11 && mod100 <= 14) return 'лет';
-  if (mod10 === 1) return 'год';
-  if (mod10 >= 2 && mod10 <= 4) return 'года';
-  return 'лет';
+  if (mod100 >= 11 && mod100 <= 14) return many;
+  if (mod10 === 1) return one;
+  if (mod10 >= 2 && mod10 <= 4) return few;
+  return many;
 }
 
 /** Готовые строки: «31 год», «14 лет». */
-export const ISLAND_YEARS_TEXT = `${YEARS_ON_ISLAND} ${yearsWord(YEARS_ON_ISLAND)}`;
-export const GUIDE_YEARS_TEXT = `${YEARS_AS_GUIDE} ${yearsWord(YEARS_AS_GUIDE)}`;
+export const ISLAND_YEARS_TEXT = `${YEARS_ON_ISLAND} ${plural(YEARS_ON_ISLAND, 'год', 'года', 'лет')}`;
+export const GUIDE_YEARS_TEXT = `${YEARS_AS_GUIDE} ${plural(YEARS_AS_GUIDE, 'год', 'года', 'лет')}`;
 
 /**
  * Профили на площадках-партнёрах. Идут в JSON-LD (sameAs) — это помогает

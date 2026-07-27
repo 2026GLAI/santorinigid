@@ -290,7 +290,7 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
 
   .channel.wa .channel-ico {
     background: rgb(37 211 102 / 0.12);
-    color: #1a9e4b;
+    color: var(--ok);
   }
 
   .channel-text {
@@ -397,11 +397,11 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
   }
 
   .form-status.ok {
-    color: #1a9e4b;
+    color: var(--ok);
   }
 
   .form-status.err {
-    color: #c0392b;
+    color: var(--err);
   }
 
   .form-status :global(a) {

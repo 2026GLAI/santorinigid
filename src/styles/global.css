@@ -158,6 +158,18 @@
     --accent-hover: var(--c-aegean-800);
     --on-accent-hover: var(--c-white);
 
+    /* ---- Цвета сообщений в формах ---------------------------------------
+       «Отправлено» и «Ошибка» раньше были вписаны в каждую форму напрямую
+       и не менялись вместе с темой. Считали контраст на фоне формы
+       (--surface, а не фон страницы — текст лежит внутри формы):
+         зелёный  #1a9e4b → 3.48 светлая / 4.15 тёмная — оба провал
+         красный  #c0392b → 5.44 светлая / 2.66 тёмная — провал в тёмной
+       Теперь для каждой темы свой оттенок, все ≥ 4.5:
+         светлая: зелёный 5.44 · красный 5.44 · звёздочка 5.18          */
+    --ok: #0f7a37;
+    --err: #c0392b;
+    --required: #c2410c;
+
     /* Типографика — плавная, зависит от ширины экрана */
     --font-display: 'Playfair Display', 'Georgia', 'Times New Roman', serif;
     --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -253,6 +265,13 @@
       --on-accent: var(--c-aegean-900);
       --accent-hover: var(--c-aegean-100);
       --on-accent-hover: var(--c-aegean-900);
+
+      /* Тёмная тема: цвета сообщений светлее — на тёмном фоне формы
+         (#142c3b) тёмно-зелёный и тёмно-красный не читались.
+         зелёный 8.29 · красный 6.33 */
+      --ok: #4ade80;
+      --err: #ff8a80;
+      --required: #ff8a80;
       --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
       --shadow: 0 4px 14px rgb(0 0 0 / 0.35);
       --shadow-lg: 0 12px 34px rgb(0 0 0 / 0.45);
@@ -275,6 +294,9 @@
     --on-accent: var(--c-aegean-900);
     --accent-hover: var(--c-aegean-100);
     --on-accent-hover: var(--c-aegean-900);
+    --ok: #4ade80;
+    --err: #ff8a80;
+    --required: #ff8a80;
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
     --shadow: 0 4px 14px rgb(0 0 0 / 0.35);
     --shadow-lg: 0 12px 34px rgb(0 0 0 / 0.45);
