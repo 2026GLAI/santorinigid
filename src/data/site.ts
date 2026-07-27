@@ -18,6 +18,27 @@ export const SITE_URL = import.meta.env.SITE?.replace(/\/$/, '') ?? 'https://san
 export const SITE_NAME = 'Гид на Санторини — Владимир';
 
 /**
+ * Полный адрес страницы для разметки JSON-LD (Google, ИИ-поисковики).
+ *
+ *   pageUrl('/tours')  → 'https://santorinigid.com/tours/'
+ *   pageUrl('/')       → 'https://santorinigid.com/'
+ *
+ * КОСАЯ ЧЕРТА В КОНЦЕ ОБЯЗАТЕЛЬНА — по такому адресу GitHub Pages отдаёт
+ * страницу сразу, а без неё отвечает «переехало» (301). Разметка обязана
+ * называть тот же адрес, что canonical, карта сайта и ссылки: если они
+ * расходятся, Google получает от одной страницы несколько разных адресов.
+ *
+ * Раньше эти адреса собирались руками в 17 местах девяти файлов через
+ * `${SITE_URL}/tours` — без слеша. Теперь одно правило в одном месте.
+ * Якоря вроде '/#business' не трогаем — это не адрес страницы.
+ */
+export function pageUrl(path: string): string {
+  if (path === '/' || path === '') return `${SITE_URL}/`;
+  const clean = path.startsWith('/') ? path : `/${path}`;
+  return SITE_URL + (clean.endsWith('/') ? clean : `${clean}/`);
+}
+
+/**
  * Полное имя владельца — подтверждено на площадках-партнёрах:
  * Tourister.ru и NeedGuide («Русский гид на Санторини Владимир Лунгу»).
  * Нужно поисковикам и ИИ, чтобы связать сайт, профили и отзывы в одну личность.

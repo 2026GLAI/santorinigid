@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
-import { CONTACTS, WHATSAPP, SITE_URL } from '../data/site';
+import { CONTACTS, WHATSAPP, SITE_URL, pageUrl } from '../data/site';
 
 import heroContacts from '../assets/img/contacts-hero.jpg';
 
@@ -12,7 +12,7 @@ const description =
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'ContactPage',
-  url: `${SITE_URL}/contacts`,
+  url: pageUrl('/contacts'),
   mainEntity: { '@id': `${SITE_URL}/#business` },
 };
 

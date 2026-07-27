@@ -17,9 +17,18 @@
 /**
  * Превращает адрес страницы в рабочую ссылку.
  *
- *   url('/tours')  → '/santorinigid/tours'  (пока на GitHub)
- *   url('/tours')  → '/tours'               (на своём домене)
- *   url('/')       → '/santorinigid'  или  '/'
+ *   url('/tours')  → '/santorinigid/tours/'  (пока на GitHub)
+ *   url('/tours')  → '/tours/'               (на своём домене)
+ *   url('/')       → '/santorinigid/'  или  '/'
+ *
+ * КОСАЯ ЧЕРТА В КОНЦЕ ОБЯЗАТЕЛЬНА. Страницы собираются папками, и
+ * GitHub Pages отдаёт их только по адресу со слешем; без слеша он
+ * отвечает «переехало» (301). Ссылки, карта сайта и canonical должны
+ * называть один и тот же адрес — тот, что отдаётся сразу.
+ * Связано с trailingSlash: 'always' в astro.config.mjs.
+ *
+ * Файлы (например '/og-default.jpg') слешем не дополняются — он им
+ * не нужен и сломал бы путь.
  */
 export function url(path: string): string {
   // BASE_URL Astro подставляет сам из настройки base.
@@ -27,7 +36,14 @@ export function url(path: string): string {
   const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
   // Главная страница: '/' + '' = '/', а не пустая строка
-  if (path === '/') return base || '/';
+  if (path === '/') return base ? base + '/' : '/';
 
-  return base + path;
+  // Якоря и параметры: '/contacts#form' → '/contacts/#form'
+  const [pathname, rest = ''] = path.split(/(?=[#?])/, 2);
+
+  // У файла есть расширение — слеш не добавляем.
+  const isFile = /\.[a-z0-9]+$/i.test(pathname);
+  const withSlash = isFile || pathname.endsWith('/') ? pathname : pathname + '/';
+
+  return base + withSlash + rest;
 }

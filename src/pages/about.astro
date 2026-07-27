@@ -12,7 +12,7 @@ import {
   PROFILES,
   ON_ISLAND_SINCE,
   ISLAND_YEARS_TEXT,
-  GUIDE_YEARS_TEXT,
+  GUIDE_YEARS_TEXT,  pageUrl,
 } from '../data/site';
 import { GALLERY } from '../data/tours';
 import { getImg } from '../data/images';
@@ -28,7 +28,7 @@ const schema = [
   {
     '@context': 'https://schema.org',
     '@type': 'AboutPage',
-    url: `${SITE_URL}/about`,
+    url: pageUrl('/about'),
     mainEntity: {
       '@type': 'Person',
       name: OWNER_FULL_NAME,
@@ -53,8 +53,8 @@ const schema = [
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'Обо мне', item: `${SITE_URL}/about` },
+      { '@type': 'ListItem', position: 1, name: 'Главная', item: pageUrl('/') },
+      { '@type': 'ListItem', position: 2, name: 'Обо мне', item: pageUrl('/about') },
     ],
   },
 ];

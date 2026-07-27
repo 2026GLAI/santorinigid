@@ -10,7 +10,7 @@
  * прямо в мессенджер владельца или лежат в браузере самого гостя.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { CONTACTS, SITE_URL, OWNER_FULL_NAME } from '../data/site';
+import { CONTACTS, SITE_URL, OWNER_FULL_NAME, pageUrl } from '../data/site';
 
 const title = 'Политика конфиденциальности | Гид на Санторини';
 const description =
@@ -20,7 +20,7 @@ const schema = {
   '@context': 'https://schema.org',
   '@type': 'WebPage',
   name: title,
-  url: `${SITE_URL}/privacy`,
+  url: pageUrl('/privacy'),
   isPartOf: { '@id': `${SITE_URL}/#business` },
 };
 ---

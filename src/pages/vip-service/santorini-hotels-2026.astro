@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Hero from '../../components/Hero.astro';
 import CtaBand from '../../components/CtaBand.astro';
-import { WHATSAPP, SITE_URL } from '../../data/site';
+import { WHATSAPP, SITE_URL, pageUrl } from '../../data/site';
 import { HOTELS } from '../../data/hotels';
 import { getImg } from '../../data/images';
 
@@ -44,13 +44,13 @@ const schema = [
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'VIP услуги', item: `${SITE_URL}/vip-service` },
+      { '@type': 'ListItem', position: 1, name: 'Главная', item: pageUrl('/') },
+      { '@type': 'ListItem', position: 2, name: 'VIP услуги', item: pageUrl('/vip-service') },
       {
         '@type': 'ListItem',
         position: 3,
         name: 'Отели',
-        item: `${SITE_URL}/vip-service/santorini-hotels-2026`,
+        item: pageUrl('/vip-service/santorini-hotels-2026'),
       },
     ],
   },

@@ -19,6 +19,7 @@ import {
   GUIDE_SINCE,
   ISLAND_YEARS_TEXT,
   GUIDE_YEARS_TEXT,
+  pageUrl,
 } from '../data/site';
 
 interface Props {
@@ -36,12 +37,17 @@ const { title, description, ogImage = '/og-default.jpg', schema, noindex = false
 /*
   Настоящий адрес страницы для Google.
 
-  Astro.url.pathname уже содержит папку сайта («/santorinigid/tours»),
+  Astro.url.pathname уже содержит папку сайта («/santorinigid/tours/»),
   поэтому склеиваем его прямо с доменом — иначе папка задвоится.
-  Косую черту в конце убираем: в sitemap и во всех ссылках её нет,
-  и адреса должны совпадать до знака.
+
+  Косую черту в конце СОХРАНЯЕМ. Именно с ней GitHub Pages отдаёт
+  страницу сразу (код 200); без неё отвечает «переехало» (301).
+  Раньше здесь слеш срезался, и сайт указывал Google на адрес,
+  которого нет — лишний прыжок на каждой из 10 страниц.
+  Настройка trailingSlash: 'always' в astro.config.mjs — та же мысль
+  для ссылок и карты сайта. Менять эти два места только вместе.
 */
-const canonical = new URL(Astro.url.pathname, SITE_URL).href.replace(/\/$/, '') || SITE_URL;
+const canonical = new URL(Astro.url.pathname, SITE_URL).href;
 const ogUrl = new URL(ogImage, SITE_URL).href;
 
 /** Организация — основная сущность сайта. Показывается ИИ-поисковикам и Google. */
@@ -51,7 +57,7 @@ const localBusiness = {
   '@id': `${SITE_URL}/#business`,
   name: 'Владимир — русскоязычный гид на Санторини',
   description: `Индивидуальные экскурсии по Санторини с русскоязычным гидом. ${ISLAND_YEARS_TEXT} жизни на острове, ${GUIDE_YEARS_TEXT} профессионального опыта. Аренда яхт, вертолётные туры, подбор отелей.`,
-  url: SITE_URL,
+  url: pageUrl('/'),
   telephone: '+306946800255',
   email: 'santorinivip@gmail.com',
   image: `${SITE_URL}/og-default.jpg`,

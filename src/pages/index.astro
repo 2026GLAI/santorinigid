@@ -13,7 +13,7 @@ import {
   PROFILES,
   ON_ISLAND_SINCE,
   ISLAND_YEARS_TEXT,
-  GUIDE_YEARS_TEXT,
+  GUIDE_YEARS_TEXT,  pageUrl,
 } from '../data/site';
 
 import heroOia from '../assets/img/hero-oia.jpg';
@@ -35,7 +35,7 @@ const schema = [
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     '@id': `${SITE_URL}/#website`,
-    url: SITE_URL,
+    url: pageUrl('/'),
     name: 'Гид на Санторини — Владимир',
     inLanguage: 'ru',
     publisher: { '@id': `${SITE_URL}/#business` },
