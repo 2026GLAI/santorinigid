@@ -162,9 +162,7 @@
     --c-white: #ffffff;
     --c-lime: #fbfaf7; /* белёная стена, тёплый оттенок извести */
     --c-sand: #f4f1ea; /* песок / камень */
-    --c-stone: #e7e2d8;
 
-    --c-aegean-50: #eef7fc;
     --c-aegean-100: #d6ecf7;
     --c-aegean-200: #a9d8ef;
     --c-aegean-400: #3f9fd4;
@@ -173,11 +171,8 @@
     --c-aegean-900: #0a2f4d; /* глубокое море */
 
     --c-sunset-200: #ffd9c2;
-    --c-sunset-400: #ff9d6e;
     --c-sunset-500: #f2793f; /* закат над Кальдерой */
     --c-sunset-600: #d95f28;
-
-    --c-volcano: #6b5b52; /* вулканическая порода */
 
     --c-ink: #12222e;
     --c-ink-soft: #43535e;
@@ -194,7 +189,6 @@
     --text-soft: var(--c-ink-soft);
     --text-muted: var(--c-ink-muted);
     --accent: var(--c-aegean-600);
-    --accent-deep: var(--c-aegean-900);
     --border: #e3ded4;
 
     /* ---- Цвета кнопок ---------------------------------------------------
@@ -255,8 +249,6 @@
     --sp-6: 2rem;
     --sp-7: 3rem;
     --sp-8: 4rem;
-    --sp-9: 6rem;
-    --sp-10: 8rem;
 
     --radius-sm: 8px;
     --radius: 14px;
@@ -323,8 +315,7 @@
       --text-soft: #b8cad6;
       --text-muted: #8ba3b2;
       --accent: var(--c-aegean-200);
-      --accent-deep: var(--c-aegean-100);
-      --border: #1e3d50;
+        --border: #1e3d50;
 
       /* Кнопки в тёмной теме: фон светлый, значит текст должен быть тёмным.
            покой:     #0a2f4d на #a9d8ef → 9.01:1 ✓ (было белым: 1.53:1)
@@ -361,7 +352,6 @@
     --text-soft: #b8cad6;
     --text-muted: #8ba3b2;
     --accent: var(--c-aegean-200);
-    --accent-deep: var(--c-aegean-100);
     --border: #1e3d50;
     --on-accent: var(--c-aegean-900);
     --accent-hover: var(--c-aegean-100);
@@ -492,10 +482,6 @@
 
   .section-alt {
     background: var(--bg-alt);
-  }
-
-  .stack > * + * {
-    margin-top: var(--flow, var(--sp-4));
   }
 
   /*
