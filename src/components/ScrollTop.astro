@@ -1,0 +1,111 @@
+---
+/**
+ * Кнопка «наверх».
+ *
+ * Появляется, когда гость прокрутил страницу заметно вниз, и увозит
+ * его к началу одним нажатием. На длинных страницах — экскурсии, отели,
+ * отзывы — иначе приходится долго листать обратно.
+ *
+ * Расположение: правый нижний угол, НАД кнопкой чата. Так три плавающие
+ * кнопки не спорят: WhatsApp слева, чат справа внизу, «наверх» — над ним.
+ */
+---
+
+<button class="to-top" id="toTop" aria-label="Наверх страницы" hidden>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 19V5M5 12l7-7 7 7" />
+  </svg>
+</button>
+
+<style>
+  .to-top {
+    position: fixed;
+    z-index: 94;
+    right: clamp(1rem, 3vw, 1.75rem);
+    /* Над кнопкой чата: её высота (68–84px) плюс просвет.
+       Считается тем же clamp — если кнопка чата изменится,
+       поправить надо будет обе в одном месте. */
+    bottom: calc(clamp(1rem, 3vw, 1.75rem) + clamp(68px, 5vw, 84px) + 0.75rem);
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: var(--radius-full);
+    /* Скромная, полупрозрачная: это вспомогательное действие,
+       она не должна спорить с чатом за внимание. */
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    border: 1px solid var(--border);
+    color: var(--text-soft);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(8px);
+    transition:
+      opacity var(--dur) var(--ease),
+      transform var(--dur) var(--ease),
+      color var(--dur) var(--ease);
+  }
+
+  .to-top:hover {
+    color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  /* Плавное появление: скрипт снимает hidden, а класс включает видимость.
+     Без этого кнопка выскакивала бы рывком. */
+  .to-top {
+    opacity: 0;
+  }
+
+  .to-top.is-visible {
+    opacity: 1;
+  }
+
+  /* На телефоне при открытом чате кнопка не нужна: чат во весь экран */
+  @media (max-width: 640px) {
+    :global(html.chat-open) .to-top {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .to-top {
+      transition: opacity var(--dur) var(--ease);
+    }
+
+    .to-top:hover {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  const btn = document.getElementById('toTop');
+
+  if (btn) {
+    /*
+      Порог появления — полтора экрана. Не один: на коротких страницах
+      кнопка мелькала бы туда-сюда при малейшей прокрутке.
+    */
+    const threshold = () => window.innerHeight * 1.5;
+
+    const update = () => {
+      const show = window.scrollY > threshold();
+      btn.hidden = !show;
+      // Класс отдельным шагом: hidden убирает элемент со страницы мгновенно,
+      // а класс даёт плавное проявление.
+      requestAnimationFrame(() => btn.classList.toggle('is-visible', show));
+    };
+
+    // passive: браузер знает, что прокрутку мы не отменяем, и не тормозит её
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+
+    btn.addEventListener('click', () => {
+      /*
+        Уважаем системную настройку «убрать движение»: кому плавная
+        прокрутка неприятна (укачивание) — переносим сразу.
+      */
+      const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'auto' });
+    });
+  }
+</script>

@@ -18,9 +18,16 @@ import { WHATSAPP } from '../data/site';
 </a>
 
 <style>
+  /*
+    Кнопка стоит СЛЕВА внизу — намеренно.
+
+    Раньше была справа и спорила с кнопкой чата: на телефоне они налезали
+    друг на друга, и чат приходилось прятать. Теперь у каждой свой угол,
+    прятать никого не нужно, обе видны всегда.
+  */
   .wa-fab {
     position: fixed;
-    right: clamp(1rem, 3vw, 1.75rem);
+    left: clamp(1rem, 3vw, 1.75rem);
     bottom: clamp(1rem, 3vw, 1.75rem);
     z-index: 90;
     display: grid;
@@ -40,9 +47,11 @@ import { WHATSAPP } from '../data/site';
     box-shadow: 0 10px 30px rgb(37 211 102 / 0.55);
   }
 
+  /* Подсказка выезжает ВПРАВО: кнопка теперь у левого края,
+     и влево тексту просто некуда деться — он ушёл бы за экран. */
   .wa-tip {
     position: absolute;
-    right: calc(100% + 12px);
+    left: calc(100% + 12px);
     white-space: nowrap;
     padding: 0.5rem 0.9rem;
     border-radius: var(--radius-full);
@@ -51,7 +60,7 @@ import { WHATSAPP } from '../data/site';
     font-size: 0.82rem;
     opacity: 0;
     pointer-events: none;
-    transform: translateX(6px);
+    transform: translateX(-6px);
     transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
   }
 
@@ -92,13 +101,15 @@ import { WHATSAPP } from '../data/site';
   }
 
   @media (max-width: 560px) {
+    /* Подсказка на телефоне не нужна: наводить нечем, а место занимает */
     .wa-tip {
       display: none;
     }
     .wa-fab {
-      width: 52px;
-      height: 52px;
-      bottom: 5.2rem; /* уступаем место кнопке чата */
+      width: 54px;
+      height: 54px;
+      /* Отступ «уступаем место кнопке чата» убран: кнопки теперь
+         в разных углах и друг другу не мешают. */
     }
   }
 </style>

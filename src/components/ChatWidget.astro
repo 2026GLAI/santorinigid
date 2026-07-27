@@ -26,13 +26,16 @@ import {
 ---
 
 <div class="chat-root">
+  {/*
+    Кнопка — это сам логотип помощника. Круглый ободок вырезан прямо
+    в картинке, поэтому кнопке не нужны ни фон, ни рамка.
+
+    Крестика здесь нет намеренно: закрывают чат крестиком в его шапке,
+    а на телефоне кнопка при открытом чате и вовсе прячется. Две кнопки
+    закрытия рядом только путали бы.
+  */}
   <button class="chat-toggle" id="chatToggle" aria-label="Открыть чат-помощника" aria-expanded="false">
-    {/* Логотип помощника вместо значка облачка: живое лицо заметнее
-        и понятнее — сразу видно, что это собеседник, а не форма. */}
-    <Image class="ico-open" src={botLogo} alt="" width={46} height={46} loading="lazy" />
-    <svg class="ico-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
-      <path d="M18 6L6 18M6 6l12 12" />
-    </svg>
+    <Image src={botLogo} alt="" width={84} height={84} loading="eager" />
   </button>
 
   <section class="chat-panel" id="chatPanel" hidden aria-label="Чат-помощник">
@@ -464,7 +467,13 @@ import {
     // Помечаем страницу: по этому классу прячем кнопку WhatsApp,
     // чтобы две плавающие кнопки не спорили друг с другом.
     document.documentElement.classList.add('chat-open');
-    hideWhatsapp(true);
+    /*
+      Прячем WhatsApp только на телефоне: там чат раскрывается во весь
+      экран, и кнопка висела бы поверх переписки.
+      На компьютере прятать не нужно — кнопки в разных углах, WhatsApp
+      слева, чат справа, они друг другу не мешают.
+    */
+    if (isPhone()) hideWhatsapp(true);
 
     if (isPhone()) {
       // Фон не должен прокручиваться под открытым чатом
@@ -548,121 +557,123 @@ import {
     }
   }
 
-  /*
-    Кнопка чата.
+  /* ═══════════════════════════════════════════════════════════════════
+     КНОПКА ЧАТА
 
-    Размер плавающий: 64px на телефоне, 76px на большом мониторе.
-    Считается через clamp от ширины экрана — не медиазапросами: те
-    в этом проекте уже подводили, проигрывая в каскаде (записано
-    в истории проекта).
+     Написана начисто 27.07.2026. Прежний вариант накопил противоречия:
+     правило :hover со своим transform перебивало анимацию пульсации
+     (последнее правило в CSS выигрывает), и пульсации не было видно.
 
-    Логотип круглый и с собственной рамкой, поэтому кнопке не нужны
-    ни фон, ни своя рамка — только тень, чтобы кнопка отделялась
-    от страницы.
-  */
+     Устройство простое:
+       .chat-toggle  — сама кнопка, только логотип, ничего лишнего;
+       ::before      — синее кольцо, расходящееся ПОД логотипом;
+       ::after       — мягкое свечение по краю, тоже под логотипом.
+
+     Пульсация живёт в кольце и свечении, а не в самой кнопке. Поэтому
+     transform кнопки свободен, и :hover ничего не ломает.
+     ═══════════════════════════════════════════════════════════════════ */
   .chat-toggle {
     position: relative;
-    display: grid;
-    place-items: center;
-    width: clamp(64px, 4.5vw, 76px);
-    height: clamp(64px, 4.5vw, 76px);
-    border-radius: var(--radius-full);
-    background: #fff;
-    color: #fff;
-    box-shadow: var(--shadow-lg);
+    display: block;
+    width: clamp(68px, 5vw, 84px);
+    height: clamp(68px, 5vw, 84px);
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    /* Тень мягкая: у логотипа свой синий ободок, вторая рамка не нужна */
+    filter: drop-shadow(0 6px 18px rgb(10 47 77 / 0.28));
     transition: transform var(--dur) var(--ease);
-    overflow: hidden;
-    /* Пульсация — чтобы кнопку заметили. Кольцо расходится от края,
-       сама кнопка при этом слегка «дышит». Останавливается при наведении
-       и при открытом чате: тогда она своё дело сделала. */
-    animation: chatPulse 2.6s var(--ease) infinite;
   }
 
-  /* Расходящееся кольцо. Отдельным слоем, чтобы не трогать саму картинку. */
-  .chat-toggle::after {
+  /* Логотип. Круглый, с ободком — вырезан в самом файле картинки. */
+  .chat-toggle img {
+    position: relative;
+    z-index: 2;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+  }
+
+  /*
+    Расходящееся кольцо — «круги по воде» от края кнопки.
+    Лежит ПОД логотипом (z-index: 1), поэтому расходится по сторонам,
+    не закрывая картинку.
+  */
+  .chat-toggle::before {
     content: '';
     position: absolute;
+    z-index: 1;
     inset: 0;
-    border-radius: var(--radius-full);
-    box-shadow: 0 0 0 0 rgb(27 111 168 / 0.55);
+    border-radius: 50%;
+    border: 2px solid var(--c-aegean-600);
     animation: chatRing 2.6s var(--ease) infinite;
     pointer-events: none;
   }
 
-  @keyframes chatPulse {
-    0%,
-    70%,
-    100% {
-      transform: scale(1);
-    }
-    35% {
-      transform: scale(1.07);
-    }
-  }
-
-  @keyframes chatRing {
-    0% {
-      box-shadow: 0 0 0 0 rgb(27 111 168 / 0.55);
-    }
-    70% {
-      box-shadow: 0 0 0 18px rgb(27 111 168 / 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgb(27 111 168 / 0);
-    }
-  }
-
-  /* Наведение и открытый чат: пульсация не нужна, она уже привлекла внимание */
-  .chat-toggle:hover,
-  .chat-toggle.is-open {
-    animation: none;
-  }
-
-  .chat-toggle:hover::after,
-  .chat-toggle.is-open::after {
-    animation: none;
+  /* Второе кольцо, с задержкой — волны идут одна за другой */
+  .chat-toggle::after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid var(--c-aegean-400);
+    animation: chatRing 2.6s var(--ease) 1.3s infinite;
+    pointer-events: none;
   }
 
   /*
-    Щадящий режим: если человек просил систему убрать движение
-    (укачивание, чувствительность к анимации) — пульсация выключается.
-    Кнопка остаётся видимой и рабочей, просто спокойной.
+    Значения взяты один в один с кнопки WhatsApp: владелец сказал, что
+    там пульсация «идеальная». Изобретать своё, когда рядом есть
+    работающий и одобренный образец, — только портить.
   */
-  @media (prefers-reduced-motion: reduce) {
-    .chat-toggle,
-    .chat-toggle::after {
-      animation: none;
+  @keyframes chatRing {
+    0% {
+      transform: scale(1);
+      opacity: 0.7;
     }
-  }
-
-  /* Логотип заполняет кнопку целиком, без полей */
-  .chat-toggle .ico-open {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: var(--radius-full);
+    70% {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+    100% {
+      opacity: 0;
+    }
   }
 
   .chat-toggle:hover {
     transform: scale(1.06);
   }
 
-  .chat-toggle .ico-close {
-    display: none;
+  .chat-toggle:active {
+    transform: scale(0.97);
   }
 
-  .chat-toggle.is-open .ico-open {
-    display: none;
+  /* Чат открыт — кольца не нужны, гость уже нажал */
+  .chat-toggle.is-open::before,
+  .chat-toggle.is-open::after {
+    animation: none;
+    opacity: 0;
   }
 
-  /* Когда чат открыт, кнопка снова становится синей: логотипа на ней нет,
-     а белый крестик на белом фоне был бы не виден. */
-  .chat-toggle.is-open {
-    background: linear-gradient(135deg, var(--c-aegean-600), var(--c-aegean-800));
-  }
+  /*
+    Щадящий режим: если человек попросил систему убрать движение
+    (укачивание, чувствительность к анимации) — кольца замирают.
+    Кнопка остаётся видимой и полностью рабочей.
+  */
+  @media (prefers-reduced-motion: reduce) {
+    .chat-toggle::before,
+    .chat-toggle::after {
+      animation: none;
+      opacity: 0;
+    }
 
-  .chat-toggle.is-open .ico-close {
-    display: block;
+    .chat-toggle {
+      transition: none;
+    }
   }
 
   .chat-panel {

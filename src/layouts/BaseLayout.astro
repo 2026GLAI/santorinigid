@@ -10,6 +10,7 @@ import { url } from '../data/url';
 import Footer from '../components/Footer.astro';
 import WhatsappFab from '../components/WhatsappFab.astro';
 import ChatWidget from '../components/ChatWidget.astro';
+import ScrollTop from '../components/ScrollTop.astro';
 import {
   SITE_URL,
   SITE_NAME,
@@ -175,6 +176,7 @@ const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [
     </main>
     <Footer />
     <WhatsappFab />
+    <ScrollTop />
     <ChatWidget />
 
     <script>
