@@ -280,6 +280,29 @@ import {
       .replace(/\n/g, '<br>');
   }
 
+  /*
+    Ответ ИИ: сначала обезвредить, потом сделать ссылки кликабельными.
+
+    Порядок важен и обратному не подлежит. Сначала весь текст становится
+    безопасным — чужой код выполниться уже не может. И только потом, из
+    того, что заведомо безопасно, мы САМИ собираем ссылки — и только на
+    известные нам адреса: WhatsApp, Telegram и наш собственный сайт.
+
+    Ссылку на чужой адрес бот кликабельной не сделает: она останется
+    обычным текстом. Это осознанно — так на сайт нельзя подсунуть переход
+    на постороннюю страницу.
+  */
+  function formatAiAnswer(raw) {
+    const safe = escapeHtml(raw);
+    const link = (url) =>
+      `<a href="${url}" target="_blank" rel="noopener">${url.replace(/^https:\/\//, '')}</a>`;
+
+    return safe.replace(
+      /https:\/\/(wa\.me\/[\w]+|t\.me\/[\w_]+|santorinigid\.com[\w\-/]*)/g,
+      (m) => link(m),
+    );
+  }
+
   /** Рисует сообщение. remember=false — для восстановленных, чтобы не дублировать. */
   function addMsg(text, who, remember = true) {
     const el = document.createElement('div');
@@ -361,14 +384,31 @@ import {
         const r = await fetch(CHAT_API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ question }),
+          body: JSON.stringify({
+            question,
+            /*
+              Отдаём последние 10 сообщений, чтобы бот помнил разговор:
+              иначе на «а сколько это стоит?» он не поймёт, о чём речь.
+
+              Переписка лежит в браузере гостя и никуда больше не уходит —
+              она отправляется только на наш Worker и только затем, чтобы
+              ИИ понял контекст. Ни база, ни сервер её не хранят.
+            */
+            history: history.slice(-10).map((m) => ({
+              role: m.w === 'bot' ? 'assistant' : 'user',
+              // Убираем разметку: в наших готовых ответах есть ссылки
+              // тегами, а ИИ нужен чистый текст — иначе он решит, что
+              // так и надо отвечать, и начнёт сыпать тегами сам.
+              content: m.t.replace(/<[^>]*>/g, '').trim(),
+            })),
+          }),
         });
         if (r.ok) {
           const data = await r.json();
-          // Ответ ИИ — чужой текст, выводим его обезвреженным.
-          // Наши собственные ответы (findAnswer) идут как есть: в них
-          // наши же ссылки на WhatsApp и Telegram.
-          answer = data.answer ? escapeHtml(data.answer) : null;
+          // Ответ ИИ — чужой текст: обезвреживаем, потом сами собираем
+          // ссылки на известные адреса. Наши собственные ответы
+          // (findAnswer) идут как есть — в них наша же разметка.
+          answer = data.answer ? formatAiAnswer(data.answer) : null;
         }
       } catch (e) {
         answer = null; // молча падаем на локальную базу
