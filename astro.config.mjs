@@ -19,7 +19,7 @@ import sitemap from '@astrojs/sitemap';
   получит указание на домен, которого ещё нет.
   ════════════════════════════════════════════════════════════════════
 */
-const НА_GITHUB_ВРЕМЕННО = true;
+const НА_GITHUB_ВРЕМЕННО = false;
 
 export const SITE = НА_GITHUB_ВРЕМЕННО
   ? 'https://2026glai.github.io'
