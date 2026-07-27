@@ -123,4 +123,8 @@ export const FOOTER_NAV = [
   { href: '/contacts', label: 'Контакты' },
 ] as const;
 
-export const COPYRIGHT = '© 2026 Все права защищены.';
+/**
+ * Год берётся при сборке, а не вписан цифрой: 1 января в подвале на всех
+ * страницах стоял бы прошлый год. Та же причина, что и у стажа выше.
+ */
+export const COPYRIGHT = `© ${CURRENT_YEAR} Все права защищены.`;

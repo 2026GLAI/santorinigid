@@ -1,9 +1,7 @@
 ---
 import { Image } from 'astro:assets';
-import { CONTACTS, FOOTER_NAV, COPYRIGHT, WHATSAPP } from '../data/site';
+import { CONTACTS, FOOTER_NAV, COPYRIGHT, WHATSAPP, ISLAND_YEARS_TEXT } from '../data/site';
 import logo from '../assets/img/logo-dome.png';
-
-const year = 2026;
 ---
 
 <footer class="site-footer">
@@ -24,7 +22,7 @@ const year = 2026;
       </a>
       <p class="footer-tagline">
         Индивидуальные экскурсии, яхты, вертолёты и лучшие отели острова.
-        31 год на Санторини — для вашего безупречного дня.
+        {ISLAND_YEARS_TEXT} на Санторини — для вашего безупречного дня.
       </p>
       <div class="socials">
         <a href={WHATSAPP.general} target="_blank" rel="noopener" aria-label="WhatsApp" class="social">

@@ -302,6 +302,50 @@ async function handleModerate(url, env) {
 }
 
 /**
+ * Кладём фотографии гостя в public/reviews/ отдельными файлами.
+ *
+ * Почему не прямо в reviews.ts: фото приходят строкой base64 длиной
+ * в сотни тысяч знаков. Вписать их в исходный код — раздуть файл на
+ * мегабайты, сломать его читаемость и заставить пересобирать сайт
+ * на каждой картинке. Файлы в public/ отдаются как есть, без обработки.
+ *
+ * Возвращает список адресов вида /reviews/own-1a2b3c-1.jpg — именно они
+ * попадают в поле photos отзыва. Если фото нет — вернётся пустой список,
+ * и в карточке не появится ни блока, ни пустого места.
+ */
+async function uploadPhotos(review, env, headers, branch) {
+  const urls = [];
+  const photos = Array.isArray(review.photos) ? review.photos.slice(0, 3) : [];
+  const shortId = review.id.slice(0, 8);
+
+  for (let i = 0; i < photos.length; i++) {
+    // Формат приходит как «data:image/jpeg;base64,XXXX» — нужен и тип, и данные
+    const m = /^data:image\/(jpeg|jpg|png|webp);base64,([A-Za-z0-9+/=]+)$/.exec(photos[i]);
+    if (!m) continue; // чужой формат — молча пропускаем, отзыв важнее фото
+
+    const ext = m[1] === 'jpeg' ? 'jpg' : m[1];
+    const name = `own-${shortId}-${i + 1}.${ext}`;
+    const res = await fetch(
+      `https://api.github.com/repos/${env.GITHUB_REPO}/contents/public/reviews/${name}`,
+      {
+        method: 'PUT',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: `Фото к отзыву от ${review.author}`,
+          content: m[2],
+          branch,
+        }),
+      },
+    );
+
+    // Не загрузилось — теряем фото, но не отзыв. Текст важнее картинки.
+    if (res.ok) urls.push(`/reviews/${name}`);
+  }
+
+  return urls;
+}
+
+/**
  * Дописываем отзыв в src/data/reviews.ts и коммитим на GitHub.
  * GitHub сообщит Cloudflare Pages — сайт пересоберётся сам.
  */
@@ -316,6 +360,12 @@ async function publishToGitHub(review, env) {
   };
 
   const branch = env.GITHUB_BRANCH || 'main';
+
+  // Сначала фотографии: они кладутся отдельными файлами, и только потом
+  // их адреса попадают в отзыв. Порядок важен — если фото не загрузятся,
+  // отзыв всё равно опубликуется, просто без них.
+  const photoUrls = await uploadPhotos(review, env, headers, branch);
+
   const getRes = await fetch(`${api}?ref=${branch}`, { headers });
   if (!getRes.ok) throw new Error(`GitHub не отдал файл (${getRes.status})`);
   const file = await getRes.json();
@@ -340,7 +390,12 @@ async function publishToGitHub(review, env) {
     published: ${q(review.published)},
     datePublished: ${q(review.datePublished)},
     source: ${q('santorinigid.com')},
-    sourceUrl: ${q((env.SITE_URL || 'https://santorinigid.com') + '/reviews#review-own-' + review.id.slice(0, 8))},
+    sourceUrl: ${q((env.SITE_URL || 'https://santorinigid.com') + '/reviews#review-own-' + review.id.slice(0, 8))},${
+      photoUrls.length
+        ? `
+    photos: [${photoUrls.map(q).join(', ')}],`
+        : ''
+    }
   },`;
 
   const insertAt = at + marker.length;

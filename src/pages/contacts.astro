@@ -130,13 +130,13 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
           Заполните форму — я свяжусь с вами и лично подготовлю предложение.
         </p>
 
-        <form
-          class="form"
-          id="contactForm"
-          action={formAction || undefined}
-          method="POST"
-          novalidate
-        >
+        {/*
+          novalidate убран намеренно. Он отключал встроенную проверку
+          браузера, и форму можно было отправить с пустым email — заявка
+          уходила без обратного адреса. Теперь браузер сам не даст отправить
+          незаполненное обязательное поле и покажет подсказку прямо у него.
+        */}
+        <form class="form" id="contactForm" action={formAction || undefined} method="POST">
           <label class="field">
             <span>Как к вам обращаться?</span>
             <input type="text" name="name" required autocomplete="name" placeholder="Ваше имя" />
@@ -192,14 +192,14 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
     // собираем текст и открываем WhatsApp с уже готовым сообщением.
     if (!hasEndpoint) {
       e.preventDefault();
+      // Проверяем ВСЕ обязательные поля, а не только имя: у полей стоит
+      // required, и reportValidity сам покажет подсказку у нужного поля.
+      // Раньше проверялось одно имя, и заявка могла уйти без обратного
+      // адреса — человек написал, а ответить ему некуда.
+      if (!form.reportValidity()) return;
+
       const d = new FormData(form);
       const name = String(d.get('name') || '').trim();
-      if (!name) {
-        status.textContent = 'Пожалуйста, напишите, как к вам обращаться.';
-        status.className = 'form-status err';
-        form.querySelector('input[name="name"]')?.focus();
-        return;
-      }
       const msg = [
         'Здравствуйте, Владимир!',
         `Меня зовут: ${name}`,

@@ -5,15 +5,14 @@ import Hero from '../components/Hero.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Faq from '../components/Faq.astro';
 import Reviews from '../components/Reviews.astro';
-import { WHATSAPP, SITE_URL } from '../data/site';
+import { WHATSAPP, SITE_URL, GUIDE_YEARS_TEXT } from '../data/site';
 import { TOUR_STOPS, TOUR_DETAILS, FAQ, GALLERY } from '../data/tours';
 import { getImg } from '../data/images';
 
 import heroTour from '../assets/img/tour-hero.jpg';
 
 const title = 'Индивидуальная экскурсия по Санторини | Гид Владимир 2026';
-const description =
-  'Индивидуальная экскурсия по Санторини с русскоязычным гидом. Ия, Имеровигли, скрытые локации без толп. 14 лет опыта. Цена 2026 года.';
+const description = `Индивидуальная экскурсия по Санторини с русскоязычным гидом. Ия, Имеровигли, скрытые локации без толп. ${GUIDE_YEARS_TEXT} опыта. Цена 2026 года.`;
 
 /** Галерея: фото гостей. */
 const gallery = GALLERY.map((f) => getImg(f));

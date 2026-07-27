@@ -14,6 +14,8 @@ import {
   OWNER_FULL_NAME,
   PROFILES,
   GUIDE_SINCE,
+  ISLAND_YEARS_TEXT,
+  GUIDE_YEARS_TEXT,
 } from '../data/site';
 
 interface Props {
@@ -37,8 +39,7 @@ const localBusiness = {
   '@type': 'TouristInformationCenter',
   '@id': `${SITE_URL}/#business`,
   name: 'Владимир — русскоязычный гид на Санторини',
-  description:
-    'Индивидуальные экскурсии по Санторини с русскоязычным гидом. 31 год жизни на острове, 14 лет профессионального опыта. Аренда яхт, вертолётные туры, подбор отелей.',
+  description: `Индивидуальные экскурсии по Санторини с русскоязычным гидом. ${ISLAND_YEARS_TEXT} жизни на острове, ${GUIDE_YEARS_TEXT} профессионального опыта. Аренда яхт, вертолётные туры, подбор отелей.`,
   url: SITE_URL,
   telephone: '+306946800255',
   email: 'santorinivip@gmail.com',
