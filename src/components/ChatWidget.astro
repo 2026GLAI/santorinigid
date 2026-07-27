@@ -13,6 +13,8 @@
  * Такой порядок выбран намеренно: сайт остаётся статическим и бесплатным,
  * а чат уже работает с первого дня.
  */
+import { Image } from 'astro:assets';
+import botLogo from '../assets/img/chat-bot.webp';
 import {
   WHATSAPP,
   CONTACTS,
@@ -25,9 +27,9 @@ import {
 
 <div class="chat-root">
   <button class="chat-toggle" id="chatToggle" aria-label="Открыть чат-помощника" aria-expanded="false">
-    <svg class="ico-open" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />
-    </svg>
+    {/* Логотип помощника вместо значка облачка: живое лицо заметнее
+        и понятнее — сразу видно, что это собеседник, а не форма. */}
+    <Image class="ico-open" src={botLogo} alt="" width={46} height={46} loading="lazy" />
     <svg class="ico-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
       <path d="M18 6L6 18M6 6l12 12" />
     </svg>
@@ -37,12 +39,7 @@ import {
   <section class="chat-panel" id="chatPanel" hidden aria-label="Чат-помощник">
     <header class="chat-head">
       <div class="chat-avatar" aria-hidden="true">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-          <path d="M12 2v3M4.9 4.9l2.1 2.1M2 12h3M19 12h3M17 7l2.1-2.1" />
-          <rect x="5" y="8" width="14" height="12" rx="3" />
-          <circle cx="9.5" cy="13.5" r="1.2" fill="currentColor" stroke="none" />
-          <circle cx="14.5" cy="13.5" r="1.2" fill="currentColor" stroke="none" />
-        </svg>
+        <Image src={botLogo} alt="" width={44} height={44} loading="lazy" />
       </div>
       <div class="chat-head-text">
         <strong>Помощник по Санторини</strong>
@@ -561,10 +558,22 @@ import {
     width: 58px;
     height: 58px;
     border-radius: var(--radius-full);
-    background: linear-gradient(135deg, var(--c-aegean-600), var(--c-aegean-800));
+    /* Светлая подложка под логотип: сам он белый с синим, и на тёмно-синем
+       фоне сливался бы. Тонкая рамка отделяет кнопку от светлой страницы. */
+    background: #fff;
+    border: 2px solid var(--c-aegean-600);
     color: #fff;
     box-shadow: var(--shadow-lg);
     transition: transform var(--dur) var(--ease);
+    overflow: hidden;
+  }
+
+  /* Логотип заполняет кнопку целиком, без полей */
+  .chat-toggle .ico-open {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-full);
   }
 
   .chat-toggle:hover {
@@ -577,6 +586,12 @@ import {
 
   .chat-toggle.is-open .ico-open {
     display: none;
+  }
+
+  /* Когда чат открыт, кнопка снова становится синей: логотипа на ней нет,
+     а белый крестик на белом фоне был бы не виден. */
+  .chat-toggle.is-open {
+    background: linear-gradient(135deg, var(--c-aegean-600), var(--c-aegean-800));
   }
 
   .chat-toggle.is-open .ico-close {
@@ -662,8 +677,17 @@ import {
     width: 38px;
     height: 38px;
     border-radius: var(--radius-full);
-    background: rgb(255 255 255 / 0.18);
+    /* Белая подложка: шапка чата тёмно-синяя, а логотип светлый —
+       без неё края робота растворились бы в фоне. */
+    background: #fff;
     flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .chat-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .chat-head-text {
