@@ -83,11 +83,14 @@ import {
     <div class="chat-log" id="chatLog" role="log" aria-live="polite"></div>
 
     <form class="chat-form" id="chatForm">
+      {/* maxlength — как в боте-образце: Worker всё равно режет до 1000,
+          но честнее не дать напечатать лишнее, чем молча обрезать. */}
       <input
         type="text"
         id="chatInput"
         placeholder="Спросите про остров, экскурсии, яхты…"
         autocomplete="off"
+        maxlength="1000"
         aria-label="Ваш вопрос"
       />
       <button type="submit" aria-label="Отправить">
@@ -123,6 +126,7 @@ import {
     WA: WHATSAPP.general,
     PHONE: CONTACTS.phone,
     TG: CONTACTS.telegram,
+    VIBER: CONTACTS.viberHref,
     ON_ISLAND_SINCE,
     ISLAND_YEARS_TEXT,
     GUIDE_YEARS_TEXT,
@@ -353,6 +357,55 @@ import {
     );
   }
 
+  /*
+    Карточка «Написать Владимиру» — как в боте-образце владельца.
+    Вставляется вместо маркера [CONTACTS] из ответа ИИ. Разметка наша
+    собственная, доверенная: в неё подставляются только адреса из site.ts.
+  */
+  const CONTACT_CARD =
+    '<div class="chat-contacts">' +
+    '<span class="chat-contacts-label">Написать Владимиру</span>' +
+    `<a href="${WA}" target="_blank" rel="noopener">WhatsApp</a>` +
+    `<a href="${VIBER}">Viber</a>` +
+    `<a href="${TG}" target="_blank" rel="noopener">Telegram</a>` +
+    '</div>';
+
+  /*
+    Подстраховка из образца: Llama иногда игнорирует маркер и пишет
+    контакты голым текстом. Такие строки вырезаем — карточка красивее
+    и надёжнее (номер с опечаткой бота никому не поможет).
+  */
+  function isContactLine(line) {
+    if (line.replace(/\D/g, '').includes('6946800255')) return true;
+    const l = line.toLowerCase();
+    return (
+      l.includes('santorinivip@gmail') ||
+      l.includes('@santorini_vladimir') ||
+      line.trimStart().startsWith('📱')
+    );
+  }
+
+  /*
+    Полная обработка ответа ИИ: маркер и контактные строки заменяются
+    карточкой (одной, сколько бы их ни было), остальной текст
+    обезвреживается и получает кликабельные ссылки.
+  */
+  function renderAiAnswer(raw) {
+    let needCard = false;
+    const kept = String(raw)
+      .split('\n')
+      .filter((line) => {
+        if (line.includes('[CONTACTS]') || isContactLine(line)) {
+          needCard = true;
+          return false;
+        }
+        return true;
+      });
+    let html = formatAiAnswer(kept.join('\n').trim());
+    if (needCard) html += CONTACT_CARD;
+    return html;
+  }
+
   /** Рисует сообщение. remember=false — для восстановленных, чтобы не дублировать. */
   function addMsg(text, who, remember = true) {
     const el = document.createElement('div');
@@ -444,7 +497,6 @@ import {
 
   async function respond(question) {
     const t = typing();
-    let answer = null;
 
     if (CHAT_API_URL) {
       // Режим настоящего ИИ (когда владелец подключит Worker).
@@ -467,26 +519,103 @@ import {
               // Убираем разметку: в наших готовых ответах есть ссылки
               // тегами, а ИИ нужен чистый текст — иначе он решит, что
               // так и надо отвечать, и начнёт сыпать тегами сам.
-              content: m.t.replace(/<[^>]*>/g, '').trim(),
+              content: m.t.replace(/<[^>]*>/g, ' ').trim(),
             })),
           }),
         });
-        if (r.ok) {
+
+        const type = r.headers.get('Content-Type') || '';
+
+        // Основной путь: поток. Бот «печатает» ответ по буквам —
+        // как в боте-образце владельца.
+        if (r.ok && type.includes('text/event-stream') && r.body) {
+          const shown = await streamAnswer(r.body, t);
+          if (shown) return;
+        } else if (r.ok && type.includes('application/json')) {
+          // Запасной путь: обычный целый ответ (если Worker без потока).
           const data = await r.json();
-          // Ответ ИИ — чужой текст: обезвреживаем, потом сами собираем
-          // ссылки на известные адреса. Наши собственные ответы
-          // (findAnswer) идут как есть — в них наша же разметка.
-          answer = data.answer ? formatAiAnswer(data.answer) : null;
+          if (data.answer) {
+            t.remove();
+            addMsg(renderAiAnswer(data.answer), 'bot');
+            return;
+          }
         }
       } catch {
-        answer = null; // молча падаем на локальную базу
+        /* сеть или Worker подвели — молча падаем на локальную базу */
       }
     }
 
-    if (!answer) answer = findAnswer(question);
+    const answer = findAnswer(question);
     await new Promise((res) => setTimeout(res, 420));
     t.remove();
     addMsg(answer || FALLBACK, 'bot');
+  }
+
+  /*
+    Чтение потока: события «data: {type:'token', content:'…'}» приходят
+    кусочками, каждый кусочек дописываем в пузырь. Пока идёт печать,
+    текст вставляется как textContent — это безопасно по построению.
+    Когда поток закончился, готовый ответ один раз прогоняется через
+    renderAiAnswer: обезвреживание, ссылки, карточка контактов.
+
+    Возвращает true, если ответ показан; false — если поток оборвался
+    пустым и нужно ответить из локальной базы.
+  */
+  async function streamAnswer(body, t) {
+    const reader = body.getReader();
+    const decoder = new TextDecoder();
+    let raw = '';
+    let el = null;
+    let bubble = null;
+    let buf = '';
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+
+        let i;
+        while ((i = buf.indexOf('\n\n')) >= 0) {
+          const line = buf.slice(0, i).trim();
+          buf = buf.slice(i + 2);
+          if (!line.startsWith('data: ')) continue;
+          let ev;
+          try {
+            ev = JSON.parse(line.slice(6));
+          } catch {
+            continue;
+          }
+          if (ev.type === 'token' && ev.content) {
+            raw += ev.content;
+            if (!el) {
+              // Первая буква пришла — убираем «печатает…», заводим пузырь
+              t.remove();
+              el = addMsg('', 'bot', false);
+              bubble = el.querySelector('.bubble');
+            }
+            bubble.textContent = raw;
+            log.scrollTop = log.scrollHeight;
+          }
+        }
+      }
+    } catch {
+      /* поток оборвался — покажем то, что успело прийти */
+    }
+
+    if (!raw.trim()) {
+      if (el) el.remove();
+      return false;
+    }
+
+    const html = renderAiAnswer(raw);
+    bubble.innerHTML = html;
+    log.scrollTop = log.scrollHeight;
+    // Запоминаем готовый ответ в переписке — как обычное сообщение
+    history.push({ t: html, w: 'bot' });
+    saveHistory();
+    if (clearBtn) clearBtn.hidden = false;
+    return true;
   }
 
   /** Телефон: чат открывается на весь экран. */
@@ -1007,51 +1136,100 @@ import {
     background: var(--bg);
   }
 
-  .msg {
+  /*
+    ⚠️ ВСЕ стили сообщений — через :global, и это не прихоть.
+
+    Сообщения создаёт СКРИПТ (addMsg), а Astro «прошивает» свои стили
+    печатью data-astro-cid только на элементы из шаблона. Скриптовые
+    элементы печати не получают — и правило `.bubble {…}` из компонента
+    для них просто не существует. Из-за этого до 28.07.2026 вся переписка
+    выводилась голым текстом: без пузырей, без синего цвета у гостя.
+    Найдено визуальной проверкой окна, а не чтением кода — код выглядел
+    правильным. Якорь .chat-log — из шаблона, он печать имеет.
+  */
+  .chat-log :global(.msg) {
     display: flex;
   }
 
-  .msg-me {
+  .chat-log :global(.msg-me) {
     justify-content: flex-end;
   }
 
-  .bubble {
+  .chat-log :global(.bubble) {
     max-width: 86%;
     padding: 0.7rem 0.95rem;
     border-radius: 16px;
     font-size: 0.9rem;
     line-height: 1.55;
+    overflow-wrap: break-word;
   }
 
-  .msg-bot .bubble {
+  .chat-log :global(.msg-bot .bubble) {
     background: var(--surface);
     border: 1px solid var(--border);
     border-bottom-left-radius: 5px;
     color: var(--text);
   }
 
-  .msg-me .bubble {
+  .chat-log :global(.msg-me .bubble) {
     background: var(--c-aegean-600);
     color: #fff;
     border-bottom-right-radius: 5px;
   }
 
-  .bubble :global(a) {
+  .chat-log :global(.bubble a) {
     color: var(--accent);
     text-decoration: underline;
   }
 
-  .msg-me .bubble :global(a) {
+  .chat-log :global(.msg-me .bubble a) {
     color: #fff;
   }
 
-  .typing .bubble {
+  /* Карточка «Написать Владимиру» — рисуется вместо маркера [CONTACTS]
+     из ответа ИИ (как в боте-образце владельца). */
+  .chat-log :global(.chat-contacts) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 0.6rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .chat-log :global(.chat-contacts-label) {
+    width: 100%;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .chat-log :global(.chat-contacts a) {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.45em 1em;
+    border-radius: var(--radius-full);
+    background: var(--c-aegean-600);
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .chat-log :global(.chat-contacts a:hover) {
+    background: var(--c-aegean-800);
+  }
+
+  .chat-log :global(.typing .bubble) {
     display: flex;
     gap: 4px;
     padding: 0.85rem 1rem;
   }
 
-  .typing span {
+  .chat-log :global(.typing span) {
     width: 6px;
     height: 6px;
     border-radius: 50%;
@@ -1059,11 +1237,11 @@ import {
     animation: blink 1.3s infinite;
   }
 
-  .typing span:nth-child(2) {
+  .chat-log :global(.typing span:nth-child(2)) {
     animation-delay: 0.18s;
   }
 
-  .typing span:nth-child(3) {
+  .chat-log :global(.typing span:nth-child(3)) {
     animation-delay: 0.36s;
   }
 

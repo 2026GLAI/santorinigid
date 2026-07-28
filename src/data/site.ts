@@ -112,6 +112,8 @@ export const PROFILES = [
 export const CONTACTS = {
   phone: '+30 6946800255',
   phoneHref: 'tel:+306946800255',
+  /** Ссылка «открыть Viber» — для карточки контактов в чате. */
+  viberHref: 'viber://chat?number=%2B306946800255',
   email: 'santorinivip@gmail.com',
   emailHref: 'mailto:santorinivip@gmail.com',
   telegram: 'https://t.me/SANTORINI_VLADIMIR',
