@@ -72,8 +72,10 @@ const json = (data, status = 200, request = null) =>
     },
   });
 
-/** Страница-ответ для Владимира после нажатия кнопки в письме. */
-const page = (title, text, tone = 'ok') =>
+/** Страница-ответ для Владимира после нажатия кнопки в письме.
+    extra — дополнительная разметка под кнопкой (например, ссылка
+    «удалить с сайта» на странице успешной публикации). */
+const page = (title, text, tone = 'ok', extra = '') =>
   new Response(
     `<!doctype html><html lang="ru"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -90,12 +92,15 @@ const page = (title, text, tone = 'ok') =>
    background:${tone === 'ok' ? '#e6f5ec' : '#fdecea'}}
  h1{font-size:1.4rem;margin:0 0 .5rem}
  p{color:#43535e;margin:0}
- a{display:inline-block;margin-top:1.5rem;padding:.8em 1.8em;border-radius:999px;
+ a.btn{display:inline-block;margin-top:1.5rem;padding:.8em 1.8em;border-radius:999px;
    background:#1b6fa8;color:#fff;text-decoration:none;font-weight:600}
+ .extra{margin-top:1.25rem;font-size:.85rem}
+ .extra a{color:#c0392b;text-decoration:underline}
 </style></head><body><div class="card">
 <div class="ico">${tone === 'ok' ? '✓' : '🗑'}</div>
 <h1>${title}</h1><p>${text}</p>
-<a href="https://santorinigid.com/reviews">Открыть страницу отзывов</a>
+<a class="btn" href="https://santorinigid.com/reviews/">Открыть страницу отзывов</a>
+${extra ? `<div class="extra">${extra}</div>` : ''}
 </div></body></html>`,
     { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } },
   );
@@ -265,6 +270,9 @@ async function sendEmail(review, env) {
   const base = env.WORKER_URL || 'https://reviews.santorinigid.com';
   const approve = `${base}/moderate?id=${review.id}&action=approve&t=${token}`;
   const reject = `${base}/moderate?id=${review.id}&action=reject&t=${token}`;
+  // «Передумал» — снять УЖЕ опубликованный отзыв с сайта. Подпись та же,
+  // ссылка вечная: работает и через месяц, и через год.
+  const unpublish = `${base}/moderate?id=${review.id}&action=unpublish&t=${token}`;
 
   const meta = [review.tripDate, review.tripWith].filter(Boolean).join(' · ');
 
@@ -305,7 +313,10 @@ box-shadow:0 4px 16px rgb(10 47 77/.08)">
     border-top:1px solid #e3ded4;line-height:1.6">
       После нажатия «Опубликовать» отзыв появится на сайте автоматически через
       2–3 минуты. Пока вы не нажали — на сайте его нет.
-      Если не решить в течение 30 дней, отзыв удалится сам.
+      Если не решить в течение 30 дней, отзыв удалится сам.<br><br>
+      Передумали уже после публикации? Нажмите
+      <a href="${unpublish}" style="color:#c0392b">удалить отзыв с сайта</a> —
+      сработает в любой момент, даже спустя месяцы.
     </p>
   </div>
 </div>
@@ -399,6 +410,26 @@ async function handleModerate(url, env) {
     return page('Ссылка недействительна', 'Подпись не совпала. Откройте ссылку из письма.', 'err');
   }
 
+  /*
+    Снятие УЖЕ опубликованного отзыва — до обращения к камере хранения:
+    к этому моменту отзыв из неё давно стёрт, он живёт в файле сайта.
+  */
+  if (action === 'unpublish') {
+    try {
+      const removed = await unpublishFromGitHub(id, env);
+      if (!removed) {
+        return page('На сайте не найден', 'Такого отзыва на сайте нет — возможно, он уже удалён.', 'ok');
+      }
+    } catch (e) {
+      return page('Не удалось удалить', `Ошибка: ${esc(e.message)}`, 'err');
+    }
+    return page(
+      'Отзыв удалён с сайта',
+      'Сайт сейчас пересобирается — через 2–3 минуты отзыва (и его фотографий) на странице не будет.',
+      'err',
+    );
+  }
+
   const raw = await env.REVIEWS.get(`pending:${id}`);
   if (!raw) {
     return page('Отзыв уже обработан', 'Похоже, вы уже нажимали кнопку по этому отзыву.', 'ok');
@@ -417,10 +448,12 @@ async function handleModerate(url, env) {
       return page('Не удалось опубликовать', `Ошибка: ${esc(e.message)}`, 'err');
     }
     await env.REVIEWS.delete(`pending:${id}`);
+    const unpublishUrl = `${env.WORKER_URL}/moderate?id=${id}&action=unpublish&t=${token}`;
     return page(
       'Отзыв опубликован',
       `Отзыв от ${esc(review.author)} появится на сайте через 2–3 минуты — сайт сейчас пересобирается.`,
       'ok',
+      `Передумали? <a href="${unpublishUrl}">Удалить этот отзыв с сайта</a> — можно в любой момент.`,
     );
   }
 
@@ -544,4 +577,74 @@ async function publishToGitHub(review, env) {
   });
 
   if (!putRes.ok) throw new Error(`GitHub отклонил запись (${putRes.status})`);
+}
+
+/**
+ * Снимает опубликованный отзыв с сайта: вырезает его блок из reviews.ts
+ * и удаляет файлы его фотографий. Владелец делает это сам, ссылкой из
+ * письма или со страницы «Отзыв опубликован» — без правки файлов.
+ * Возвращает false, если отзыва в файле уже нет.
+ */
+async function unpublishFromGitHub(id, env) {
+  const ownId = 'own-' + id.slice(0, 8);
+  const path = 'src/data/reviews.ts';
+  const api = `https://api.github.com/repos/${env.GITHUB_REPO}/contents/`;
+  const headers = {
+    Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+    Accept: 'application/vnd.github+json',
+    'User-Agent': 'santorinigid-reviews-worker',
+    'X-GitHub-Api-Version': '2022-11-28',
+  };
+  const branch = env.GITHUB_BRANCH || 'main';
+
+  const getRes = await fetch(`${api}${path}?ref=${branch}`, { headers });
+  if (!getRes.ok) throw new Error(`GitHub не отдал файл (${getRes.status})`);
+  const file = await getRes.json();
+  const current = new TextDecoder().decode(
+    Uint8Array.from(atob(file.content.replace(/\n/g, '')), (c) => c.charCodeAt(0)),
+  );
+
+  // Блок отзыва ровно той формы, в которой его дописывает publishToGitHub
+  const re = new RegExp(`\\n  \\{\\n    id: ${JSON.stringify(ownId)},[\\s\\S]*?\\n  \\},`);
+  const m = re.exec(current);
+  if (!m) return false;
+
+  // Файлы фотографий отзыва — тоже удаляем, мусора в репозитории не оставляем
+  const photosMatch = /photos: \[([^\]]*)\]/.exec(m[0]);
+  if (photosMatch) {
+    const urls = [...photosMatch[1].matchAll(/"([^"]+)"/g)].map((x) => x[1]);
+    for (const u of urls) {
+      const p = `public${u}`;
+      try {
+        const fr = await fetch(`${api}${p}?ref=${branch}`, { headers });
+        if (!fr.ok) continue;
+        const f = await fr.json();
+        await fetch(`${api}${p}`, {
+          method: 'DELETE',
+          headers: { ...headers, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: `Фото удалённого отзыва ${ownId}`, sha: f.sha, branch }),
+        });
+      } catch {
+        /* фото не удалилось — не страшно, главное убрать сам отзыв */
+      }
+    }
+  }
+
+  const updated = current.replace(m[0], '');
+  const bytes = new TextEncoder().encode(updated);
+  let bin = '';
+  bytes.forEach((b) => (bin += String.fromCharCode(b)));
+
+  const putRes = await fetch(`${api}${path}`, {
+    method: 'PUT',
+    headers: { ...headers, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: `Отзыв ${ownId} удалён владельцем с сайта`,
+      content: btoa(bin),
+      sha: file.sha,
+      branch,
+    }),
+  });
+  if (!putRes.ok) throw new Error(`GitHub отклонил запись (${putRes.status})`);
+  return true;
 }
