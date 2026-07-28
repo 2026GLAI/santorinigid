@@ -291,8 +291,10 @@ const REVIEW_API = 'https://santorinigid-reviews.2026glai.workers.dev/review';
         'Спасибо! Отзыв отправлен Владимиру. Он прочитает его и опубликует на сайте — обычно в течение суток.';
       status.className = 'rf-status ok';
     } catch (err) {
+      // replace(/\.$/ …) — у сообщений сервера своя точка на конце,
+      // без среза выходило «…WhatsApp.. Напишите» с двумя точками
       status.innerHTML =
-        (err.message ? esc(err.message) + '. ' : 'Не получилось отправить. ') +
+        (err.message ? esc(err.message).replace(/\.\s*$/, '') + '. ' : 'Не получилось отправить. ') +
         'Напишите отзыв, пожалуйста, в WhatsApp на номер ' +
         PHONE +
         ' — так он точно дойдёт.';
