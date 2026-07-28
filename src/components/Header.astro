@@ -320,6 +320,16 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
     position: relative;
   }
 
+  /*
+    Подменю «VIP услуги».
+
+    Две защиты от преждевременного закрытия (жалоба владельца 28.07.2026 —
+    «не успеваю перейти на подменю»):
+    1. Невидимый мостик (::before) накрывает зазор 6px между пунктом
+       и окошком — наведение не теряется, пока курсор летит вниз.
+    2. Задержка закрытия 350 мс: увёл курсор в сторону — меню прощает
+       и ждёт. Открытие при этом мгновенное (задержка обнуляется).
+  */
   .submenu {
     position: absolute;
     top: calc(100% + 6px);
@@ -335,6 +345,16 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
     transform: translateY(-6px);
     transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease),
       visibility var(--dur);
+    transition-delay: 350ms;
+  }
+
+  .submenu::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -8px;
+    height: 8px;
   }
 
   .has-sub:hover .submenu,
@@ -342,6 +362,7 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
     opacity: 1;
     visibility: visible;
     transform: none;
+    transition-delay: 0ms;
   }
 
   .submenu a {
