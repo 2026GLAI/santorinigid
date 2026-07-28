@@ -88,7 +88,7 @@ const schema = {
         {
           SERVICES.map((s) => (
             <a
-              href={url(s.href)}
+              href={s.external ? s.href : url(s.href)}
               class="card svc reveal"
               target={s.external ? '_blank' : undefined}
               rel={s.external ? 'noopener' : undefined}

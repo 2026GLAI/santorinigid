@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
-import { CONTACTS, WHATSAPP, SITE_URL, pageUrl } from '../data/site';
+import { CONTACTS, WHATSAPP, WA_BASE, SITE_URL, pageUrl } from '../data/site';
 
 import heroContacts from '../assets/img/contacts-hero.jpg';
 
@@ -183,7 +183,7 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
   </section>
 </BaseLayout>
 
-<script define:vars={{ hasEndpoint: Boolean(formAction), WA: WHATSAPP.general }}>
+<script define:vars={{ hasEndpoint: Boolean(formAction), WA: WHATSAPP.general, WA_BASE }}>
   const form = document.getElementById('contactForm');
   const status = document.getElementById('formStatus');
 
@@ -209,7 +209,7 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
       ]
         .filter(Boolean)
         .join('\n');
-      window.open('https://wa.me/306946800255?text=' + encodeURIComponent(msg), '_blank', 'noopener');
+      window.open(WA_BASE + encodeURIComponent(msg), '_blank', 'noopener');
       status.textContent = 'Открыл WhatsApp с вашим сообщением — осталось нажать «отправить».';
       status.className = 'form-status ok';
       return;

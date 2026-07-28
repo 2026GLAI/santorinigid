@@ -63,7 +63,13 @@ export const GUIDE_SINCE = 2012;
 const CURRENT_YEAR = new Date().getFullYear();
 
 const YEARS_ON_ISLAND = CURRENT_YEAR - ON_ISLAND_SINCE;
-const YEARS_AS_GUIDE = CURRENT_YEAR - GUIDE_SINCE;
+
+/**
+ * Число лет стажа отдельно от готовой строки: нужно там, где рядом
+ * с числом стоит свой текст и склонение считается на месте
+ * (например, плашка «14 лет как гид» на главной).
+ */
+export const YEARS_AS_GUIDE = CURRENT_YEAR - GUIDE_SINCE;
 
 /**
  * Склонение существительного по числу — общее правило русского языка.
@@ -115,8 +121,13 @@ export const CONTACTS = {
   messengers: 'Viber, WhatsApp, Telegram',
 } as const;
 
-/** Готовые ссылки WhatsApp с предзаполненным текстом (как на исходном сайте). */
-const WA_BASE = 'https://wa.me/306946800255?text=';
+/**
+ * Основа ссылки WhatsApp: к ней приклеивается текст сообщения.
+ * Экспортируется для форм, которые собирают текст уже в браузере
+ * (заявка на /contacts, отзыв в ReviewForm). Номер телефона живёт
+ * ТОЛЬКО здесь и в CONTACTS — руками его больше нигде не вписывать.
+ */
+export const WA_BASE = 'https://wa.me/306946800255?text=';
 export const WHATSAPP = {
   tour: WA_BASE + encodeURIComponent('Здравствуйте, Владимир! Хочу узнать подробнее об индивидуальной экскурсии.'),
   yacht: WA_BASE + encodeURIComponent('Здравствуйте, Владимир! Хочу узнать подробнее про аренду яхты.'),

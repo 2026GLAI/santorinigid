@@ -140,33 +140,33 @@ const eur = (n: number) => '€' + n.toLocaleString('ru-RU').replace(/,/g, ' ');
                 <p class="yacht-desc">{y.description}</p>
 
                 <div class="prices-scroll">
-                <table class="prices">
-                  <caption class="visually-hidden">Цены на аренду {y.name}</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Программа</th>
-                      <th scope="col">Низкий сезон</th>
-                      <th scope="col">Высокий сезон</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row">Дневной тур (5 ч)</th>
-                      <td>{eur(y.low.day)}</td>
-                      <td>{eur(y.high.day)}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Вечерний с закатом (5 ч)</th>
-                      <td>{eur(y.low.sunset)}</td>
-                      <td>{eur(y.high.sunset)}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Весь день (10 ч)</th>
-                      <td>{eur(y.low.full)}</td>
-                      <td>{eur(y.high.full)}</td>
-                    </tr>
-                  </tbody>
-                </table>
+                  <table class="prices">
+                    <caption class="visually-hidden">Цены на аренду {y.name}</caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">Программа</th>
+                        <th scope="col">Низкий сезон</th>
+                        <th scope="col">Высокий сезон</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <th scope="row">Дневной тур (5 ч)</th>
+                        <td>{eur(y.low.day)}</td>
+                        <td>{eur(y.high.day)}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Вечерний с закатом (5 ч)</th>
+                        <td>{eur(y.low.sunset)}</td>
+                        <td>{eur(y.high.sunset)}</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">Весь день (10 ч)</th>
+                        <td>{eur(y.low.full)}</td>
+                        <td>{eur(y.high.full)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
 
                 <div class="yacht-perks" aria-label="Включено в стоимость">

@@ -315,7 +315,7 @@
       --text-soft: #b8cad6;
       --text-muted: #8ba3b2;
       --accent: var(--c-aegean-200);
-        --border: #1e3d50;
+      --border: #1e3d50;
 
       /* Кнопки в тёмной теме: фон светлый, значит текст должен быть тёмным.
            покой:     #0a2f4d на #a9d8ef → 9.01:1 ✓ (было белым: 1.53:1)
@@ -414,7 +414,7 @@
   */
   @media (pointer: coarse) {
     .btn,
-    button:not(.rv-expand):not([class*='chip']),
+    button,
     input[type='checkbox'],
     input[type='radio'],
     select {
@@ -474,7 +474,6 @@
   .container-wide {
     max-width: var(--container-wide);
   }
-
 
   .section {
     padding-block: clamp(3rem, 7vw, 8rem);
@@ -772,13 +771,10 @@
     transition: opacity 640ms var(--ease), transform 640ms var(--ease);
   }
 
+  /* Задержку каскада задаёт переменная --i, её проставляет BaseLayout */
   .js-on .reveal-stagger.is-visible > * {
     opacity: 1;
     transform: none;
-  }
-
-  /* Задержку задаём переменной --i, её проставляет BaseLayout */
-  .js-on .reveal-stagger.is-visible > * {
     transition-delay: calc(var(--i, 0) * 90ms);
   }
 
@@ -939,7 +935,6 @@
   .text-center {
     text-align: center;
   }
-
 
   .mx-auto {
     margin-inline: auto;

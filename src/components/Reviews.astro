@@ -137,7 +137,7 @@ const bySource = REVIEW_SOURCES.map((s) => ({
           </p>
           <div class="rv-cta-actions">
             <a
-              href="https://www.tourister.ru/add_response_for_expert/Vladimir_Santorini"
+              href={LEAVE_REVIEW_URL}
               class="btn btn-primary"
               target="_blank"
               rel="noopener"
@@ -257,18 +257,6 @@ const bySource = REVIEW_SOURCES.map((s) => ({
     }
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
   /*
     «Показать ещё» — один механизм, без скриптов.
     Свёрнутый список ограничен по высоте и притушён снизу градиентом;
@@ -367,12 +355,6 @@ const bySource = REVIEW_SOURCES.map((s) => ({
   .rv-toggle:focus-visible ~ .rv-more-btn {
     outline: 3px solid var(--accent);
     outline-offset: 3px;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .rv-hidden-list {
-      transition: none;
-    }
   }
 
   /* --- призыв оставить отзыв --- */

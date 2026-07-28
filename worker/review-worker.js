@@ -13,7 +13,7 @@
  *     с полным текстом, фотографиями и двумя кнопками.
  *  3. Владимир жмёт «Опубликовать» → Worker дописывает отзыв в файл
  *     src/data/reviews.ts на GitHub.
- *  4. GitHub сообщает Cloudflare Pages, что файл изменился → сайт
+ *  4. Изменение файла в ветке main запускает GitHub Actions → сайт
  *     пересобирается сам. Через 2–3 минуты отзыв на сайте.
  *  5. Жмёт «Удалить» → отзыв стирается из KV и никуда не попадает.
  *
@@ -427,7 +427,7 @@ async function uploadPhotos(review, env, headers, branch) {
 
 /**
  * Дописываем отзыв в src/data/reviews.ts и коммитим на GitHub.
- * GitHub сообщит Cloudflare Pages — сайт пересоберётся сам.
+ * Коммит в main запускает GitHub Actions — сайт пересоберётся сам.
  */
 async function publishToGitHub(review, env) {
   const path = 'src/data/reviews.ts';

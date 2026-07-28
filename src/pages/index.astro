@@ -13,7 +13,10 @@ import {
   PROFILES,
   ON_ISLAND_SINCE,
   ISLAND_YEARS_TEXT,
-  GUIDE_YEARS_TEXT,  pageUrl,
+  GUIDE_YEARS_TEXT,
+  YEARS_AS_GUIDE,
+  plural,
+  pageUrl,
 } from '../data/site';
 
 import heroOia from '../assets/img/hero-oia.jpg';
@@ -86,7 +89,11 @@ const services = [
 
 const facts = [
   { n: String(ON_ISLAND_SINCE), label: 'год переезда на остров' },
-  { n: GUIDE_YEARS_TEXT.split(' ')[0], label: 'лет как гид' },
+  /*
+    Слово «лет» склоняется вместе с числом, а не вписано намертво:
+    в 2033 году стаж станет 21 год, и «21 лет» выглядело бы ошибкой.
+  */
+  { n: String(YEARS_AS_GUIDE), label: `${plural(YEARS_AS_GUIDE, 'год', 'года', 'лет')} как гид` },
   { n: '8', label: 'судов во флоте' },
   { n: '24/7', label: 'на связи' },
 ];

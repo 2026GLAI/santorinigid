@@ -12,7 +12,8 @@ import {
   PROFILES,
   ON_ISLAND_SINCE,
   ISLAND_YEARS_TEXT,
-  GUIDE_YEARS_TEXT,  pageUrl,
+  GUIDE_YEARS_TEXT,
+  pageUrl,
 } from '../data/site';
 import { GALLERY } from '../data/tours';
 import { getImg } from '../data/images';
@@ -320,35 +321,6 @@ const timeline = [
   .principle p {
     font-size: var(--fs-sm);
     color: var(--text-soft);
-  }
-
-  /* --- отзывы --- */
-  .stars {
-    display: flex;
-    gap: 2px;
-    color: var(--c-sunset-500);
-  }
-
-  .review blockquote {
-    font-size: var(--fs-sm);
-    color: var(--text-soft);
-    line-height: 1.7;
-  }
-
-  .review figcaption {
-    margin-top: auto;
-    padding-top: var(--sp-3);
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: var(--sp-2);
-    font-size: var(--fs-sm);
-  }
-
-  .review figcaption span {
-    color: var(--text-muted);
-    font-size: var(--fs-xs);
   }
 
   /* --- галерея --- */

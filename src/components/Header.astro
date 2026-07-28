@@ -218,11 +218,8 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
   );
 
   // Шапка «прилипает» и уплотняется при прокрутке
-  let last = 0;
   const onScroll = () => {
-    const y = window.scrollY;
-    header?.classList.toggle('scrolled', y > 20);
-    last = y;
+    header?.classList.toggle('scrolled', window.scrollY > 20);
   };
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });

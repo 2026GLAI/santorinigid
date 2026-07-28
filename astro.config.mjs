@@ -21,7 +21,7 @@ import sitemap from '@astrojs/sitemap';
 */
 const НА_GITHUB_ВРЕМЕННО = false;
 
-export const SITE = НА_GITHUB_ВРЕМЕННО
+const SITE = НА_GITHUB_ВРЕМЕННО
   ? 'https://2026glai.github.io'
   : 'https://santorinigid.com';
 
@@ -50,7 +50,7 @@ export default defineConfig({
   /*
     Каждая страница собирается папкой с index.html внутри: /tours/index.html.
     Из-за этого Astro.url.pathname не содержит «.html», и canonical в
-    BaseLayout строится верным: santorinigid.com/tours — ровно как в sitemap
+    BaseLayout строится верным: santorinigid.com/tours/ — ровно как в sitemap
     и во всех ссылках сайта.
 
     При прежнем format: 'file' canonical получался «/tours.html», то есть
@@ -62,8 +62,8 @@ export default defineConfig({
     и папка vip-service/ — какой из них отдаст GitHub Pages по адресу
     /vip-service, документация не определяет. Теперь двойника нет.
 
-    Связано с trailingSlash: 'never' — адреса остаются без косой черты.
-    Менять одно без проверки другого нельзя.
+    Связано с trailingSlash: 'always' выше — папки отдаются по адресу
+    со слешем. Менять одно без проверки другого нельзя.
   */
   build: { format: 'directory' },
   integrations: [
