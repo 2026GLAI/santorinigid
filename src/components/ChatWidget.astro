@@ -599,30 +599,60 @@ import {
     let finished = false;
 
     /*
-      «Перо» — просьба владельца 29.07.2026: Groq отдаёт весь ответ
-      почти мгновенно, и текст вываливался простынёй. Теперь буквы
-      появляются плавно, как будто помощник пишет ручкой, с курсором
-      на кончике строки. Скорость живая и умная: базово ~50 букв в
-      секунду, а если в очереди скопилось много текста — перо
-      ускоряется до ~200, чтобы гость не ждал длинный ответ вечность.
+      «Перо» — просьба владельца 29.07.2026, доведено до мягкости в тот
+      же вечер («не похоже на ручку… сделай помягче»). Как устроено:
+      • буквы появляются ПО ОДНОЙ, каждая мягко проявляется (класс
+        pen-ch с коротким затуханием — жёсткого «дописывания» нет);
+      • ритм живой и неровный, как у руки: 22–48 мс на букву,
+        с микропаузами после точек и запятых — перо «думает»;
+      • если в очереди скопился длинный хвост, перо тихо ускоряется —
+        гость не ждёт большой ответ вечность;
+      • на кончике строки — тонкий мягко дышащий курсор (pen-caret).
       Кто просил «меньше движения» — получает текст сразу, без пера.
     */
     const instant = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let shown = 0;
-    let pen = null;
+    let penActive = false;
+    const caret = document.createElement('span');
+    caret.className = 'pen-caret';
 
-    const draw = () => {
-      if (!bubble) return;
-      const backlog = raw.length - shown;
-      if (backlog > 0) {
-        shown += Math.max(1, Math.min(4, Math.round(backlog / 30)));
-        const typing = shown < raw.length || !finished;
-        bubble.textContent = raw.slice(0, shown) + (typing ? '▍' : '');
-        log.scrollTop = log.scrollHeight;
-      } else if (finished && pen) {
-        clearInterval(pen);
-        pen = null;
+    const writeNext = () => {
+      if (!bubble) {
+        penActive = false;
+        return;
       }
+      const backlog = raw.length - shown;
+
+      if (backlog <= 0) {
+        if (finished) {
+          caret.remove();
+          penActive = false;
+          return;
+        }
+        // Буквы ещё в пути — перо ждёт у бумаги
+        setTimeout(writeNext, 40);
+        return;
+      }
+
+      const ch = raw[shown];
+      shown += 1;
+      const span = document.createElement('span');
+      span.className = 'pen-ch';
+      span.textContent = ch;
+      bubble.insertBefore(span, caret);
+      log.scrollTop = log.scrollHeight;
+
+      let delay;
+      if (backlog > 220) {
+        delay = 6; // длинный хвост — ускоряемся незаметно
+      } else if (backlog > 90) {
+        delay = 14;
+      } else {
+        delay = 22 + Math.random() * 26; // живой неровный ритм руки
+        if ('.!?…'.includes(ch)) delay += 260;
+        else if (',;:—'.includes(ch)) delay += 120;
+      }
+      setTimeout(writeNext, delay);
     };
 
     try {
@@ -649,7 +679,11 @@ import {
               t.remove();
               el = addMsg('', 'bot', false);
               bubble = el.querySelector('.bubble');
-              if (!instant) pen = setInterval(draw, 20);
+              if (!instant) {
+                bubble.appendChild(caret);
+                penActive = true;
+                writeNext();
+              }
             }
             if (instant) {
               shown = raw.length;
@@ -666,17 +700,16 @@ import {
     finished = true;
 
     if (!raw.trim()) {
-      if (pen) clearInterval(pen);
+      caret.remove();
       if (el) el.remove();
       return false;
     }
 
     // Даём перу дописать остаток до последней буквы
     if (!instant) {
-      while (shown < raw.length) {
+      while (penActive || shown < raw.length) {
         await new Promise((r) => setTimeout(r, 40));
       }
-      if (pen) clearInterval(pen);
     }
 
     const html = renderAiAnswer(raw);
@@ -1266,6 +1299,24 @@ import {
     text-decoration: underline;
   }
 
+  /* Буква «пера»: мягко проявляется, а не вспыхивает */
+  .chat-log :global(.pen-ch) {
+    opacity: 0;
+    animation: penIn 0.22s ease-out forwards;
+  }
+
+  /* Кончик пера: тонкая, мягко дышащая вертикальная черта */
+  .chat-log :global(.pen-caret) {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin-left: 1px;
+    vertical-align: -0.15em;
+    background: currentColor;
+    border-radius: 1px;
+    animation: penCaret 0.9s ease-in-out infinite;
+  }
+
   .chat-log :global(.msg-me .bubble a) {
     color: #fff;
   }
@@ -1337,6 +1388,25 @@ import {
     }
     30% {
       opacity: 1;
+    }
+  }
+
+  @keyframes penIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes penCaret {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.15;
     }
   }
 
