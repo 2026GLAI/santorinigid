@@ -93,9 +93,10 @@ import {
       </button>
     </form>
 
+    {/* Ссылка в той же строке, что и текст: перенос строки перед тегом
+        Astro схлопывает, и выходило «цены?Написать» без пробела. */}
     <p class="chat-foot">
-      Нужен точный ответ или расчёт цены?
-      <a href={WHATSAPP.general} target="_blank" rel="noopener">Написать Владимиру →</a>
+      Нужен точный ответ или расчёт цены? <a href={WHATSAPP.general} target="_blank" rel="noopener">Написать Владимиру →</a>
     </p>
   </section>
 </div>

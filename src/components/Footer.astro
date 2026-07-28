@@ -21,9 +21,14 @@ import logo from '../assets/img/logo-dome.png';
           <span>гид Владимир</span>
         </span>
       </a>
+      {/*
+        Выражение стоит В СЕРЕДИНЕ строки намеренно: перенос строки перед
+        {…} Astro схлопывает в ничто, и на сайте выходило «острова.31 год»
+        без пробела. Не разбивать эту строку.
+      */}
       <p class="footer-tagline">
-        Индивидуальные экскурсии, яхты, вертолёты и лучшие отели острова.
-        {ISLAND_YEARS_TEXT} на Санторини — для вашего безупречного дня.
+        Индивидуальные экскурсии, яхты, вертолёты и лучшие отели острова. {ISLAND_YEARS_TEXT} на
+        Санторини — для вашего безупречного дня.
       </p>
       <div class="socials">
         <a href={WHATSAPP.general} target="_blank" rel="noopener" aria-label="WhatsApp" class="social">
@@ -67,8 +72,11 @@ import logo from '../assets/img/logo-dome.png';
   </div>
 
   <div class="container footer-bottom">
+    {/* Пробел задан явно: перенос строки перед тегом Astro схлопывает,
+        и в тексте страницы выходило «защищены.Политика» (глазу не видно
+        из-за отступа margin, но при копировании текст слипался). */}
     <p>
-      {COPYRIGHT}
+      {COPYRIGHT}{' '}
       <a href={url('/privacy')} class="footer-privacy">Политика конфиденциальности</a>
     </p>
     <p class="made">

@@ -125,7 +125,9 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
 
       <!-- Форма -->
       <div class="form-wrap reveal">
-        <h2 class="form-title">Как к вам обращаться?</h2>
+        {/* Заголовок не повторяет подпись первого поля («Как к вам
+            обращаться?» стояло и тут, и там — читалось как ошибка). */}
+        <h2 class="form-title">Оставьте заявку</h2>
         <p class="form-sub">
           Заполните форму — я свяжусь с вами и лично подготовлю предложение.
         </p>
