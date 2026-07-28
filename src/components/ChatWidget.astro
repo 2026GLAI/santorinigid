@@ -15,6 +15,10 @@
  */
 import { Image } from 'astro:assets';
 import botLogo from '../assets/img/chat-bot.webp';
+/* Аватар шапки чата — отдельная картинка (робот за ноутбуком на фоне
+   Ии), прислана владельцем 29.07.2026. На кнопке остаётся прежний
+   круглый логотип. */
+import headAvatar from '../assets/img/chat-avatar.png';
 import {
   WHATSAPP,
   CONTACTS,
@@ -54,9 +58,9 @@ import {
   <section class="chat-panel" id="chatPanel" hidden aria-label="Чат-помощник">
     <header class="chat-head">
       <div class="chat-avatar" aria-hidden="true">
-        {/* densities — та же причина, что и у кнопки выше: без них
-            логотип в шапке выдаётся ровно 44×44 и мылит на телефоне. */}
-        <Image src={botLogo} alt="" width={44} height={44} densities={[1, 2, 3]} loading="lazy" />
+        {/* densities — без них картинка выдаётся ровно в размер вёрстки
+            и мылит на телефоне (плотность пикселей 2–3×). */}
+        <Image src={headAvatar} alt="" width={88} height={88} densities={[1, 2, 3]} loading="lazy" />
       </div>
       <div class="chat-head-text">
         <strong>ИИ помощник Владимира</strong>
@@ -1008,8 +1012,10 @@ import {
       Отступ добавляется К уже имеющемуся: calc(свой + системный).
     */
     .chat-head {
-      /* базовый отступ шапки — var(--sp-4), к нему прибавляем системный */
-      padding-top: calc(var(--sp-4) + env(safe-area-inset-top, 0px));
+      /* Только системный отступ выреза: свои вертикальные отступы
+         шапка отдала текстовому блоку (аватар — во всю высоту).
+         Полоска над аватаром остаётся синим градиентом шапки. */
+      padding-top: env(safe-area-inset-top, 0px);
     }
 
     .chat-form {
@@ -1025,26 +1031,30 @@ import {
     }
   }
 
+  /*
+    Шапка без собственных вертикальных отступов: аватар растягивается
+    на ВСЮ её высоту (просьба владельца 29.07.2026 — «квадратным и на
+    всю высоту шапки»). Высоту шапке задаёт текстовый блок своими
+    отступами, а аватар подстраивается под неё квадратом.
+  */
   .chat-head {
     display: flex;
-    align-items: center;
+    align-items: stretch;
     gap: var(--sp-3);
-    padding: var(--sp-4);
+    padding: 0 var(--sp-2) 0 0;
     background: linear-gradient(135deg, var(--c-aegean-600), var(--c-aegean-800));
     color: #fff;
   }
 
+  /*
+    Квадрат во всю высоту шапки: высота приходит от растяжения
+    (align-items: stretch), ширина считается из пропорции 1:1.
+    Углы не скругляем — у панели свой overflow: hidden, он сам
+    подрежет угол под скругление окна.
+  */
   .chat-avatar {
-    display: grid;
-    place-items: center;
-    width: 38px;
-    height: 38px;
-    /* Логотип в шапке остаётся КВАДРАТНЫМ — прямое указание владельца
-       28.07.2026. Скругление только по углам, в круг не превращаем. */
-    border-radius: var(--radius-sm);
-    /* Белая подложка: шапка чата тёмно-синяя, а логотип светлый —
-       без неё края робота растворились бы в фоне. */
-    background: #fff;
+    align-self: stretch;
+    aspect-ratio: 1 / 1;
     flex-shrink: 0;
     overflow: hidden;
   }
@@ -1055,12 +1065,16 @@ import {
     object-fit: cover;
   }
 
+  /* Высоту шапки задаёт именно этот блок своими отступами —
+     аватар слева растягивается вслед за ним. */
   .chat-head-text {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     line-height: 1.25;
     flex: 1;
     min-width: 0;
+    padding-block: var(--sp-4);
   }
 
   .chat-head-text strong {
@@ -1083,6 +1097,7 @@ import {
     place-items: center;
     width: 40px;
     height: 40px;
+    align-self: center;
     flex-shrink: 0;
     border-radius: var(--radius-full);
     color: rgb(255 255 255 / 0.75);
@@ -1101,6 +1116,7 @@ import {
     place-items: center;
     width: 44px;
     height: 44px;
+    align-self: center;
     flex-shrink: 0;
     margin-right: -6px;
     border-radius: var(--radius-full);
