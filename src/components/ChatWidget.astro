@@ -261,8 +261,13 @@ import {
 
   const FALLBACK = `На этот вопрос у меня нет проверенного ответа — не хочу придумывать. Лучше спросите Владимира напрямую: <a href="${WA}" target="_blank" rel="noopener">WhatsApp</a> или <a href="${TG}" target="_blank" rel="noopener">Telegram</a>. Он отвечает в течение часа.`;
 
-  // Если владелец подключит Worker с ИИ — вписать сюда его адрес.
-  const CHAT_API_URL = '';
+  /*
+    Адрес «мозга» чата — Cloudflare Worker santorini-chat.
+    Развёрнут 28.07.2026 (аккаунт 2026glai@gmail.com), ключ Groq лежит
+    там секретом. Если Worker недоступен или лимит исчерпан — чат сам
+    падает на встроенную базу, гость ошибок не видит.
+  */
+  const CHAT_API_URL = 'https://santorini-chat.2026glai.workers.dev';
 
   const $ = (id) => document.getElementById(id);
   const toggle = $('chatToggle');
