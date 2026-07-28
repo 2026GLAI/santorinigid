@@ -19,8 +19,13 @@
  */
 import { CONTACTS, WA_BASE } from '../data/site';
 
-/** Адрес Worker. Пустая строка = запасной путь через WhatsApp. */
-const REVIEW_API = '';
+/**
+ * Адрес Worker модерации — включён 28.07.2026.
+ * Отзыв уходит на Worker → письмо Владимиру с кнопками → публикация
+ * только после его нажатия. Если Worker недоступен, форма честно
+ * сообщит об этом и предложит написать в WhatsApp — отзыв не теряется.
+ */
+const REVIEW_API = 'https://santorinigid-reviews.2026glai.workers.dev/review';
 ---
 
 <section class="section section-alt" id="review-form">

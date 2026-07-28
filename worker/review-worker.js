@@ -20,23 +20,19 @@
  * ГЛАВНОЕ: без нажатия Владимира на сайт не попадает НИЧЕГО.
  * Конкурент физически не может ничего опубликовать.
  *
- * ЧТО НУЖНО НАСТРОИТЬ (один раз, инструкция — docs/setup-reviews.md):
- *  Переменные (Settings → Variables):
- *    OWNER_EMAIL      — rusantorini@gmail.com (рабочая почта для писем
- *                       модерации; santorinivip@gmail.com — публичная,
- *                       она указана на сайте и здесь не используется)
- *    GITHUB_REPO      — например vladimir/santorinigid
- *    GITHUB_BRANCH    — main
- *    SITE_URL         — https://santorinigid.com
- *  Секреты (Settings → Variables → Encrypt):
- *    GITHUB_TOKEN     — токен GitHub с правом repo
- *    RESEND_API_KEY   — ключ сервиса писем Resend (бесплатно 3000 писем/мес)
- *    ADMIN_SECRET     — длинная случайная строка, подпись кнопок в письме
- *  Хранилище (Settings → Bindings):
- *    REVIEWS          — KV namespace
+ * НАСТРОЙКА — в worker/wrangler-reviews.toml (переменные, камера
+ * хранения KV, право отправки почты). Секретов два: GITHUB_TOKEN
+ * (право дописать одобренный отзыв в репозиторий) и ADMIN_SECRET
+ * (подпись кнопок в письме). Развёрнуто 28.07.2026.
  *
- * Цена вопроса: 0 ₽. Все сервисы в бесплатных тарифах с большим запасом.
+ * ПИСЬМА — встроенной почтой Cloudflare (Email Routing домена
+ * santorinigid.com), БЕЗ сторонних сервисов: решение владельца
+ * «меньше платформ». Письмо может уйти только на его подтверждённый
+ * адрес — это зашито привязкой send_email в настройке.
+ *
+ * Цена вопроса: 0 ₽.
  */
+import { EmailMessage } from 'cloudflare:email';
 
 /**
  * Кто имеет право слать сюда отзывы.
@@ -315,39 +311,80 @@ box-shadow:0 4px 16px rgb(10 47 77/.08)">
 </div>
 </body></html>`;
 
-  // Фотографии прикладываем к письму — чтобы Владимир видел их сразу
-  const attachments = review.photos.map((p, i) => ({
-    filename: `foto-${i + 1}.jpg`,
-    content: p.replace(/^data:image\/\w+;base64,/, ''),
-  }));
-
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${env.RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      /*
-        Отправитель onboarding@resend.dev — стандартный адрес Resend,
-        который работает БЕЗ подтверждения домена, но шлёт только на
-        почту владельца аккаунта Resend (нам ровно это и нужно).
-        Захотим красивый адрес reviews@santorinigid.com — надо будет
-        подтвердить домен в Resend парой DNS-записей в Cloudflare.
-      */
-      from: 'Отзывы сайта <onboarding@resend.dev>',
-      to: [env.OWNER_EMAIL],
-      reply_to: review.contact.includes('@') ? review.contact : undefined,
-      subject: `Новый отзыв: ${review.author}`,
-      html,
-      attachments: attachments.length ? attachments : undefined,
-    }),
+  /*
+    Письмо собирается вручную в формате MIME и уходит встроенной почтой
+    Cloudflare (привязка OWNER_MAIL). Никаких сторонних почтовых
+    сервисов — решение владельца. Фотографии гостя идут вложениями.
+  */
+  const mime = buildMime({
+    from: 'reviews@santorinigid.com',
+    to: env.OWNER_EMAIL,
+    replyTo: review.contact.includes('@') ? review.contact : null,
+    subject: `Новый отзыв: ${review.author.slice(0, 40)}`,
+    html,
+    photos: review.photos,
   });
 
-  if (!res.ok) {
+  try {
+    await env.OWNER_MAIL.send(new EmailMessage('reviews@santorinigid.com', env.OWNER_EMAIL, mime));
+  } catch (e) {
     // Письмо не ушло — отзыв всё равно в KV, не потеряется.
-    console.error('Не удалось отправить письмо:', await res.text());
+    console.error('Не удалось отправить письмо:', e.message);
   }
+}
+
+/** Текст → base64 с поддержкой кириллицы (btoa сам по себе её не умеет). */
+function b64utf8(s) {
+  const bytes = new TextEncoder().encode(s);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 8192) {
+    bin += String.fromCharCode(...bytes.subarray(i, i + 8192));
+  }
+  return btoa(bin);
+}
+
+/** Строки base64 в письме не длиннее 76 знаков — требование формата. */
+const wrap76 = (b64) => b64.replace(/(.{76})/g, '$1\r\n');
+
+/**
+ * Собирает письмо в формате MIME: заголовки, HTML-тело и фотографии
+ * вложениями. Формат старый и строгий, поэтому переводы строк — \r\n,
+ * а всё нелатинское кодируется в base64.
+ */
+function buildMime({ from, to, replyTo, subject, html, photos }) {
+  const boundary = 'santorinigid-review-boundary';
+  const lines = [
+    `From: =?UTF-8?B?${b64utf8('Отзывы сайта')}?= <${from}>`,
+    `To: <${to}>`,
+    replyTo ? `Reply-To: <${replyTo}>` : null,
+    `Subject: =?UTF-8?B?${b64utf8(subject)}?=`,
+    'MIME-Version: 1.0',
+    `Content-Type: multipart/mixed; boundary="${boundary}"`,
+    '',
+    `--${boundary}`,
+    'Content-Type: text/html; charset=utf-8',
+    'Content-Transfer-Encoding: base64',
+    '',
+    wrap76(b64utf8(html)),
+  ].filter((l) => l !== null);
+
+  const list = Array.isArray(photos) ? photos.slice(0, 3) : [];
+  for (let i = 0; i < list.length; i++) {
+    const m = /^data:image\/(jpeg|jpg|png|webp);base64,([A-Za-z0-9+/=]+)$/.exec(list[i]);
+    if (!m) continue; // чужой формат — письмо важнее вложения
+    const ext = m[1] === 'jpeg' ? 'jpg' : m[1];
+    lines.push(
+      `--${boundary}`,
+      `Content-Type: image/${m[1] === 'jpg' ? 'jpeg' : m[1]}; name="foto-${i + 1}.${ext}"`,
+      'Content-Transfer-Encoding: base64',
+      `Content-Disposition: attachment; filename="foto-${i + 1}.${ext}"`,
+      '',
+      wrap76(m[2]),
+    );
+  }
+
+  lines.push(`--${boundary}--`, '');
+  return lines.join('\r\n');
 }
 
 async function handleModerate(url, env) {
