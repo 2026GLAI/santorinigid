@@ -417,27 +417,31 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
     display: block;
   }
 
+  /* Размер 48×48 и линии потолще — просьба владельца 28.07.2026:
+     кнопка меню на телефоне должна быть заметной и крупной.
+     Шапка липкая (position: sticky), поэтому кнопка видна всегда,
+     на любой прокрутке — прятаться ей некуда. */
   .burger {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 5px;
-    width: 44px;
-    height: 44px;
+    gap: 6px;
+    width: 48px;
+    height: 48px;
     padding: 0 10px;
     border-radius: var(--radius-sm);
   }
 
   .burger span {
     display: block;
-    height: 2px;
+    height: 3px;
     background: var(--text);
-    border-radius: 2px;
+    border-radius: 3px;
     transition: transform var(--dur) var(--ease), opacity var(--dur) var(--ease);
   }
 
   .burger[aria-expanded='true'] span:nth-child(1) {
-    transform: translateY(7px) rotate(45deg);
+    transform: translateY(9px) rotate(45deg);
   }
 
   .burger[aria-expanded='true'] span:nth-child(2) {
@@ -445,7 +449,7 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
   }
 
   .burger[aria-expanded='true'] span:nth-child(3) {
-    transform: translateY(-7px) rotate(-45deg);
+    transform: translateY(-9px) rotate(-45deg);
   }
 
   /* --- мобильное меню --- */
@@ -559,10 +563,7 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
       gap: var(--sp-2);
     }
 
-    .burger {
-      width: 40px;
-      padding: 0 8px;
-    }
+    /* Кнопку меню на телефоне НЕ ужимаем — владелец просил крупную. */
 
     .nav-mobile {
       inset-block-start: 62px;
