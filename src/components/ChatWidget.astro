@@ -596,6 +596,34 @@ import {
     let el = null;
     let bubble = null;
     let buf = '';
+    let finished = false;
+
+    /*
+      «Перо» — просьба владельца 29.07.2026: Groq отдаёт весь ответ
+      почти мгновенно, и текст вываливался простынёй. Теперь буквы
+      появляются плавно, как будто помощник пишет ручкой, с курсором
+      на кончике строки. Скорость живая и умная: базово ~50 букв в
+      секунду, а если в очереди скопилось много текста — перо
+      ускоряется до ~200, чтобы гость не ждал длинный ответ вечность.
+      Кто просил «меньше движения» — получает текст сразу, без пера.
+    */
+    const instant = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let shown = 0;
+    let pen = null;
+
+    const draw = () => {
+      if (!bubble) return;
+      const backlog = raw.length - shown;
+      if (backlog > 0) {
+        shown += Math.max(1, Math.min(4, Math.round(backlog / 30)));
+        const typing = shown < raw.length || !finished;
+        bubble.textContent = raw.slice(0, shown) + (typing ? '▍' : '');
+        log.scrollTop = log.scrollHeight;
+      } else if (finished && pen) {
+        clearInterval(pen);
+        pen = null;
+      }
+    };
 
     try {
       while (true) {
@@ -621,9 +649,13 @@ import {
               t.remove();
               el = addMsg('', 'bot', false);
               bubble = el.querySelector('.bubble');
+              if (!instant) pen = setInterval(draw, 20);
             }
-            bubble.textContent = raw;
-            log.scrollTop = log.scrollHeight;
+            if (instant) {
+              shown = raw.length;
+              bubble.textContent = raw;
+              log.scrollTop = log.scrollHeight;
+            }
           }
         }
       }
@@ -631,9 +663,20 @@ import {
       /* поток оборвался — покажем то, что успело прийти */
     }
 
+    finished = true;
+
     if (!raw.trim()) {
+      if (pen) clearInterval(pen);
       if (el) el.remove();
       return false;
+    }
+
+    // Даём перу дописать остаток до последней буквы
+    if (!instant) {
+      while (shown < raw.length) {
+        await new Promise((r) => setTimeout(r, 40));
+      }
+      if (pen) clearInterval(pen);
     }
 
     const html = renderAiAnswer(raw);
