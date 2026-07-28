@@ -686,11 +686,10 @@ import {
     Лежит ПОД логотипом (z-index: 1), поэтому расходится по сторонам,
     не закрывая картинку.
 
-    Цвет — красно-закатный из палитры сайта (--c-sunset-600/700),
-    кольца толстые (4px), яркие на старте и с широким размахом:
-    прямые просьбы владельца 28.07.2026 — «пульсация должна бросаться
-    в глаза», «+30% силы», «чуть краснее». Ритм остался как у кнопки
-    WhatsApp (одобренный образец).
+    Цвет — «шапка Деда Мороза» #ca3a27 (токен --c-pulse), выбран
+    владельцем лично 28.07.2026. Кольца толстые (4px), яркие на старте
+    и с широким размахом: его же просьбы — «пульсация должна бросаться
+    в глаза», «+30% силы». Ритм остался как у кнопки WhatsApp.
   */
   .chat-toggle::before {
     content: '';
@@ -698,7 +697,7 @@ import {
     z-index: 1;
     inset: 0;
     border-radius: 50%;
-    border: 4px solid var(--c-sunset-600);
+    border: 4px solid var(--c-pulse);
     animation: chatRing 2.6s var(--ease) infinite;
     pointer-events: none;
   }
@@ -710,7 +709,7 @@ import {
     z-index: 1;
     inset: 0;
     border-radius: 50%;
-    border: 4px solid var(--c-sunset-700);
+    border: 4px solid var(--c-pulse);
     animation: chatRing 2.6s var(--ease) 1.3s infinite;
     pointer-events: none;
   }
@@ -745,7 +744,7 @@ import {
 
   @keyframes chatHalo {
     0% {
-      box-shadow: 0 0 0 0 color-mix(in srgb, var(--c-sunset-600) 55%, transparent);
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--c-pulse) 55%, transparent);
     }
     75% {
       box-shadow: 0 0 0 26px transparent;
