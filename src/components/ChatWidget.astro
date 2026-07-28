@@ -44,6 +44,10 @@ import {
     Теперь Astro делает три размера, а телефон берёт себе подходящий.
   */}
   <button class="chat-toggle" id="chatToggle" aria-label="Открыть чат-помощника" aria-expanded="false">
+    {/* Ореол «пышной» пульсации — заливка, расходящаяся от кнопки.
+        Отдельный элемент, потому что оба псевдоэлемента кнопки уже
+        заняты кольцами. Просьба владельца 28.07.2026. */}
+    <span class="chat-halo" aria-hidden="true"></span>
     <Image src={botLogo} alt="" width={84} height={84} densities={[1, 2, 3]} loading="eager" />
   </button>
 
@@ -725,6 +729,32 @@ import {
     }
   }
 
+  /*
+    Ореол — мягкая тёплая волна-заливка, расходящаяся от кнопки.
+    Вместе с двумя кольцами даёт ту самую «пышную» пульсацию,
+    которую владелец показал на своём другом сайте (28.07.2026).
+  */
+  .chat-halo {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: chatHalo 2.6s var(--ease) infinite;
+  }
+
+  @keyframes chatHalo {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--c-sunset-600) 55%, transparent);
+    }
+    75% {
+      box-shadow: 0 0 0 26px transparent;
+    }
+    100% {
+      box-shadow: 0 0 0 26px transparent;
+    }
+  }
+
   .chat-toggle:hover {
     transform: scale(1.06);
   }
@@ -733,11 +763,16 @@ import {
     transform: scale(0.97);
   }
 
-  /* Чат открыт — кольца не нужны, гость уже нажал */
+  /* Чат открыт — кольца и ореол не нужны, гость уже нажал */
   .chat-toggle.is-open::before,
   .chat-toggle.is-open::after {
     animation: none;
     opacity: 0;
+  }
+
+  .chat-toggle.is-open .chat-halo {
+    animation: none;
+    box-shadow: none;
   }
 
   /*
