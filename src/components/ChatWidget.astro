@@ -19,6 +19,17 @@ import botLogo from '../assets/img/chat-bot.webp';
    Ии), прислана владельцем 29.07.2026. На кнопке остаётся прежний
    круглый логотип. */
 import headAvatar from '../assets/img/chat-avatar.png';
+/*
+  Рисованные эмодзи (Twemoji, файлы в public/emoji/): в сообщениях чата
+  эмодзи показываются одинаковыми красивыми картинками у всех гостей,
+  а не по-разному системными символами («дешёвые», оценка владельца
+  29.07.2026). Символ вне списка остаётся обычным системным.
+*/
+import { CHAT_EMOJI, twemojiFile } from '../data/chat-emoji';
+
+const EMOJI_MAP = Object.fromEntries(
+  CHAT_EMOJI.map((e) => [e, `/emoji/${twemojiFile(e)}.svg`]),
+);
 import {
   WHATSAPP,
   CONTACTS,
@@ -139,6 +150,7 @@ import {
     ON_ISLAND_SINCE,
     ISLAND_YEARS_TEXT,
     GUIDE_YEARS_TEXT,
+    EMOJI_MAP,
   }}
 >
   // ---------------------------------------------------------------------
@@ -429,11 +441,33 @@ import {
     return html;
   }
 
-  /** Рисует сообщение. remember=false — для восстановленных, чтобы не дублировать. */
+  /*
+    Рисованные эмодзи: символы из нашего набора заменяются картинками.
+    Замена идёт по готовой разметке, где эмодзи не могут оказаться
+    внутри адресов ссылок — только в тексте. Длинные символы первыми,
+    чтобы составные эмодзи не разрезались короткими.
+  */
+  const EMOJI_KEYS = Object.keys(EMOJI_MAP).sort((a, b) => b.length - a.length);
+
+  function emojiImgTag(ch) {
+    return `<img class="emo" src="${EMOJI_MAP[ch]}" alt="${ch}" loading="lazy">`;
+  }
+
+  function swapEmoji(html) {
+    let out = html;
+    for (const ch of EMOJI_KEYS) {
+      if (out.includes(ch)) out = out.split(ch).join(emojiImgTag(ch));
+    }
+    return out;
+  }
+
+  /** Рисует сообщение. remember=false — для восстановленных, чтобы не дублировать.
+      В историю кладётся исходный текст, а картинки-эмодзи подставляются
+      только при показе — так замена работает и для восстановленных. */
   function addMsg(text, who, remember = true) {
     const el = document.createElement('div');
     el.className = `msg msg-${who}`;
-    el.innerHTML = `<div class="bubble">${text}</div>`;
+    el.innerHTML = `<div class="bubble">${swapEmoji(text)}</div>`;
     log.appendChild(el);
     log.scrollTop = log.scrollHeight;
     if (remember) {
@@ -616,12 +650,24 @@ import {
     const caret = document.createElement('span');
     caret.className = 'pen-caret';
 
+    /*
+      Перо пишет ЦЕЛЫМИ символами, а не машинными половинками: эмодзи
+      и составные знаки занимают несколько машинных единиц, и без этого
+      на долю секунды мелькал бы «битый» символ.
+    */
+    const seg =
+      typeof Intl !== 'undefined' && Intl.Segmenter
+        ? new Intl.Segmenter('ru', { granularity: 'grapheme' })
+        : null;
+    const toGraphemes = (s) => (seg ? [...seg.segment(s)].map((x) => x.segment) : Array.from(s));
+
     const writeNext = () => {
       if (!bubble) {
         penActive = false;
         return;
       }
-      const backlog = raw.length - shown;
+      const gs = toGraphemes(raw);
+      const backlog = gs.length - shown;
 
       if (backlog <= 0) {
         if (finished) {
@@ -634,12 +680,21 @@ import {
         return;
       }
 
-      const ch = raw[shown];
+      const ch = gs[shown];
       shown += 1;
-      const span = document.createElement('span');
-      span.className = 'pen-ch';
-      span.textContent = ch;
-      bubble.insertBefore(span, caret);
+      let piece;
+      if (EMOJI_MAP[ch]) {
+        // Эмодзи из набора перо рисует сразу красивой картинкой
+        piece = document.createElement('img');
+        piece.className = 'pen-ch emo';
+        piece.src = EMOJI_MAP[ch];
+        piece.alt = ch;
+      } else {
+        piece = document.createElement('span');
+        piece.className = 'pen-ch';
+        piece.textContent = ch;
+      }
+      bubble.insertBefore(piece, caret);
       log.scrollTop = log.scrollHeight;
 
       let delay;
@@ -707,15 +762,15 @@ import {
 
     // Даём перу дописать остаток до последней буквы
     if (!instant) {
-      while (penActive || shown < raw.length) {
+      while (penActive) {
         await new Promise((r) => setTimeout(r, 40));
       }
     }
 
     const html = renderAiAnswer(raw);
-    bubble.innerHTML = html;
+    bubble.innerHTML = swapEmoji(html);
     log.scrollTop = log.scrollHeight;
-    // Запоминаем готовый ответ в переписке — как обычное сообщение
+    // В историю — без картинок: их подставит addMsg при восстановлении
     history.push({ t: html, w: 'bot' });
     saveHistory();
     if (clearBtn) clearBtn.hidden = false;
@@ -1297,6 +1352,16 @@ import {
   .chat-log :global(.bubble a) {
     color: var(--accent);
     text-decoration: underline;
+  }
+
+  /* Рисованный эмодзи в строке текста: по размеру буквы, чуть ниже
+     базовой линии — как настоящий символ, а не приклеенная картинка */
+  .chat-log :global(img.emo) {
+    display: inline-block;
+    width: 1.2em;
+    height: 1.2em;
+    vertical-align: -0.24em;
+    margin: 0 0.04em;
   }
 
   /* Буква «пера»: мягко проявляется, а не вспыхивает */
