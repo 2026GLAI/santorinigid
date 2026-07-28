@@ -64,7 +64,12 @@ import {
       </div>
       <div class="chat-head-text">
         <strong>ИИ помощник Владимира</strong>
-        <span id="chatStatus">Отвечу на частые вопросы</span>
+        {/* Зелёная мигающая точка + «Онлайн» — замена подписи
+            «Отвечу на частые вопросы», просьба владельца 29.07.2026. */}
+        <span class="chat-status" id="chatStatus">
+          <span class="chat-status-dot" aria-hidden="true"></span>
+          Онлайн
+        </span>
       </div>
       {/* Очистить переписку. Показывается только когда есть что стирать —
           пустая кнопка в шапке лишь путала бы. Переписка хранится
@@ -1081,9 +1086,33 @@ import {
     font-size: 0.95rem;
   }
 
-  .chat-head-text span {
+  .chat-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     font-size: 0.75rem;
-    opacity: 0.85;
+    font-weight: 600;
+    /* Тот же зелёный, что у сообщений «отправлено» в тёмной теме —
+       на тёмно-синем градиенте шапки читается отлично */
+    color: #4ade80;
+  }
+
+  .chat-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4ade80;
+    animation: statusBlink 1.6s ease-in-out infinite;
+  }
+
+  @keyframes statusBlink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.25;
+    }
   }
 
   /*
