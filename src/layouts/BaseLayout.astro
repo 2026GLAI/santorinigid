@@ -8,7 +8,6 @@ import Header from '../components/Header.astro';
 import { Font } from 'astro:assets';
 import { url } from '../data/url';
 import Footer from '../components/Footer.astro';
-import WhatsappFab from '../components/WhatsappFab.astro';
 import ChatWidget from '../components/ChatWidget.astro';
 import ScrollTop from '../components/ScrollTop.astro';
 import {
@@ -194,7 +193,10 @@ const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [
       <slot />
     </main>
     <Footer />
-    <WhatsappFab />
+    {/* Плавающей кнопки WhatsApp больше нет — убрана владельцем
+        28.07.2026 («у нас их и так много»): WhatsApp остался в шапке,
+        в блоках-призывах и в подвале. Плавающих кнопок две:
+        «наверх» и чат, обе справа. */}
     <ScrollTop />
     <ChatWidget />
 

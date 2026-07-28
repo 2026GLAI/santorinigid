@@ -631,43 +631,13 @@ import {
   /** Телефон: чат открывается на весь экран. */
   const isPhone = () => window.matchMedia('(max-width: 640px)').matches;
 
-  /*
-    Кнопку WhatsApp прячем напрямую из скрипта, а не правилом CSS.
-
-    Почему: стили компонентов Astro не помещаются в слои @layer, и любое
-    наше правило со слоем оказывалось слабее. Вынос правила из слоёв тоже
-    не помог — проверено замером в браузере. Прямое указание стиля
-    элементу сильнее любого правила, поэтому работает надёжно.
-  */
-  const waFab = document.querySelector('.wa-fab');
-
-  function hideWhatsapp(hide) {
-    if (!waFab) return;
-    if (hide) {
-      waFab.style.setProperty('visibility', 'hidden', 'important');
-      waFab.style.setProperty('opacity', '0', 'important');
-      waFab.style.setProperty('pointer-events', 'none', 'important');
-    } else {
-      waFab.style.removeProperty('visibility');
-      waFab.style.removeProperty('opacity');
-      waFab.style.removeProperty('pointer-events');
-    }
-  }
-
   function openChat() {
     panel.hidden = false;
     toggle.setAttribute('aria-expanded', 'true');
     toggle.classList.add('is-open');
-    // Помечаем страницу: по этому классу прячем кнопку WhatsApp,
-    // чтобы две плавающие кнопки не спорили друг с другом.
+    // Класс на странице: по нему на телефоне прячутся кнопка чата
+    // и «наверх» (правила в global.css и ScrollTop).
     document.documentElement.classList.add('chat-open');
-    /*
-      Прячем WhatsApp только на телефоне: там чат раскрывается во весь
-      экран, и кнопка висела бы поверх переписки.
-      На компьютере прятать не нужно — кнопки в разных углах, WhatsApp
-      слева, чат справа, они друг другу не мешают.
-    */
-    if (isPhone()) hideWhatsapp(true);
 
     if (isPhone()) {
       // Фон не должен прокручиваться под открытым чатом
@@ -704,7 +674,6 @@ import {
     toggle.classList.remove('is-open');
     document.documentElement.classList.remove('chat-open');
     document.body.style.overflow = '';
-    hideWhatsapp(false);
 
     // Возвращаем родителю его обычные отступы от края экрана
     const root = document.querySelector('.chat-root');
@@ -749,7 +718,15 @@ import {
     position: fixed;
     right: max(clamp(1rem, 3vw, 1.75rem), env(safe-area-inset-right, 0px));
     bottom: max(clamp(1rem, 3vw, 1.75rem), env(safe-area-inset-bottom, 0px));
-    z-index: 95;
+    /*
+      z-index 250 — ВЫШЕ шапки (100) и полоски прогресса (200), и это
+      не прихоть. Родитель с position:fixed и z-index создаёт свой
+      «этаж» для всего содержимого: внутренний z-index 200 у окна чата
+      не мог выпрыгнуть выше родительских 95, и на телефоне ШАПКА
+      ПЕРЕКРЫВАЛА ВЕРХ открытого чата (кнопку закрытия в том числе).
+      Найдено владельцем 28.07.2026. Поднят весь слой чата целиком.
+    */
+    z-index: 250;
   }
 
   /* Пока чат открыт на телефоне — прячем кнопку открытия:
@@ -825,10 +802,10 @@ import {
     Лежит ПОД логотипом (z-index: 1), поэтому расходится по сторонам,
     не закрывая картинку.
 
-    Цвет — «шапка Деда Мороза» #ca3a27 (токен --c-pulse), выбран
-    владельцем лично 28.07.2026. Кольца толстые (4px), яркие на старте
-    и с широким размахом: его же просьбы — «пульсация должна бросаться
-    в глаза», «+30% силы». Ритм остался как у кнопки WhatsApp.
+    Цвет — «транспортный красный» #cc0605 (токен --c-pulse), выбран
+    владельцем лично. Кольца толстые (4px), яркие на старте и с широким
+    размахом: его же просьбы — «пульсация должна бросаться в глаза»,
+    «+30% силы».
   */
   .chat-toggle::before {
     content: '';
