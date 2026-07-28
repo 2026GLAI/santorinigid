@@ -31,3 +31,6 @@ docs/
 CLAUDE.md
 ПРОЧТИ-МЕНЯ.md
 .claude/
+
+# служебный кэш wrangler (Cloudflare)
+.wrangler/
