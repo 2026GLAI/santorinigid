@@ -387,7 +387,9 @@ import {
       `<a href="${url}" target="_blank" rel="noopener">${url.replace(/^https:\/\//, '')}</a>`;
 
     return safe.replace(
-      /https:\/\/(wa\.me\/[\w]+|t\.me\/[\w_]+|santorinigid\.com[\w\-/]*)/g,
+      // Кликабельными становятся только заведомо наши адреса + одно
+      // конкретное видео владельца про высадку с лайнера (тендеры)
+      /https:\/\/(wa\.me\/[\w]+|t\.me\/[\w_]+|santorinigid\.com[\w\-/]*|www\.youtube\.com\/watch\?v=m331MPP7PpI)/g,
       (m) => link(m),
     );
   }
