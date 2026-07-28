@@ -253,9 +253,11 @@ async function handleSubmit(request, env) {
     receivedAt: now.toISOString(),
   };
 
-  // Держим 60 дней — если Владимир не успел решить, отзыв не висит вечно.
+  // Держим 30 дней — требование владельца 28.07.2026: «хранить нет
+  // смысла». Решил (опубликовать/удалить) — стирается сразу; не решил —
+  // отзыв сам испаряется, чистить руками ничего не нужно.
   await env.REVIEWS.put(`pending:${id}`, JSON.stringify(review), {
-    expirationTtl: 60 * 24 * 60 * 60,
+    expirationTtl: 30 * 24 * 60 * 60,
   });
 
   await sendEmail(review, env);
@@ -307,7 +309,7 @@ box-shadow:0 4px 16px rgb(10 47 77/.08)">
     border-top:1px solid #e3ded4;line-height:1.6">
       После нажатия «Опубликовать» отзыв появится на сайте автоматически через
       2–3 минуты. Пока вы не нажали — на сайте его нет.
-      Если не решить в течение 60 дней, отзыв удалится сам.
+      Если не решить в течение 30 дней, отзыв удалится сам.
     </p>
   </div>
 </div>
@@ -326,7 +328,14 @@ box-shadow:0 4px 16px rgb(10 47 77/.08)">
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: 'Отзывы сайта <reviews@santorinigid.com>',
+      /*
+        Отправитель onboarding@resend.dev — стандартный адрес Resend,
+        который работает БЕЗ подтверждения домена, но шлёт только на
+        почту владельца аккаунта Resend (нам ровно это и нужно).
+        Захотим красивый адрес reviews@santorinigid.com — надо будет
+        подтвердить домен в Resend парой DNS-записей в Cloudflare.
+      */
+      from: 'Отзывы сайта <onboarding@resend.dev>',
       to: [env.OWNER_EMAIL],
       reply_to: review.contact.includes('@') ? review.contact : undefined,
       subject: `Новый отзыв: ${review.author}`,

@@ -1,0 +1,30 @@
+# Настройка развёртывания Worker модерации отзывов.
+#
+# Развернуть / обновить:
+#   npx wrangler deploy -c worker/wrangler-reviews.toml
+# Секреты (вводятся один раз, значения запрашивает сам wrangler):
+#   npx wrangler secret put RESEND_API_KEY -c worker/wrangler-reviews.toml
+#   npx wrangler secret put GITHUB_TOKEN   -c worker/wrangler-reviews.toml
+#   npx wrangler secret put ADMIN_SECRET   -c worker/wrangler-reviews.toml
+#
+# Секретов в этом файле НЕТ и быть не должно: репозиторий открытый.
+# Здесь только несекретные настройки и привязка хранилища.
+
+name = "santorinigid-reviews"
+main = "review-worker.js"
+compatibility_date = "2026-07-01"
+
+# Камера хранения отзывов до решения владельца.
+# Отзыв стирается сразу после решения; нерешённый — сам через 30 дней.
+[[kv_namespaces]]
+binding = "REVIEWS"
+id = "ab69ee2ac8c04e108353d79da3c910d9"
+
+[vars]
+# Рабочая почта модерации (решение владельца 25.07.2026);
+# santorinivip@gmail.com — публичная, здесь не используется.
+OWNER_EMAIL = "rusantorini@gmail.com"
+GITHUB_REPO = "2026GLAI/santorinigid"
+GITHUB_BRANCH = "main"
+SITE_URL = "https://santorinigid.com"
+WORKER_URL = "https://santorinigid-reviews.2026glai.workers.dev"
