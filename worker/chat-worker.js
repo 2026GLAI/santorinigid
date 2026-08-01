@@ -31,6 +31,28 @@
  * CHAT_API_URL. Пока там пусто — чат работает по встроенной базе.
  */
 
+/*
+  Страховка от редкого глюка Llama: посторонний алфавит просачивается
+  в русский/английский ответ («можно肯定» — поймано испытанием 28.07,
+  даже на temperature 0.7). Единый набор диапазонов для проверки
+  «гость сам пишет на этом языке» (ALLOW-проверка) и для вырезания
+  из ответа — если завести их порознь, можно вырезать язык, на
+  котором гость сам обратился.
+
+  Что внутри: японская кана, китайские/корэйские иероглифы, хангыль
+  (были с самого начала), плюс добавлено 01.08.2026 — полноширинные
+  формы, знаки препинания CJK, тайский, деванагари, иврит, арабский.
+
+  Что НАРОЧНО не внутри:
+  • греческий — сайт про Грецию, названия мест и слова гида законны;
+  • латиница расширенная (польский, чешский и т.п.) — задела бы
+    гостя, пишущего на своём языке, ради редкого глюка;
+  • эмодзи — отдельные unicode-блоки выше U+FFFF, здесь их нет и
+    не будет: без них рисованные иконки чата (EMOJI_MAP) пропадут.
+*/
+const FOREIGN_SCRIPT =
+  /[぀-ヿ㐀-䶿一-鿿가-힯＀-￯　-〿฀-๿ऀ-ॿ֐-׿؀-ۿ]/;
+
 /** Кто имеет право обращаться. Чужим сайтам чат не отдаём. */
 const ALLOWED_ORIGINS = [
   'https://santorinigid.com',
@@ -264,18 +286,11 @@ export default {
 
       if (!upstream.ok || !upstream.body) continue; // лимит/ошибка — следующий ключ
 
-      /*
-        Страховка от редкого глюка Llama: в русский текст иногда
-        просачиваются иероглифы («можно肯定» — поймано испытанием 28.07,
-        даже на temperature 0.7). Если гость пишет НЕ на китайском,
-        японском или корейском — такие символы вырезаются из потока.
-        Гостям, пишущим на этих языках, ответ не трогаем.
-      */
-      const CJK = /[぀-ヿ㐀-䶿一-鿿가-힯]/;
-      const allowCjk = CJK.test(question + history.map((m) => m.content).join(''));
+      // Гость сам пишет одним из «посторонних» языков — его ответ не трогаем.
+      const allowForeign = FOREIGN_SCRIPT.test(question + history.map((m) => m.content).join(''));
 
       const { readable, writable } = new TransformStream();
-      ctx.waitUntil(pump(upstream.body, writable, allowCjk));
+      ctx.waitUntil(pump(upstream.body, writable, allowForeign));
       return new Response(readable, {
         headers: {
           'Content-Type': 'text/event-stream; charset=utf-8',
@@ -291,12 +306,12 @@ export default {
 };
 
 /** Пережимает поток Groq (формат OpenAI SSE) в наши простые события. */
-async function pump(body, writable, allowCjk) {
+async function pump(body, writable, allowForeign) {
   const writer = writable.getWriter();
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
   const send = (obj) => writer.write(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
-  const cjkStrip = /[぀-ヿ㐀-䶿一-鿿가-힯]/g;
+  const foreignStrip = new RegExp(FOREIGN_SCRIPT.source, 'g');
   let buf = '';
 
   try {
@@ -316,7 +331,7 @@ async function pump(body, writable, allowCjk) {
         try {
           const chunk = JSON.parse(payload);
           let delta = chunk.choices?.[0]?.delta?.content;
-          if (delta && !allowCjk) delta = delta.replace(cjkStrip, '');
+          if (delta && !allowForeign) delta = delta.replace(foreignStrip, '');
           if (delta) await send({ type: 'token', content: delta });
         } catch {
           /* обрывок JSON на границе чанка — дособерётся со следующим */
