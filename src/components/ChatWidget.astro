@@ -656,7 +656,9 @@ import {
         с микропаузами после точек и запятых — перо «думает»;
       • если в очереди скопился длинный хвост, перо тихо ускоряется —
         гость не ждёт большой ответ вечность;
-      • на кончике строки — тонкий мягко дышащий курсор (pen-caret).
+      • на кончике строки — три мягко дышащие точки «печатает…»
+        (pen-caret, было чертой — заменено 01.08.2026 по просьбе
+        владельца, черта выглядела как курсор ввода).
       Кто просил «меньше движения» — получает текст сразу, без пера.
     */
     const instant = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -664,6 +666,8 @@ import {
     let penActive = false;
     const caret = document.createElement('span');
     caret.className = 'pen-caret';
+    caret.setAttribute('aria-hidden', 'true');
+    caret.append(document.createElement('span'), document.createElement('span'), document.createElement('span'));
 
     /*
       Перо пишет ЦЕЛЫМИ символами, а не машинными половинками: эмодзи
@@ -1385,16 +1389,31 @@ import {
     animation: penIn 0.22s ease-out forwards;
   }
 
-  /* Кончик пера: тонкая, мягко дышащая вертикальная черта */
+  /* Кончик пера: три мягко дышащие точки, как «печатает…» в мессенджерах.
+     Просьба владельца 01.08.2026 — прежняя вертикальная черта походила
+     на курсор ввода, а не на живое перо. */
   .chat-log :global(.pen-caret) {
+    display: inline-flex;
+    gap: 0.16em;
+    margin-left: 0.16em;
+    vertical-align: -0.1em;
+  }
+
+  .chat-log :global(.pen-caret span) {
     display: inline-block;
-    width: 2px;
-    height: 1em;
-    margin-left: 1px;
-    vertical-align: -0.15em;
+    width: 0.28em;
+    height: 0.28em;
+    border-radius: 50%;
     background: currentColor;
-    border-radius: 1px;
-    animation: penCaret 0.9s ease-in-out infinite;
+    animation: penCaret 1.1s ease-in-out infinite;
+  }
+
+  .chat-log :global(.pen-caret span:nth-child(2)) {
+    animation-delay: 0.15s;
+  }
+
+  .chat-log :global(.pen-caret span:nth-child(3)) {
+    animation-delay: 0.3s;
   }
 
   .chat-log :global(.msg-me .bubble a) {
