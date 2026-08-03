@@ -227,8 +227,27 @@ export default {
       return json({ error: 'Такой запрос не поддерживается. Задайте вопрос о Санторини!' }, 400, request);
     }
 
+    /*
+      Модель ИИ не знает текущую дату сама по себе — её знания
+      заканчиваются датой обучения (cutoff). Без этой строки на вопрос
+      «какое сегодня число» или «который час в Греции» она отвечает
+      наугад или называет дату из обучения. Формируем строку заново
+      при КАЖДОМ запросе (не хардкод) — время Афин/Санторини = UTC+3
+      летом (EEST), UTC+2 зимой (EET); переключение вручную не нужно,
+      Intl.DateTimeFormat с timeZone сам учитывает переход на летнее
+      время для Европы/Афин.
+    */
+    const now = new Date();
+    const athensTime = new Intl.DateTimeFormat('ru-RU', {
+      timeZone: 'Europe/Athens',
+      dateStyle: 'full',
+      timeStyle: 'short',
+    }).format(now);
+    const dateContext = `Текущая дата и время на Санторини (Греция) прямо сейчас: ${athensTime}. Используй это, если гость спросит про сегодняшний день, число или время — не полагайся на свои знания о дате, они устарели.`;
+
     const messages = [
       { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'system', content: dateContext },
       ...history,
       { role: 'user', content: question },
     ];

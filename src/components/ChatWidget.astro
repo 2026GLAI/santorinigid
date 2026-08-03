@@ -401,12 +401,19 @@ import {
     const link = (url) =>
       `<a href="${url}" target="_blank" rel="noopener">${url.replace(/^https:\/\//, '')}</a>`;
 
-    return safe.replace(
+    const withLinks = safe.replace(
       // Кликабельными становятся только заведомо наши адреса + одно
       // конкретное видео владельца про высадку с лайнера (тендеры)
       /https:\/\/(wa\.me\/[\w]+|t\.me\/[\w_]+|santorinigid\.com[\w\-/]*|www\.youtube\.com\/watch\?v=m331MPP7PpI)/g,
       (m) => link(m),
     );
+
+    /*
+      ИИ иногда оборачивает слова в **звёздочки** (markdown-выделение) —
+      текст уже безопасен (escapeHtml прошёл выше), поэтому здесь просто
+      меняем пару звёздочек на <strong>, без риска для безопасности.
+    */
+    return withLinks.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   }
 
   /*
