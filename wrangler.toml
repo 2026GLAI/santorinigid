@@ -3,10 +3,10 @@
 # Развернуть (после `npx wrangler login`):
 #   npx wrangler deploy
 # Вписать ключ (после развёртывания, один раз):
-#   npx wrangler secret put GROQ_API_KEY_1
+#   npx wrangler secret put OPENAI_API_KEY
 #
 # Секретов в этом файле НЕТ и быть не должно: репозиторий открытый.
-# Ключи живут только в настройках Worker на стороне Cloudflare.
+# Ключ живёт только в настройках Worker на стороне Cloudflare.
 #
 # Worker модерации отзывов (worker/review-worker.js) разворачивается
 # отдельно — у него свои привязки (KV, почта), см. docs/setup-reviews.md.
