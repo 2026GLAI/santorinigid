@@ -411,9 +411,9 @@ import {
   const CONTACT_CARD =
     '<div class="chat-contacts">' +
     '<span class="chat-contacts-label">Написать Владимиру</span>' +
-    `<a href="${WA}" target="_blank" rel="noopener">WhatsApp</a>` +
-    `<a href="${VIBER}">Viber</a>` +
-    `<a href="${TG}" target="_blank" rel="noopener">Telegram</a>` +
+    `<a class="chat-contact-wa" href="${WA}" target="_blank" rel="noopener">WhatsApp</a>` +
+    `<a class="chat-contact-viber" href="${VIBER}">Viber</a>` +
+    `<a class="chat-contact-tg" href="${TG}" target="_blank" rel="noopener">Telegram</a>` +
     '</div>';
 
   /*
@@ -1456,6 +1456,26 @@ import {
 
   .chat-log :global(.chat-contacts a:hover) {
     background: var(--c-aegean-800);
+  }
+
+  /* Фирменные цвета мессенджеров — по просьбе владельца 03.08.2026 */
+  .chat-log :global(.chat-contact-wa) {
+    background: #25d366;
+  }
+  .chat-log :global(.chat-contact-wa:hover) {
+    background: #1da851;
+  }
+  .chat-log :global(.chat-contact-viber) {
+    background: #7360f2;
+  }
+  .chat-log :global(.chat-contact-viber:hover) {
+    background: #5b48d9;
+  }
+  .chat-log :global(.chat-contact-tg) {
+    background: #229ed9;
+  }
+  .chat-log :global(.chat-contact-tg:hover) {
+    background: #1b84b8;
   }
 
   .chat-log :global(.typing .bubble) {
