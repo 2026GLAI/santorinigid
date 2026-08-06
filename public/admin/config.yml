@@ -1,0 +1,159 @@
+# ═══════════════════════════════════════════════════════════════════
+# Настройка админки (Sveltia CMS).
+#
+# ПРИНЦИП «ЗАПЕРТОГО ДИЗАЙНА» (решение владельца, подтверждено дважды
+# 03.08.2026): здесь правится ТОЛЬКО содержимое — тексты, цены, списки.
+# Шрифты, размеры, каркас страниц недоступны. Не добавлять поля
+# оформления и markdown-виджеты со стилями.
+#
+# Владелец входит своим GitHub (2026GLAI). «Сохранить» = коммит в main
+# → GitHub Actions пересобирает сайт → правка в интернете через 2–3 мин.
+# ═══════════════════════════════════════════════════════════════════
+
+backend:
+  name: github
+  repo: 2026GLAI/santorinigid
+  branch: main
+  # Воркер-посредник входа (Cloudflare, аккаунт владельца)
+  base_url: https://santorinigid-admin-auth.2026glai.workers.dev
+  commit_messages:
+    update: 'Правка через админку: {{path}}'
+
+site_url: https://santorinigid.com
+display_url: https://santorinigid.com
+locale: ru
+
+# Фото сайта лежат здесь; Sharp обрабатывает их при сборке.
+media_folder: src/assets/img
+public_folder: ''
+
+collections:
+  - name: content
+    label: Содержимое сайта
+    files:
+      # ───────────────────────── ЯХТЫ ─────────────────────────
+      - name: yachts
+        label: Яхты и цены
+        file: src/data/yachts.json
+        fields:
+          - name: yachts
+            label: Суда (порядок = порядок на странице)
+            label_singular: судно
+            widget: list
+            fields:
+              - { name: slug, label: 'Служебное имя (НЕ МЕНЯТЬ)', widget: string }
+              - { name: name, label: Название, widget: string }
+              - { name: description, label: Описание, widget: text }
+              - { name: image, label: 'Файл фото (из папки картинок сайта)', widget: string }
+              - { name: guests, label: 'Вместимость, гостей (если известна)', widget: number, required: false }
+              - { name: badge, label: 'Плашка (например «Хит»)', widget: string, required: false }
+              - name: low
+                label: 'Цены НИЗКИЙ сезон, €'
+                widget: object
+                fields:
+                  - { name: day, label: 'Дневной (5 ч)', widget: number }
+                  - { name: sunset, label: 'Закатный (5 ч)', widget: number }
+                  - { name: full, label: 'Full Day (10 ч)', widget: number }
+              - name: high
+                label: 'Цены ВЫСОКИЙ сезон, €'
+                widget: object
+                fields:
+                  - { name: day, label: 'Дневной (5 ч)', widget: number }
+                  - { name: sunset, label: 'Закатный (5 ч)', widget: number }
+                  - { name: full, label: 'Full Day (10 ч)', widget: number }
+          - name: programs
+            label: Программы круизов
+            label_singular: программа
+            widget: list
+            fields:
+              - { name: title, label: Название, widget: string }
+              - { name: time, label: Время, widget: string }
+              - { name: text, label: Описание, widget: text }
+              - { name: image, label: Файл фото, widget: string }
+          - name: included
+            label: Что включено в стоимость
+            label_singular: пункт
+            widget: list
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+              - { name: text, label: Текст, widget: text }
+              - { name: image, label: Файл фото, widget: string }
+
+      # ───────────────────────── ОТЕЛИ ─────────────────────────
+      - name: hotels
+        label: Отели
+        file: src/data/hotels.json
+        fields:
+          - name: hotels
+            label: Отели (порядок = порядок на странице)
+            label_singular: отель
+            widget: list
+            fields:
+              - { name: name, label: Название, widget: string }
+              - { name: area, label: Район, widget: string }
+              - { name: description, label: Описание, widget: text }
+              - { name: image, label: Файл фото, widget: string }
+              - name: link
+                label: '⚠️ ПАРТНЁРСКАЯ ССЫЛКА — ваш доход. Не менять без крайней необходимости'
+                widget: string
+
+      # ─────────────────────── ЭКСКУРСИЯ ───────────────────────
+      - name: tours
+        label: Экскурсия
+        file: src/data/tours.json
+        fields:
+          - name: TOUR_STOPS
+            label: Точки маршрута
+            label_singular: точка
+            widget: list
+            fields:
+              - { name: title, label: Название, widget: string }
+              - { name: subtitle, label: Подзаголовок, widget: string }
+              - { name: text, label: Описание, widget: text }
+              - { name: image, label: 'Файл фото (пусто = карточка без фото)', widget: string, required: false }
+          - name: TOUR_DETAILS
+            label: Условия экскурсии
+            label_singular: условие
+            widget: list
+            fields:
+              - { name: label, label: Подпись, widget: string }
+              - { name: value, label: Значение, widget: string }
+          - name: FAQ
+            label: Вопросы и ответы
+            label_singular: вопрос
+            widget: list
+            fields:
+              - { name: q, label: Вопрос, widget: string }
+              - { name: a, label: Ответ, widget: text }
+          - name: GALLERY
+            label: Галерея (имена файлов фото)
+            label_singular: фото
+            widget: list
+            field: { name: image, label: Файл фото, widget: string }
+
+      # ───────────────────────── ОТЗЫВЫ ─────────────────────────
+      - name: reviews
+        label: Отзывы
+        file: src/data/reviews.json
+        fields:
+          - name: reviews
+            label: 'Отзывы. ⚠️ Тексты гостей ДОСЛОВНЫЕ — чужие слова не редактируем, только удаляем отзыв целиком при необходимости'
+            label_singular: отзыв
+            widget: list
+            fields:
+              - { name: id, label: 'Служебный номер (НЕ МЕНЯТЬ)', widget: string }
+              - { name: author, label: Автор, widget: string }
+              - { name: text, label: 'Текст (дословный!)', widget: text }
+              - { name: tripDate, label: 'Месяц поездки', widget: string, required: false }
+              - { name: tripWith, label: 'Состав компании', widget: string, required: false }
+              - { name: published, label: 'Дата публикации словами', widget: string }
+              - { name: datePublished, label: 'Дата публикации ГГГГ-ММ-ДД', widget: string }
+              - { name: source, label: Площадка, widget: string }
+              - { name: sourceUrl, label: 'Ссылка на оригинал', widget: string }
+              - { name: reply, label: 'Ваш ответ (только если реально был)', widget: text, required: false }
+              - { name: dislikes, label: 'Поле площадки «Что не понравилось»', widget: string, required: false }
+              - name: photos
+                label: Фотографии отзыва
+                widget: list
+                required: false
+                field: { name: photo, label: Путь к фото, widget: string }

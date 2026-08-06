@@ -1,0 +1,13 @@
+# Воркер входа в админку /admin через GitHub.
+# Деплой: npx wrangler deploy --config worker/wrangler-admin-auth.toml
+# Секрет (задаёт владелец, один раз):
+#   npx wrangler secret put GITHUB_CLIENT_SECRET --config worker/wrangler-admin-auth.toml
+
+name = "santorinigid-admin-auth"
+main = "admin-auth-worker.js"
+compatibility_date = "2026-08-01"
+
+[vars]
+# Клиентский номер OAuth App (не секрет — виден в адресе входа GitHub).
+# Вписать после создания приложения на github.com.
+GITHUB_CLIENT_ID = ""
