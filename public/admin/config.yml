@@ -23,6 +23,12 @@ site_url: https://santorinigid.com
 display_url: https://santorinigid.com
 locale: ru
 
+# Правое окно-«превью» отключено (просьба владельца 06.08.2026):
+# оно не показывает настоящий сайт, а лишь дублирует поля формы —
+# только путает. Настоящий просмотр — сам сайт через 2–3 мин.
+editor:
+  preview: false
+
 # Фото сайта лежат здесь; Sharp обрабатывает их при сборке.
 media_folder: src/assets/img
 public_folder: ''
