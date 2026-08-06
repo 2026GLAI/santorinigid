@@ -10,6 +10,41 @@
   </head>
   <body>
     <!--
+      Автовыход «как в банке» (просьба владельца 06.08.2026): 10 минут
+      без действий в админке — вход забывается, при возврате Sveltia
+      снова просит кнопку GitHub (секунда, но чужого за компьютером
+      не пустит). Ключи входа подсмотрены в sveltia-cms.js:596 —
+      sveltia-cms.user и sveltia-cms.auth. Скрипт обязан стоять ВЫШЕ
+      подключения CMS: инлайн выполняется сразу, module — после парсинга.
+    -->
+    <script>
+      (() => {
+        const KEY = 'admin-last-active';
+        const LIMIT = 10 * 60 * 1000;
+        const last = Number(localStorage.getItem(KEY)) || 0;
+        if (last && Date.now() - last > LIMIT) {
+          localStorage.removeItem('sveltia-cms.user');
+          localStorage.removeItem('sveltia-cms.auth');
+        }
+        let stamped = -Infinity;
+        const stamp = () => {
+          const now = Date.now();
+          if (now - stamped > 30000) {
+            stamped = now;
+            localStorage.setItem(KEY, String(now));
+          }
+        };
+        stamp();
+        for (const ev of ['click', 'keydown', 'pointermove'])
+          addEventListener(ev, stamp, { passive: true });
+        // Вкладка осталась открытой без дела — перезагрузка сама
+        // приведёт к проверке выше и экрану входа.
+        setInterval(() => {
+          if (Date.now() - (Number(localStorage.getItem(KEY)) || 0) > LIMIT) location.reload();
+        }, 60000);
+      })();
+    </script>
+    <!--
       Sveltia CMS, версия 0.180.0, скачана 06.08.2026 из официального
       реестра npm и живёт ЗДЕСЬ, в папке сайта — никаких загрузок с чужих
       серверов при входе. Обновлять только осознанно: заменить файл
