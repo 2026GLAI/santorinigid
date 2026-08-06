@@ -131,7 +131,7 @@ const schema = [
         <p class="eyebrow">{t.principlesSection.eyebrow}</p>
         <h2 class="section-title">{t.principlesSection.title}</h2>
       </header>
-      <div class="grid-auto">
+      <div class="grid-auto principles-grid">
         {
           t.principles.map((p) => (
             <article class="principle reveal">
@@ -268,6 +268,17 @@ const schema = [
   }
 
   /* --- принципы --- */
+  /*
+    Принципов ровно четыре, а резиновая сетка клала их «3 + 1» с сиротой
+    (дизайн-осмотр 06.08.2026). Всегда ровно 2×2 — и карточки шире,
+    текст читается свободнее.
+  */
+  @media (min-width: 640px) {
+    .principles-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
   .principle {
     padding: var(--sp-5);
     border: 1px solid var(--border);

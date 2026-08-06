@@ -139,7 +139,7 @@ const facts = [
         <p class="lede">{t.servicesSection.lede}</p>
       </header>
 
-      <div class="grid-auto reveal-stagger">
+      <div class="grid-auto services-grid reveal-stagger">
         {
           t.services.map((s) => (
             <a href={url(s.href)} class="card service-card">
@@ -318,6 +318,19 @@ const facts = [
   }
 
   /* --- услуги --- */
+  /*
+    Карточек ровно четыре, а резиновая сетка на средних экранах клала их
+    «3 + 1»: «Отели» сиротой на втором ряду (дизайн-осмотр 06.08.2026).
+    Всегда ровно 2×2 — как у направлений на /vip-service: без сирот,
+    карточки крупные, и «Индивидуальные» не рвётся переносом в узкой
+    колонке (проверено скриншотами: 4 в ряд слову уже тесно).
+  */
+  @media (min-width: 700px) {
+    .services-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
   .service-card {
     text-decoration: none;
   }
