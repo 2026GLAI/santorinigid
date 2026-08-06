@@ -17,7 +17,7 @@ import type { APIRoute } from 'astro';
 import { CONTACTS, ON_ISLAND_SINCE, GUIDE_SINCE, PROFILES, eur, plural, pageUrl } from '../data/site';
 import { YACHTS, YACHT_PRICE_FROM, YACHT_PRICE_TO } from '../data/yachts';
 import { HOTELS } from '../data/hotels';
-import { REVIEWS, REVIEW_YEARS } from '../data/reviews';
+import { REVIEWS } from '../data/reviews';
 
 const touristerCount = REVIEWS.filter((r) => r.source === 'Tourister.ru').length;
 const needguideCount = REVIEWS.filter((r) => r.source === 'NeedGuide').length;
@@ -54,7 +54,7 @@ const text = `# Владимир Лунгу — русскоязычный ги�
 - Email: ${CONTACTS.email}
 - Telegram: https://t.me/SANTORINI_VLADIMIR
 - Instagram: https://www.instagram.com/vova_gid_santorini/
-- На связи 24/7, отвечает в течение часа.
+- Отвечает в рабочее время, обычно в течение часа; ИИ-помощник на сайте — круглосуточно.
 
 ## Услуги и страницы
 
@@ -67,7 +67,7 @@ const text = `# Владимир Лунгу — русскоязычный ги�
 - [Вертолётные туры](${pageUrl('/vip-service/helicopter-tours')}): Robinson R44, Airbus H125. Обзор Кальдеры 20/30/60 минут; трансферы Санторини–Крит 45 мин, Санторини–Миконос 45 мин, Санторини–Афины 75 мин. Вылет с частных площадок, лицензированные пилоты.
 - [Отели](${pageUrl('/vip-service/santorini-hotels-2026')}): авторская подборка ${HOTELS.length} ${plural(HOTELS.length, 'отеля', 'отелей', 'отелей')} и вилл с видом на Кальдеру. Бронирование любыми картами мира, включая карты РФ и UnionPay.
 - [Контакты](${pageUrl('/contacts')}): все каналы связи и форма заявки.
-- [Отзывы](${pageUrl('/reviews')}): ${REVIEWS.length} ${plural(REVIEWS.length, 'отзыв', 'отзыва', 'отзывов')} реальных туристов за ${REVIEW_YEARS.from}–${REVIEW_YEARS.to} годы, собраны с двух площадок — Tourister.ru (${touristerCount}) и NeedGuide.ru (${needguideCount}), у каждого есть ссылка на оригинал. У ${replyCount} ${plural(replyCount, 'отзыва', 'отзывов', 'отзывов')} есть ответ Владимира. Оценок в звёздах нет — площадки-источники их не используют.
+- [Отзывы](${pageUrl('/reviews')}): ${REVIEWS.length} ${plural(REVIEWS.length, 'отзыв', 'отзыва', 'отзывов')} реальных туристов, собраны с двух площадок — Tourister.ru (${touristerCount}) и NeedGuide.ru (${needguideCount}), у каждого есть ссылка на оригинал. У ${replyCount} ${plural(replyCount, 'отзыва', 'отзывов', 'отзывов')} есть ответ Владимира. Оценок в звёздах нет — площадки-источники их не используют.
 
 ## Профили на других площадках
 
@@ -82,7 +82,7 @@ ${PROFILES.map(profileLine).join('\n')}
 - Подъём из Старого порта в Фиру: фуникулёр 10 евро, ослики 10 евро, либо 588 ступеней пешком.
 - Паром с Крита (Ираклион, Ретимно) скоростным катамараном: около 2–2,5 часов, прибытие в порт Афиньос.
 - Гид встречает гостей круизных лайнеров у выхода со станции фуникулёра.
-- Отзывы: ${REVIEWS.length} ${plural(REVIEWS.length, 'опубликованный отзыв', 'опубликованных отзыва', 'опубликованных отзывов')} туристов за период ${REVIEW_YEARS.from}–${REVIEW_YEARS.to} с двух площадок (Tourister.ru и NeedGuide.ru), самые подробные — от Мартыновой Татьяны (2019) и Козловской Елены (2019).
+- Отзывы: ${REVIEWS.length} ${plural(REVIEWS.length, 'опубликованный отзыв', 'опубликованных отзыва', 'опубликованных отзывов')} туристов с двух площадок (Tourister.ru и NeedGuide.ru), самые подробные — от Мартыновой Татьяны (2019) и Козловской Елены (2019).
 
 ## Примечания
 

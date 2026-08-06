@@ -11,7 +11,7 @@
  *  3. Оценок в звёздах нет — их нет и в источнике. См. src/data/reviews.ts.
  */
 import ReviewCard from './ReviewCard.astro';
-import { REVIEWS, REVIEW_SOURCES, REVIEWS_VISIBLE, LEAVE_REVIEW_URL, REVIEW_YEARS } from '../data/reviews';
+import { REVIEWS, REVIEW_SOURCES, REVIEWS_VISIBLE, LEAVE_REVIEW_URL } from '../data/reviews';
 import { plural } from '../data/site';
 import { url } from '../data/url';
 import shared from '../data/pages/shared.json';
@@ -49,9 +49,14 @@ const hidden = REVIEWS.slice(visible);
  * данным. Лозунги вроде «100% реальные люди» рядом с настоящими цифрами
  * выглядят как цифра и занимают чужое место — такого здесь быть не должно.
  */
+/*
+  Плашки «2014–2026 годы отзывов» здесь БЫЛО и убрано 06.08.2026 по слову
+  владельца: большой диапазон лет при скромном числе отзывов подчёркивал,
+  что их мало (отзывы годами копились у площадок-партнёров, не у него).
+  Даты честно стоят у каждого отзыва — сводную плашку не возвращать.
+*/
 const stats = [
   { n: String(REVIEWS.length), label: s.statReviews },
-  { n: `${REVIEW_YEARS.from}–${REVIEW_YEARS.to}`, label: s.statYears },
   {
     n: String(REVIEWS.filter((r) => r.reply).length),
     label: s.statReplies,

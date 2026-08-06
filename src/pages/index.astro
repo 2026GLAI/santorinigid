@@ -67,7 +67,9 @@ const facts = [
   { n: String(ON_ISLAND_SINCE), label: 'год переезда на остров' },
   { n: String(YEARS_AS_GUIDE), label: `${plural(YEARS_AS_GUIDE, 'год', 'года', 'лет')} как гид` },
   { n: String(YACHTS.length), label: plural(YACHTS.length, 'судно во флоте', 'судна во флоте', 'судов во флоте') },
-  { n: '24/7', label: 'на связи' },
+  /* «24/7 на связи» было про Владимира — неправда для живого человека
+     (его замечание 06.08.2026): круглосуточно дежурит ИИ-помощник. */
+  { n: '24/7', label: 'ИИ-помощник на связи' },
 ];
 ---
 
@@ -81,6 +83,7 @@ const facts = [
     image={heroOia}
     alt={t.hero.alt}
     size="full"
+    focusMobile="76% 50%"
     priority
     eyebrow={t.hero.eyebrow}
     title={t.hero.title}

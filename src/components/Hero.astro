@@ -12,6 +12,17 @@ interface Props {
   /** Высокий вариант для главной, компактный — для внутренних страниц */
   size?: 'full' | 'compact';
   /**
+   * Точка внимания кадра НА ТЕЛЕФОНЕ (значение CSS object-position).
+   *
+   * Узкий экран обрезает широкую панораму по бокам, и главный сюжет
+   * фото может «уехать» за край: у панорамы Ии на главной синие купола
+   * стояли правее центра и на телефоне прятались (замечание владельца
+   * 06.08.2026). «70% 50%» = смотреть на точку в 70% ширины фото.
+   * На компьютере не влияет: там действует обычный центр.
+   */
+  focusMobile?: string;
+
+  /**
    * Грузить картинку в первую очередь.
    *
    * По умолчанию ДА — и это не перестраховка: шапка занимает верх экрана,
@@ -36,12 +47,13 @@ const {
   subtitle,
   text,
   size = 'compact',
+  focusMobile,
   priority = true,
 } = Astro.props;
 ---
 
 <section class:list={['hero', `hero-${size}`]}>
-  <div class="hero-media parallax-slow">
+  <div class="hero-media parallax-slow" style={focusMobile ? `--hero-focus-mobile: ${focusMobile}` : undefined}>
     <Image
       src={image}
       alt={alt}
@@ -122,6 +134,13 @@ const {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  /* Точка внимания кадра на узких экранах — см. проп focusMobile выше. */
+  @media (max-width: 700px) {
+    .hero-media :global(img) {
+      object-position: var(--hero-focus-mobile, 50% 50%);
+    }
   }
 
   /*

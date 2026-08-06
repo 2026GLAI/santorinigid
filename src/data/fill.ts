@@ -23,7 +23,7 @@ import {
 } from './site';
 import { YACHTS, YACHT_PRICE_FROM, YACHT_PRICE_TO } from './yachts';
 import { HOTELS } from './hotels';
-import { REVIEWS, REVIEW_SOURCES, REVIEW_YEARS } from './reviews';
+import { REVIEWS, REVIEW_SOURCES } from './reviews';
 
 const VALUES: Record<string, string> = {
   /** Текущий год: {ГОД} → 2026 */
@@ -50,18 +50,17 @@ const VALUES: Record<string, string> = {
   ЧИСЛО_ОТЗЫВОВ: String(REVIEWS.length),
   /** Со склонением: {ОТЗЫВОВ_СЛОВОМ} → «22 отзыва» */
   ОТЗЫВОВ_СЛОВОМ: `${REVIEWS.length} ${plural(REVIEWS.length, 'отзыв', 'отзыва', 'отзывов')}`,
-  /** Первый год отзывов: {ГОД_ОТЗЫВОВ_ОТ} → 2014 */
-  ГОД_ОТЗЫВОВ_ОТ: REVIEW_YEARS.from,
-  /** Последний год отзывов: {ГОД_ОТЗЫВОВ_ДО} → 2026 */
-  ГОД_ОТЗЫВОВ_ДО: REVIEW_YEARS.to,
+  /*
+    Меток годов отзывов ({ГОД_ОТЗЫВОВ_ОТ/ДО}) больше НЕТ — убраны
+    06.08.2026 по слову владельца: диапазон лет при скромном числе
+    отзывов подчёркивал, что их мало. Не возвращать.
+  */
   /** Площадки-источники: {ПЛОЩАДКИ_ОТЗЫВОВ} → «Tourister.ru или NeedGuide» */
   ПЛОЩАДКИ_ОТЗЫВОВ: REVIEW_SOURCES.map((s) => s.name).join(' или '),
   /** Минимальная цена круиза: {ЦЕНА_ЯХТ_ОТ} → «€1 200» */
   ЦЕНА_ЯХТ_ОТ: eur(YACHT_PRICE_FROM),
   /** Максимальная цена круиза: {ЦЕНА_ЯХТ_ДО} → «€7 000» */
   ЦЕНА_ЯХТ_ДО: eur(YACHT_PRICE_TO),
-  /** Диапазон лет отзывов: {ГОДЫ_ОТЗЫВОВ} → «2014–2026» */
-  ГОДЫ_ОТЗЫВОВ: `${REVIEW_YEARS.from}–${REVIEW_YEARS.to}`,
 };
 
 /** Заменяет метки в одной строке. */
