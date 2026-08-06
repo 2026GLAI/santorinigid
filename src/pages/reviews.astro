@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Reviews from '../components/Reviews.astro';
 import ReviewForm from '../components/ReviewForm.astro';
 import CtaBand from '../components/CtaBand.astro';
-import { SITE_URL, WHATSAPP, plural, pageUrl } from '../data/site';
+import { WHATSAPP, plural, pageUrl } from '../data/site';
 import { REVIEWS, REVIEW_SOURCES, REVIEW_YEARS } from '../data/reviews';
 
 /** Правильное склонение: 1 отзыв / 2 отзыва / 5 отзывов. */
@@ -27,49 +27,23 @@ const latestExcerpt = (() => {
 })();
 
 /**
- * Разметка отзывов для поисковиков и ИИ.
- *
- * ⚠️ Сознательно БЕЗ reviewRating и без aggregateRating:
+ * ⚠️ Разметки Review здесь НЕТ — и это решение, а не забывчивость
+ * (стояла до 06.08.2026, убрана по итогам аудита):
  *  1. Оценок нет в источнике — на Tourister у отзывов нет поля рейтинга,
  *     на NeedGuide рейтинг отключён (ratingOff: true). Проставить «5» =
- *     выдумать цифру, которую клиенты не ставили.
+ *     выдумать цифру, которую клиенты не ставили. А Review без оценки
+ *     Google считает ошибкой схемы и сыпал бы её в Search Console.
  *  2. Даже с оценками звёзд в Google не будет: по правилам Google страницы
  *     LocalBusiness/Organization с отзывами о самих себе не участвуют в
  *     показе звёзд. [ПРОВЕРЕНО: developers.google.com/search/docs/appearance/
  *     structured-data/review-snippet]
  *
- * Что разметка всё равно даёт: Google, Яндекс и ИИ-поисковики понимают, что
- * это отзывы конкретных людей с именами и датами, и цитируют их в ответах.
- * Звёзды в поиске появляются из Google Business Profile — это отдельная
- * задача владельца, см. docs/promotion-plan.md
+ * Поисковики и ИИ ничего не теряют: все 22 отзыва с именами и датами
+ * целиком лежат в HTML этой страницы (принцип №1 в Reviews.astro)
+ * и описаны в llms.txt. Звёзды в поиске появляются из Google Business
+ * Profile — это отдельная задача владельца, см. docs/promotion-plan.md
  */
 const schema = [
-  {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    name: 'Отзывы туристов о гиде Владимире Лунгу на Санторини',
-    numberOfItems: REVIEWS.length,
-    itemListElement: REVIEWS.map((r, i) => ({
-      '@type': 'ListItem',
-      position: i + 1,
-      item: {
-        '@type': 'Review',
-        '@id': `${SITE_URL}/reviews#review-${r.id}`,
-        reviewBody: r.text,
-        datePublished: r.datePublished,
-        inLanguage: 'ru',
-        author: { '@type': 'Person', name: r.author },
-        itemReviewed: {
-          '@type': 'TouristTrip',
-          name: 'Индивидуальная экскурсия по Санторини с гидом Владимиром',
-          provider: { '@id': `${SITE_URL}/#business` },
-        },
-        // Площадка указывается для КАЖДОГО отзыва своя — они собраны с разных.
-        publisher: { '@type': 'Organization', name: r.source },
-        url: r.sourceUrl,
-      },
-    })),
-  },
   {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',

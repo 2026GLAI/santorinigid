@@ -66,7 +66,12 @@ import {
     <Image src={botLogo} alt="" width={84} height={84} densities={[1, 2, 3]} loading="eager" />
   </button>
 
-  <section class="chat-panel" id="chatPanel" hidden aria-label="Чат-помощник">
+  {/* role="dialog" — окно объявлено диалогом для экранных читалок.
+      aria-modal НЕ вписан в разметку: его ставит скрипт, и только на
+      телефоне — там чат на весь экран и фон заперт. На ПК это плавающее
+      окошко, страница за ним живая, и объявлять её «недоступной» нельзя.
+      tabindex="-1" — чтобы скрипт мог передать окну фокус при открытии. */}
+  <section class="chat-panel" id="chatPanel" hidden role="dialog" aria-label="Чат-помощник" tabindex="-1">
     <header class="chat-head">
       <div class="chat-avatar" aria-hidden="true">
         {/* densities — без них картинка выдаётся ровно в размер вёрстки
@@ -813,6 +818,29 @@ import {
   /** Телефон: чат открывается на весь экран. */
   const isPhone = () => window.matchMedia('(max-width: 640px)').matches;
 
+  /*
+    Ловушка фокуса для телефона: пока модальное окно открыто, Tab ходит
+    только по его элементам, не проваливаясь на страницу под ним.
+    Список элементов собирается при каждом нажатии: кнопка «очистить»
+    и ссылки в переписке появляются и исчезают по ходу разговора.
+  */
+  function trapFocus(e) {
+    if (e.key !== 'Tab') return;
+    const items = Array.from(panel.querySelectorAll('a[href], button, input')).filter(
+      (el) => !el.hidden && el.offsetParent !== null
+    );
+    if (!items.length) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && (document.activeElement === last || document.activeElement === panel)) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
   function openChat() {
     panel.hidden = false;
     toggle.setAttribute('aria-expanded', 'true');
@@ -824,6 +852,9 @@ import {
     if (isPhone()) {
       // Фон не должен прокручиваться под открытым чатом
       document.body.style.overflow = 'hidden';
+      // Модальность и ловушка фокуса — только здесь (см. trapFocus)
+      panel.setAttribute('aria-modal', 'true');
+      panel.addEventListener('keydown', trapFocus);
       // Окно чата — строго на весь экран, без отступов родителя
       const root = document.querySelector('.chat-root');
       if (root) {
@@ -845,9 +876,12 @@ import {
         addMsg(greeting(), 'bot');
       }
     }
-    // На телефоне не наводим фокус сразу: иначе выскакивает клавиатура
-    // и закрывает половину и без того небольшого экрана.
-    if (!isPhone()) setTimeout(() => input.focus(), 120);
+    // На телефоне не наводим фокус в поле ввода: иначе выскакивает
+    // клавиатура и закрывает половину и без того небольшого экрана.
+    // Вместо этого фокус получает само окно — экранная читалка
+    // объявляет «Чат-помощник, диалог», а клавиатура не выскакивает.
+    if (isPhone()) setTimeout(() => panel.focus(), 120);
+    else setTimeout(() => input.focus(), 120);
   }
 
   function closeChat() {
@@ -856,6 +890,8 @@ import {
     toggle.classList.remove('is-open');
     document.documentElement.classList.remove('chat-open');
     document.body.style.overflow = '';
+    panel.removeAttribute('aria-modal');
+    panel.removeEventListener('keydown', trapFocus);
 
     // Возвращаем родителю его обычные отступы от края экрана
     const root = document.querySelector('.chat-root');
@@ -864,6 +900,10 @@ import {
       root.style.removeProperty('right');
       root.style.removeProperty('bottom');
     }
+
+    // Фокус — назад на кнопку чата: гость с клавиатуры или читалкой
+    // продолжает с того места, откуда открывал, а не с начала страницы.
+    toggle.focus();
   }
 
   toggle.addEventListener('click', () => (panel.hidden ? openChat() : closeChat()));
@@ -1118,6 +1158,9 @@ import {
     position: absolute;
     right: 0;
     bottom: calc(100% + 12px);
+    /* Окно получает фокус скриптом при открытии (доступность), но само
+       оно не кнопка — кольцо фокуса на всём окне было бы шумом. */
+    outline: none;
     /*
       Ширина считается от 100dvw, а НЕ от 100vw.
 

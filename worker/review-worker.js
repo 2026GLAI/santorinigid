@@ -75,7 +75,7 @@ const json = (data, status = 200, request = null) =>
 /** Страница-ответ для Владимира после нажатия кнопки в письме.
     extra — дополнительная разметка под кнопкой (например, ссылка
     «удалить с сайта» на странице успешной публикации). */
-const page = (title, text, tone = 'ok', extra = '') =>
+const page = (title, text, tone = 'ok', extra = '', showLink = true) =>
   new Response(
     `<!doctype html><html lang="ru"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -99,7 +99,7 @@ const page = (title, text, tone = 'ok', extra = '') =>
 </style></head><body><div class="card">
 <div class="ico">${tone === 'ok' ? '✓' : '🗑'}</div>
 <h1>${title}</h1><p>${text}</p>
-<a class="btn" href="https://santorinigid.com/reviews/">Открыть страницу отзывов</a>
+${showLink ? '<a class="btn" href="https://santorinigid.com/reviews/">Открыть страницу отзывов</a>' : ''}
 ${extra ? `<div class="extra">${extra}</div>` : ''}
 </div></body></html>`,
     { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } },
@@ -150,8 +150,21 @@ export default {
       return handleSubmit(request, env);
     }
 
-    // --- 2. Владимир нажал кнопку в письме ---
+    /*
+      --- 2. Владимир открыл ссылку из письма ---
+      GET только ПОКАЗЫВАЕТ страницу подтверждения и ничего не меняет.
+      Причина: почтовые сервисы и антивирусы ходят по ссылкам в письмах
+      сами (предпросмотр/проверка) — до 06.08.2026 такой робот мог
+      опубликовать или удалить отзыв без ведома владельца. Роботы делают
+      только GET; действие теперь выполняется по нажатию кнопки — POST.
+      Старые письма продолжают работать: их ссылки ведут на подтверждение.
+    */
     if (url.pathname === '/moderate' && request.method === 'GET') {
+      return confirmModerate(url, env);
+    }
+
+    // --- 3. Владимир нажал кнопку подтверждения ---
+    if (url.pathname === '/moderate' && request.method === 'POST') {
       return handleModerate(url, env);
     }
 
@@ -261,7 +274,22 @@ async function handleSubmit(request, env) {
     expirationTtl: 30 * 24 * 60 * 60,
   });
 
-  await sendEmail(review, env);
+  /*
+    Письмо не ушло → гостю честная ошибка, а не «спасибо»: форма на сайте
+    в ответ сама предложит отправить отзыв в WhatsApp (её штатный запасной
+    путь). До 06.08.2026 здесь всегда отвечалось ok:true, и при сбое почты
+    отзыв тихо истекал в хранилище через 30 дней — никто не узнавал.
+    Копию из хранилища стираем: отзыв уйдёт по WhatsApp, сирота не нужна.
+  */
+  const sent = await sendEmail(review, env);
+  if (!sent) {
+    await env.REVIEWS.delete(`pending:${id}`);
+    return json(
+      { error: 'Не получилось передать отзыв. Пожалуйста, отправьте его в WhatsApp.' },
+      502,
+      request,
+    );
+  }
   return json({ ok: true }, 200, request);
 }
 
@@ -311,8 +339,9 @@ box-shadow:0 4px 16px rgb(10 47 77/.08)">
 
     <p style="font-size:12px;color:#5f6e78;margin:24px 0 0;padding-top:16px;
     border-top:1px solid #e3ded4;line-height:1.6">
-      После нажатия «Опубликовать» отзыв появится на сайте автоматически через
-      2–3 минуты. Пока вы не нажали — на сайте его нет.
+      Кнопка откроет страницу с подтверждением — отзыв появится на сайте
+      автоматически через 2–3 минуты после нажатия кнопки там. Пока вы не
+      подтвердили — на сайте его нет.
       Если не решить в течение 30 дней, отзыв удалится сам.<br><br>
       Передумали уже после публикации? Нажмите
       <a href="${unpublish}" style="color:#c0392b">удалить отзыв с сайта</a> —
@@ -338,9 +367,11 @@ box-shadow:0 4px 16px rgb(10 47 77/.08)">
 
   try {
     await env.OWNER_MAIL.send(new EmailMessage('reviews@santorinigid.com', env.OWNER_EMAIL, mime));
+    return true;
   } catch (e) {
-    // Письмо не ушло — отзыв всё равно в KV, не потеряется.
+    // Причина остаётся в журнале Worker; гостю ответит handleSubmit.
     console.error('Не удалось отправить письмо:', e.message);
+    return false;
   }
 }
 
@@ -396,6 +427,61 @@ function buildMime({ from, to, replyTo, subject, html, photos }) {
 
   lines.push(`--${boundary}--`, '');
   return lines.join('\r\n');
+}
+
+/**
+ * Страница подтверждения (ответ на GET). НИЧЕГО не меняет — показывает,
+ * что именно произойдёт, и даёт одну кнопку. Проверки те же, что перед
+ * действием: битая подпись не должна доводить даже до кнопки.
+ */
+async function confirmModerate(url, env) {
+  const id = url.searchParams.get('id');
+  const action = url.searchParams.get('action');
+  const token = url.searchParams.get('t');
+
+  if (!id || !action || !token) return page('Ссылка неполная', 'В адресе не хватает данных.', 'err');
+
+  const expected = await sign(id, env.ADMIN_SECRET);
+  if (!safeEqual(token, expected)) {
+    return page('Ссылка недействительна', 'Подпись не совпала. Откройте ссылку из письма.', 'err');
+  }
+
+  const KNOWN = {
+    approve: { title: 'Опубликовать отзыв?', btn: '✓ Да, опубликовать', color: '#1b6fa8', tone: 'ok' },
+    reject: { title: 'Удалить отзыв?', btn: 'Да, удалить', color: '#c0392b', tone: 'err' },
+    unpublish: { title: 'Снять отзыв с сайта?', btn: 'Да, снять с сайта', color: '#c0392b', tone: 'err' },
+  };
+  const known = KNOWN[action];
+  if (!known) return page('Непонятное действие', 'Такой команды нет.', 'err');
+
+  let text;
+  if (action === 'unpublish') {
+    text = 'Отзыв будет удалён со страницы отзывов; сайт пересоберётся за 2–3 минуты.';
+  } else {
+    // Покажем автора; а если отзыв уже обработан — скажем сразу, без кнопки.
+    const raw = await env.REVIEWS.get(`pending:${id}`);
+    if (!raw) {
+      return page('Отзыв уже обработан', 'Похоже, вы уже нажимали кнопку по этому отзыву.', 'ok');
+    }
+    const review = JSON.parse(raw);
+    text =
+      action === 'approve'
+        ? `Отзыв от ${esc(review.author)} появится на сайте через 2–3 минуты после подтверждения.`
+        : `Отзыв от ${esc(review.author)} будет стёрт и на сайт не попадёт.`;
+  }
+
+  /*
+    Значения в адресе формы безопасны для HTML: подпись сверена выше
+    (значит id и t — наши собственные), action взят из белого списка.
+  */
+  const form = `<form method="post" action="/moderate?id=${id}&action=${action}&t=${token}"
+  style="margin-top:1.5rem">
+  <button type="submit" style="cursor:pointer;border:0;padding:.85em 2em;border-radius:999px;
+  background:${known.color};color:#fff;font:600 16px/1.2 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif">
+    ${known.btn}
+  </button></form>`;
+
+  return page(known.title, text, known.tone, form, false);
 }
 
 async function handleModerate(url, env) {
