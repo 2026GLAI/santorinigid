@@ -6,7 +6,25 @@ interface Props {
 }
 
 const { items, title = 'Часто задаваемые вопросы', eyebrow = 'Вопросы и ответы' } = Astro.props;
+
+/**
+ * Разметка FAQPage для Google и ИИ-поисковиков собирается здесь же,
+ * из тех же items, что видит гость. С 06.08.2026 страницы НЕ должны
+ * добавлять FAQPage в свой schema сами — выйдет дубль разметки.
+ * Пары «вопрос-ответ» — самый цитируемый ИИ-поисковиками формат.
+ */
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: items.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: item.a },
+  })),
+};
 ---
+
+<script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
 
 <section class="section section-alt">
   <div class="container container-narrow">

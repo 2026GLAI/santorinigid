@@ -1,9 +1,9 @@
 ---
-import { Image } from 'astro:assets';
+import { getImage, Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Hero from '../../components/Hero.astro';
 import CtaBand from '../../components/CtaBand.astro';
-import { WHATSAPP, SITE_URL, CURRENT_YEAR, pageUrl } from '../../data/site';
+import { WHATSAPP, SITE_URL, CURRENT_YEAR, plural, pageUrl } from '../../data/site';
 import { HOTELS } from '../../data/hotels';
 import { getImg } from '../../data/images';
 
@@ -13,6 +13,9 @@ import { getImg } from '../../data/images';
   изображение в двух местах выглядит как недоделка.
 */
 import heroHotel from '../../assets/img/hotel-katikies.webp';
+
+/* OG-картинка 1200×630 для превью ссылки в WhatsApp/Telegram. */
+const og = await getImage({ src: heroHotel, width: 1200, height: 630, format: 'jpeg' });
 
 /* Год в ЗАГОЛОВКЕ живой, а в АДРЕСЕ страницы (…-hotels-2026) — нет:
    адрес менять нельзя без 301-редиректа, это решение владельца на зиму. */
@@ -59,7 +62,7 @@ const schema = [
 ];
 ---
 
-<BaseLayout title={title} description={description} schema={schema}>
+<BaseLayout title={title} description={description} schema={schema} ogImage={og.src}>
   <Hero
     image={heroHotel}
     alt="Белоснежный отель на скалах Ии с бассейном над Эгейским морем"
@@ -79,6 +82,14 @@ const schema = [
 
   <section class="section section-alt">
     <div class="container">
+      {/* h2 закрывает разрыв иерархии заголовков: раньше после h1 шли
+          сразу 14 карточек с h3, без родительского раздела (аудит 06.08). */}
+      <header class="section-head reveal">
+        <p class="eyebrow">Подборка</p>
+        <h2 class="section-title">
+          {HOTELS.length} {plural(HOTELS.length, 'отель', 'отеля', 'отелей')} с видом на Кальдеру
+        </h2>
+      </header>
       <div class="hotels">
         {
           HOTELS.map((h, i) => (
@@ -125,7 +136,7 @@ const schema = [
         <p>
           На Санторини сотни прекрасных отелей, и каждый из них по-своему уникален. В этом гиде
           я собрал лишь часть из них — те объекты, которые мне особенно близки по эстетике и
-          уровню сервиса. Моя цель — не ограничить ваш выбор, а предложить удобные и надежные
+          уровню сервиса. Моя цель — не ограничить ваш выбор, а предложить удобные и надёжные
           способы бронирования через проверенные глобальные сервисы. Я ценю ваше доверие и
           стремлюсь к тому, чтобы процесс организации отдыха был таким же прозрачным и приятным,
           как и само путешествие по нашему острову.
@@ -154,6 +165,11 @@ const schema = [
 </BaseLayout>
 
 <style>
+  .section-head {
+    max-width: min(62ch, 100%);
+    margin-bottom: var(--sp-7);
+  }
+
   .hotels {
     display: grid;
     gap: var(--sp-6);

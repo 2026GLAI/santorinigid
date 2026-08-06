@@ -31,3 +31,7 @@ User-agent: YandexBot
 Allow: /
 
 Sitemap: https://santorinigid.com/sitemap-index.xml
+
+# Визитка сайта для ИИ-ассистентов — краткие проверенные факты и ссылки.
+# Стандартной директивы для llms.txt пока нет, поэтому просто адрес:
+# https://santorinigid.com/llms.txt

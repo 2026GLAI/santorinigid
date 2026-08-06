@@ -1,8 +1,9 @@
 ---
-import { Image } from 'astro:assets';
+import { getImage, Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Hero from '../../components/Hero.astro';
 import CtaBand from '../../components/CtaBand.astro';
+import Faq from '../../components/Faq.astro';
 import { WHATSAPP, SITE_URL, CURRENT_YEAR, eur, plural, pageUrl } from '../../data/site';
 import {
   YACHTS,
@@ -14,6 +15,29 @@ import {
 import { getImg } from '../../data/images';
 
 import heroYacht from '../../assets/img/yacht-nautitech-46.jpg';
+
+/* OG-картинка 1200×630 для превью ссылки в WhatsApp/Telegram. */
+const og = await getImage({ src: heroYacht, width: 1200, height: 630, format: 'jpeg' });
+
+/*
+  FAQ: каждый факт взят из данных этой же страницы (yachts.ts) — цены
+  и число судов считаются, а не вписаны цифрой. Разметку FAQPage отдаёт
+  сам компонент Faq. Пары «вопрос-ответ» — любимый формат ИИ-поисковиков.
+*/
+const YACHT_FAQ = [
+  {
+    q: 'Сколько стоит аренда яхты на Санторини?',
+    a: `Цена — за судно целиком, а не за человека: от ${eur(YACHT_PRICE_FROM)} за дневной круиз в низкий сезон до ${eur(YACHT_PRICE_TO)} за формат Full Day в высокий. У каждого из ${YACHTS.length} судов на этой странице — своя таблица цен.`,
+  },
+  {
+    q: 'Что включено в стоимость круиза?',
+    a: 'Трансфер из отеля и обратно, открытый бар — охлаждённое белое вино, пиво и прохладительные напитки, обед или ужин из греческих блюд, приготовленных прямо на борту, и снорклинг-набор: маски, ласты, полотенца.',
+  },
+  {
+    q: 'Какие форматы круизов есть?',
+    a: 'Дневной круиз с 10:00 до 15:00 — лучшее время для купания и снорклинга. Круиз на закате с 15:30 до времени после заката — ужин на борту и встреча заката под скалами Ии. Full Day — индивидуальный маршрут на 10 и более часов, включая поездку к острову Анафи или Иос.',
+  },
+];
 
 const title = `Аренда яхт на Санторини ${CURRENT_YEAR}: Катамараны | Гид Владимир`;
 const description = `Аренда яхт и катамаранов на Санторини: дневные и закатные круизы, Full Day. ${YACHTS.length} ${plural(YACHTS.length, 'судно', 'судна', 'судов')}, цены ${CURRENT_YEAR}, всё включено — трансфер, бар, обед на борту.`;
@@ -53,7 +77,7 @@ const schema = [
 
 ---
 
-<BaseLayout title={title} description={description} schema={schema}>
+<BaseLayout title={title} description={description} schema={schema} ogImage={og.src}>
   <Hero
     image={heroYacht}
     alt="Яхта на закате у берегов Санторини, бокалы и фрукты на палубе"
@@ -223,6 +247,8 @@ const schema = [
       </div>
     </div>
   </section>
+
+  <Faq items={YACHT_FAQ} title="Вопросы об аренде яхт" />
 
   <CtaBand
     title="Не нашли то, что искали?"

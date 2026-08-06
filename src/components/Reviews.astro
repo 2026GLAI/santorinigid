@@ -119,7 +119,11 @@ const bySource = REVIEW_SOURCES.map((s) => ({
             {hidden.map((r) => <ReviewCard review={r} />)}
           </ol>
 
-          <label for="rv-toggle" class="rv-more-btn">
+          {/* Ярлык одет в общие классы кнопок (.btn .btn-ghost) — до
+              06.08.2026 он описывал те же стили заново у себя. Заодно
+              теперь его ловит глобальная страховка размера нажатия
+              для сенсорных экранов (@media pointer: coarse). */}
+          <label for="rv-toggle" class="btn btn-ghost rv-more-btn">
             <span class="rv-more-open">
               Ещё {hidden.length} {plural(hidden.length, 'отзыв', 'отзыва', 'отзывов')}
             </span>
@@ -317,27 +321,11 @@ const bySource = REVIEW_SOURCES.map((s) => ({
     }
   }
 
+  /* Внешний вид — из общих .btn .btn-ghost; здесь только то, чего
+     у обычной кнопки нет: отступ сверху и курсор (это <label>). */
   .rv-more-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sp-2);
     margin-top: var(--sp-6);
-    padding: 0.8em 1.7em;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-full);
-    background: var(--surface);
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    color: var(--text);
     cursor: pointer;
-    transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease),
-      transform var(--dur) var(--ease);
-  }
-
-  .rv-more-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    transform: translateY(-2px);
   }
 
   .rv-more-btn svg {

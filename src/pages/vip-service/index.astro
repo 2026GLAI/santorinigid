@@ -37,7 +37,7 @@ const SERVICES = [
   {
     href: '/vip-service/helicopter-tours',
     image: 'svc-helicopter.jpg',
-    title: 'Вертолеты',
+    title: 'Вертолёты',
     text: 'Полёты над островом: обзорные туры и VIP-трансферы на другие острова Греции',
     external: false,
   },
@@ -52,7 +52,7 @@ const SERVICES = [
     href: EXTERNAL.flyingDress,
     image: 'svc-flying-dress.jpg',
     title: 'Фотосессии',
-    text: 'Оставьте в памяти не только впечатления, но и безупречные снимки. Профессиональная съемка на фоне белоснежной Ии, закатов Кальдеры или знаменитая фотосессия в «летящем платье».',
+    text: 'Оставьте в памяти не только впечатления, но и безупречные снимки. Профессиональная съёмка на фоне белоснежной Ии, закатов Кальдеры или знаменитая фотосессия в «летящем платье».',
     external: true,
   },
 ];
@@ -101,7 +101,7 @@ const schema = {
               <div class="svc-media">
                 <Image
                   src={getImg(s.image)}
-                  alt={s.title}
+                  alt={`${s.title} на Санторини`}
                   widths={[420, 640, 900]}
                   sizes="(min-width: 900px) 46vw, 92vw"
                   quality={80}

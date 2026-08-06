@@ -16,13 +16,29 @@ const title = 'Политика конфиденциальности | Гид н
 const description =
   'Какие данные собирает сайт, зачем и как долго хранит. Коротко и по делу: счётчиков слежения нет, данные уходят напрямую в мессенджер.';
 
-const schema = {
-  '@context': 'https://schema.org',
-  '@type': 'WebPage',
-  name: title,
-  url: pageUrl('/privacy'),
-  isPartOf: { '@id': `${SITE_URL}/#business` },
-};
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: title,
+    url: pageUrl('/privacy'),
+    isPartOf: { '@id': `${SITE_URL}/#business` },
+  },
+  // Хлебные крошки — как на остальных страницах (добавлено 06.08.2026).
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Главная', item: pageUrl('/') },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Политика конфиденциальности',
+        item: pageUrl('/privacy'),
+      },
+    ],
+  },
+];
 ---
 
 <BaseLayout title={title} description={description} schema={schema}>

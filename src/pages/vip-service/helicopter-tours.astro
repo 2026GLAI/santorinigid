@@ -1,14 +1,18 @@
 ---
-import { Image } from 'astro:assets';
+import { getImage, Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Hero from '../../components/Hero.astro';
 import CtaBand from '../../components/CtaBand.astro';
+import Faq from '../../components/Faq.astro';
 import { WHATSAPP, SITE_URL, pageUrl } from '../../data/site';
 import { getImg } from '../../data/images';
 
 import heroHeli from '../../assets/img/heli-hero.jpg';
 
-const title = 'Вертолетные прогулки на Санторини | VIP трансферы в Греции';
+/* OG-картинка 1200×630 для превью ссылки в WhatsApp/Telegram. */
+const og = await getImage({ src: heroHeli, width: 1200, height: 630, format: 'jpeg' });
+
+const title = 'Вертолётные прогулки на Санторини | VIP трансферы в Греции';
 const description =
   'Вертолётные прогулки над Кальдерой Санторини. Robinson R44 и Airbus H125. Обзорные туры 20–60 мин, трансферы на Миконос и Крит. Лицензированные пилоты.';
 
@@ -21,17 +25,39 @@ const FLEET = [
   {
     name: 'Robinson R44',
     image: 'heli-robinson-r44.jpg',
+    alt: 'Вертолёт Robinson R44 для обзорных полётов над Санторини',
     text: 'Классика частных обзорных полётов над Кальдерой. Панорамный обзор и манёвренность — идеально для короткой прогулки над Ией и вулканом.',
   },
   {
     name: 'Airbus H125',
     image: 'heli-airbus-h125.jpg',
+    alt: 'Вертолёт Airbus H125 для межостровных перелётов по Греции',
     text: 'Мощная и устойчивая машина для межостровных перелётов. Уверенно держится в эгейских ветрах, комфортна на длинных маршрутах.',
   },
   {
     name: 'Свадебные полёты и съёмка',
     image: 'heli-wedding.jpg',
+    alt: 'Свадебный полёт на вертолёте над Санторини',
     text: 'Эффектное появление на свадьбе, предложение руки и сердца в полёте, аэрофотосъёмка в труднодоступных локациях острова.',
+  },
+];
+
+/*
+  FAQ: все факты — из этой же страницы (ROUTES, ADVANTAGES и текст
+  CtaBand внизу). Разметку FAQPage отдаёт сам компонент Faq.
+*/
+const HELI_FAQ = [
+  {
+    q: 'Сколько длится вертолётная прогулка над Санторини?',
+    a: 'Обзорный полёт над Кальдерой — 20, 30 или 60 минут на выбор.',
+  },
+  {
+    q: 'Куда можно улететь с Санторини на вертолёте?',
+    a: 'VIP-трансферы: на Крит — 45 минут, на Миконос — 45 минут, в Афины — 75 минут. Вылет с частных площадок, без очередей аэропорта.',
+  },
+  {
+    q: 'Как узнать стоимость полёта?',
+    a: 'Стоимость зависит от борта, маршрута и даты. Напишите мне в WhatsApp или Telegram — подберу вариант и назову точную цену.',
   },
 ];
 
@@ -75,12 +101,12 @@ const schema = [
 ];
 ---
 
-<BaseLayout title={title} description={description} schema={schema}>
+<BaseLayout title={title} description={description} schema={schema} ogImage={og.src}>
   <Hero
     image={heroHeli}
     alt="Вертолёт над деревней Ия и кальдерой Санторини на закате"
     eyebrow="VIP услуги"
-    title="Вертолетные прогулки и VIP-трансферы на Санторини"
+    title="Вертолётные прогулки и VIP-трансферы на Санторини"
     text="Испытайте незабываемые эмоции, взглянув на Кальдеру с высоты птичьего полёта, или доберитесь до соседних островов за считанные минуты."
   >
     <a href={WHATSAPP.helicopter} class="btn btn-whatsapp btn-lg" target="_blank" rel="noopener">
@@ -91,10 +117,13 @@ const schema = [
   <section class="section">
     <div class="container container-narrow reveal">
       <p class="lede text-center">
-        Я предлагаю эксклюзивный сервис частных авиаперелётов по всей Греции. Наша команда
-        профессиональных пилотов обеспечит вашу безопасность и комфорт, а современный авиапарк
-        позволит подобрать идеальное решение — от короткой прогулки над живописной Ией (Oia) до
-        VIP-трансфера на Миконос или Крит.
+        {/* «Наша команда» заменено на первое лицо 06.08.2026: весь сайт
+            написан от «я», и этот абзац выбивался. Факт не изменился —
+            пилоты лицензированные, это подтверждено блоком преимуществ. */}
+        Я предлагаю эксклюзивный сервис частных авиаперелётов по всей Греции. Работаю с
+        лицензированными профессиональными пилотами — они обеспечат вашу безопасность и комфорт,
+        а современный авиапарк позволит подобрать идеальное решение — от короткой прогулки над
+        живописной Ией (Oia) до VIP-трансфера на Миконос или Крит.
       </p>
     </div>
   </section>
@@ -103,7 +132,7 @@ const schema = [
   <section class="section section-alt">
     <div class="container">
       <header class="section-head reveal">
-        <p class="eyebrow">Наш авиапарк</p>
+        <p class="eyebrow">Авиапарк</p>
         <h2 class="section-title">Борта и форматы полётов</h2>
       </header>
       <div class="grid-auto">
@@ -113,7 +142,7 @@ const schema = [
               <div class="heli-media">
                 <Image
                   src={getImg(f.image)}
-                  alt={f.name}
+                  alt={f.alt}
                   widths={[380, 560, 780]}
                   sizes="(min-width: 1000px) 360px, 92vw"
                   quality={80}
@@ -183,6 +212,8 @@ const schema = [
       </div>
     </div>
   </section>
+
+  <Faq items={HELI_FAQ} title="Вопросы о вертолётных турах" />
 
   <CtaBand
     title="Полетим над Кальдерой?"

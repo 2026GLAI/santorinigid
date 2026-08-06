@@ -9,12 +9,23 @@ const title = 'Контакты | Гид на Санторини Владими�
 const description =
   'Связаться с Владимиром — русскоязычным гидом на Санторини. WhatsApp, Telegram, Viber, email. На связи 24/7, отвечаю в течение часа.';
 
-const schema = {
-  '@context': 'https://schema.org',
-  '@type': 'ContactPage',
-  url: pageUrl('/contacts'),
-  mainEntity: { '@id': `${SITE_URL}/#business` },
-};
+const schema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    url: pageUrl('/contacts'),
+    mainEntity: { '@id': `${SITE_URL}/#business` },
+  },
+  // Хлебные крошки — как на остальных страницах (добавлено 06.08.2026).
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Главная', item: pageUrl('/') },
+      { '@type': 'ListItem', position: 2, name: 'Контакты', item: pageUrl('/contacts') },
+    ],
+  },
+];
 
 /**
  * Форма отправляется через Formspree (бесплатный тариф).
