@@ -13,6 +13,7 @@
 import ReviewCard from './ReviewCard.astro';
 import { REVIEWS, REVIEW_SOURCES, REVIEWS_VISIBLE, LEAVE_REVIEW_URL, REVIEW_YEARS } from '../data/reviews';
 import { plural } from '../data/site';
+import { url } from '../data/url';
 
 interface Props {
   title?: string;
@@ -149,7 +150,9 @@ const bySource = REVIEW_SOURCES.map((s) => ({
             >
               Оставить отзыв на Tourister
             </a>
-            <a href="#review-form" class="btn btn-ghost">
+            {/* Форма живёт только на /reviews — на остальных страницах
+                якорь #review-form сам по себе вёл бы в никуда. */}
+            <a href={url('/reviews#review-form')} class="btn btn-ghost">
               Написать отзыв мне
             </a>
           </div>

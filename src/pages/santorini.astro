@@ -4,7 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Faq from '../components/Faq.astro';
-import { WHATSAPP, EXTERNAL, SITE_URL, pageUrl } from '../data/site';
+import { WHATSAPP, EXTERNAL, SITE_URL, CURRENT_YEAR, pageUrl } from '../data/site';
 import { getImg } from '../data/images';
 
 /*
@@ -14,7 +14,7 @@ import { getImg } from '../data/images';
 */
 import heroIsland from '../assets/img/heli-caldera.jpg';
 
-const title = 'О Санторини: достопримечательности, районы и советы гида 2026';
+const title = `О Санторини: достопримечательности, районы и советы гида ${CURRENT_YEAR}`;
 const description =
   'Всё о Санторини от гида, живущего на острове с 1995 года: главные достопримечательности, районы Ия и Имеровигли, как добраться, когда ехать и что посмотреть.';
 

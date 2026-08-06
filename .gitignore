@@ -31,6 +31,7 @@ docs/
 CLAUDE.md
 ПРОЧТИ-МЕНЯ.md
 .claude/
+GPT-5.6-Luna-настройки.md
 
 # служебный кэш wrangler (Cloudflare)
 .wrangler/

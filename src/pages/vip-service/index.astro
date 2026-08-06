@@ -4,7 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { url } from '../../data/url';
 import Hero from '../../components/Hero.astro';
 import CtaBand from '../../components/CtaBand.astro';
-import { WHATSAPP, EXTERNAL, SITE_URL, pageUrl } from '../../data/site';
+import { WHATSAPP, EXTERNAL, SITE_URL, CURRENT_YEAR, pageUrl } from '../../data/site';
 import { getImg } from '../../data/images';
 
 /*
@@ -14,7 +14,7 @@ import { getImg } from '../../data/images';
 */
 import heroVip from '../../assets/img/svc-yacht-aerial.webp';
 
-const title = 'VIP услуги на Санторини | Яхты, вертолёты, отели — 2026';
+const title = `VIP услуги на Санторини | Яхты, вертолёты, отели — ${CURRENT_YEAR}`;
 const description =
   'VIP-сервис на Санторини: аренда яхт и катамаранов, вертолётные прогулки, подбор лучших отелей с видом на Кальдеру и профессиональные фотосессии.';
 
@@ -28,7 +28,10 @@ const SERVICES = [
     href: '/vip-service/yacht-rent-santorini',
     image: 'yacht-targa-46.jpg',
     title: 'Яхты',
-    text: 'Морские прогулки: от групповых круизов на закате до аренды приватных яхт',
+    /* «Групповых круизов» тут БЫЛО и убрано 06.08.2026 по слову владельца:
+       групповой формат (билет на человека) он не продаёт, все цены на
+       странице яхт — за судно целиком. Не возвращать. */
+    text: 'Морские прогулки: от закатных круизов до аренды приватных яхт',
     external: false,
   },
   {

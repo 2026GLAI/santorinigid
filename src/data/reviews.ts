@@ -324,5 +324,12 @@ export const LEAVE_REVIEW_URL =
 /** Сколько отзывов показываем сразу; остальные — под кнопкой (без JS-подгрузки). */
 export const REVIEWS_VISIBLE = 6;
 
-/** Годы, за которые есть отзывы. */
-export const REVIEW_YEARS = { from: '2014', to: '2026' } as const;
+/**
+ * Годы, за которые есть отзывы — считаются из дат самих отзывов.
+ * Появится отзыв 2027 года — диапазон обновится сам, вписывать не надо.
+ */
+const reviewYearNumbers = REVIEWS.map((r) => Number(r.datePublished.slice(0, 4)));
+export const REVIEW_YEARS = {
+  from: String(Math.min(...reviewYearNumbers)),
+  to: String(Math.max(...reviewYearNumbers)),
+} as const;

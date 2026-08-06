@@ -254,7 +254,9 @@ const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [
         z-index: 999;
         padding: var(--sp-3) var(--sp-5);
         background: var(--accent);
-        color: #fff;
+        /* НЕ #fff: в тёмной теме --accent светло-голубой, белый на нём
+           нечитаем (1.53:1). --on-accent задан для каждой темы своим. */
+        color: var(--on-accent);
         border-radius: var(--radius);
         transition: top var(--dur) var(--ease);
       }

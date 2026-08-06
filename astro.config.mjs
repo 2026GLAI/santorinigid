@@ -69,7 +69,13 @@ export default defineConfig({
   integrations: [
     sitemap({
       changefreq: 'monthly',
-      lastmod: new Date('2026-07-25'),
+      /*
+        Дата сборки, не вписанная дата: сайт пересобирается автоматически
+        1-го числа каждого месяца (deploy.yml), содержимое при этом реально
+        обновляется (стаж, год в заголовках) — lastmod честно идёт за ним.
+        Раньше здесь стояло new Date('2026-07-25') намертво.
+      */
+      lastmod: new Date(),
     }),
   ],
   image: {

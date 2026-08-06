@@ -15,9 +15,13 @@ import {
   ISLAND_YEARS_TEXT,
   GUIDE_YEARS_TEXT,
   YEARS_AS_GUIDE,
+  CURRENT_YEAR,
+  eur,
   plural,
   pageUrl,
 } from '../data/site';
+import { YACHTS, YACHT_PRICE_FROM } from '../data/yachts';
+import { HOTELS } from '../data/hotels';
 
 import heroOia from '../assets/img/hero-oia.jpg';
 import portrait from '../assets/img/vladimir-portrait.jpg';
@@ -28,9 +32,8 @@ import heliImg from '../assets/img/heli-hero.jpg';
 import hotelImg from '../assets/img/hotel-perivolas.webp';
 import tourImg from '../assets/img/tour-oia-couple.jpg';
 
-const title = 'Гид на Санторини | Экскурсии, яхты, вертолёты — 2026';
-const description =
-  'Русскоязычный гид на Санторини — на острове с 1995 года. Индивидуальные экскурсии, яхты, вертолёты. Для туристов с лайнеров и с Крита. Цены 2026.';
+const title = `Гид на Санторини | Экскурсии, яхты, вертолёты — ${CURRENT_YEAR}`;
+const description = `Русскоязычный гид на Санторини — на острове с ${ON_ISLAND_SINCE} года. Индивидуальные экскурсии, яхты, вертолёты. Для туристов с лайнеров и с Крита. Цены ${CURRENT_YEAR}.`;
 
 /** Разметка для поисковиков: сайт + личность гида. */
 const schema = [
@@ -68,8 +71,8 @@ const services = [
     href: '/vip-service/yacht-rent-santorini',
     img: yachtImg,
     title: 'Аренда яхт и катамаранов',
-    text: 'Дневные и закатные круизы, Full Day. 8 судов на выбор, всё включено: трансфер, бар, обед на борту.',
-    tag: 'от €1 200',
+    text: `Дневные и закатные круизы, Full Day. ${YACHTS.length} ${plural(YACHTS.length, 'судно', 'судна', 'судов')} на выбор, всё включено: трансфер, бар, обед на борту.`,
+    tag: `от ${eur(YACHT_PRICE_FROM)}`,
   },
   {
     href: '/vip-service/helicopter-tours',
@@ -82,7 +85,7 @@ const services = [
     href: '/vip-service/santorini-hotels-2026',
     img: hotelImg,
     title: 'Лучшие отели острова',
-    text: '14 проверенных отелей с видом на Кальдеру. Бронирование картами РФ и любыми картами мира.',
+    text: `${HOTELS.length} ${plural(HOTELS.length, 'проверенный отель', 'проверенных отеля', 'проверенных отелей')} с видом на Кальдеру. Бронирование картами РФ и любыми картами мира.`,
     tag: 'Подборка',
   },
 ];
@@ -94,7 +97,7 @@ const facts = [
     в 2033 году стаж станет 21 год, и «21 лет» выглядело бы ошибкой.
   */
   { n: String(YEARS_AS_GUIDE), label: `${plural(YEARS_AS_GUIDE, 'год', 'года', 'лет')} как гид` },
-  { n: '8', label: 'судов во флоте' },
+  { n: String(YACHTS.length), label: plural(YACHTS.length, 'судно во флоте', 'судна во флоте', 'судов во флоте') },
   { n: '24/7', label: 'на связи' },
 ];
 ---

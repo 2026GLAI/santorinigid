@@ -150,3 +150,12 @@ export const YACHT_INCLUDED = [
     image: 'yacht-incl-snorkel.jpg',
   },
 ] as const;
+
+/**
+ * Границы цен флота — считаются из таблиц выше, не вписаны цифрой.
+ * «От» — самый дешёвый дневной круиз в низкий сезон,
+ * «до» — самый дорогой Full Day в высокий сезон.
+ * Используются на странице яхт, в плашках главной и в llms.txt.
+ */
+export const YACHT_PRICE_FROM = Math.min(...YACHTS.map((y) => y.low.day));
+export const YACHT_PRICE_TO = Math.max(...YACHTS.map((y) => y.high.full));

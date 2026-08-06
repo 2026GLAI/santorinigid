@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Hero from '../../components/Hero.astro';
 import CtaBand from '../../components/CtaBand.astro';
-import { WHATSAPP, SITE_URL, pageUrl } from '../../data/site';
+import { WHATSAPP, SITE_URL, CURRENT_YEAR, pageUrl } from '../../data/site';
 import { HOTELS } from '../../data/hotels';
 import { getImg } from '../../data/images';
 
@@ -14,7 +14,9 @@ import { getImg } from '../../data/images';
 */
 import heroHotel from '../../assets/img/hotel-katikies.webp';
 
-const title = 'Лучшие отели Санторини 5 звёзд | Вид на Кальдеру 2026';
+/* Год в ЗАГОЛОВКЕ живой, а в АДРЕСЕ страницы (…-hotels-2026) — нет:
+   адрес менять нельзя без 301-редиректа, это решение владельца на зиму. */
+const title = `Лучшие отели Санторини 5 звёзд | Вид на Кальдеру ${CURRENT_YEAR}`;
 const description =
   'Лучшие отели Санторини с видом на Кальдеру. Ия, Имеровигли, Фиростефани. Бронирование картами РФ и зарубежными. Только проверенные объекты.';
 

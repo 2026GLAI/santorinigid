@@ -60,7 +60,13 @@ export const OWNER_FULL_NAME = 'Владимир Лунгу';
 export const ON_ISLAND_SINCE = 1995;
 export const GUIDE_SINCE = 2012;
 
-const CURRENT_YEAR = new Date().getFullYear();
+/**
+ * Текущий год — единственный источник для всех «2026» в заголовках,
+ * описаниях и подсказках. Вписывать год цифрой в тексты НЕЛЬЗЯ:
+ * сайт пересобирается автоматически 1-го числа каждого месяца
+ * (.github/workflows/deploy.yml), и год обновится сам.
+ */
+export const CURRENT_YEAR = new Date().getFullYear();
 
 const YEARS_ON_ISLAND = CURRENT_YEAR - ON_ISLAND_SINCE;
 
@@ -96,6 +102,13 @@ export function plural(n: number, one: string, few: string, many: string): strin
 /** Готовые строки: «31 год», «14 лет». */
 export const ISLAND_YEARS_TEXT = `${YEARS_ON_ISLAND} ${plural(YEARS_ON_ISLAND, 'год', 'года', 'лет')}`;
 export const GUIDE_YEARS_TEXT = `${YEARS_AS_GUIDE} ${plural(YEARS_AS_GUIDE, 'год', 'года', 'лет')}`;
+
+/**
+ * Цена в евро с пробелом между тысячами: eur(1200) → '€1 200'.
+ * Одна функция на весь сайт (страница яхт, плашки главной, llms.txt) —
+ * копии в разных файлах разошлись бы форматом.
+ */
+export const eur = (n: number) => '€' + n.toLocaleString('ru-RU').replace(/,/g, ' ');
 
 /**
  * Профили на площадках-партнёрах. Идут в JSON-LD (sameAs) — это помогает

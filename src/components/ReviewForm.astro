@@ -17,7 +17,7 @@
  * так отзыв не потеряется. Чтобы включить основной путь, впишите адрес
  * Worker в REVIEW_API ниже. Инструкция: docs/setup-reviews.md
  */
-import { CONTACTS, WA_BASE } from '../data/site';
+import { CONTACTS, WA_BASE, CURRENT_YEAR } from '../data/site';
 
 /**
  * Адрес Worker модерации — включён 28.07.2026.
@@ -55,7 +55,7 @@ const REVIEW_API = 'https://santorinigid-reviews.2026glai.workers.dev/review';
 
         <label class="field">
           <span>Когда были на Санторини?</span>
-          <input type="text" name="tripDate" placeholder="Например: июль 2026" />
+          <input type="text" name="tripDate" placeholder={`Например: июль ${CURRENT_YEAR}`} />
         </label>
       </div>
 

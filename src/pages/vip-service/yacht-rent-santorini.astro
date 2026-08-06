@@ -3,17 +3,20 @@ import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Hero from '../../components/Hero.astro';
 import CtaBand from '../../components/CtaBand.astro';
-import { WHATSAPP, SITE_URL, plural, pageUrl } from '../../data/site';
-import { YACHTS, YACHT_PROGRAMS, YACHT_INCLUDED } from '../../data/yachts';
+import { WHATSAPP, SITE_URL, CURRENT_YEAR, eur, plural, pageUrl } from '../../data/site';
+import {
+  YACHTS,
+  YACHT_PROGRAMS,
+  YACHT_INCLUDED,
+  YACHT_PRICE_FROM,
+  YACHT_PRICE_TO,
+} from '../../data/yachts';
 import { getImg } from '../../data/images';
 
 import heroYacht from '../../assets/img/yacht-nautitech-46.jpg';
 
-const title = 'Аренда яхт на Санторини 2026: Катамараны | Гид Владимир';
-const description =
-  'Аренда яхт и катамаранов на Санторини: дневные и закатные круизы, Full Day. 8 судов, цены 2026, всё включено — трансфер, бар, обед на борту.';
-
-const minPrice = Math.min(...YACHTS.map((y) => y.low.day));
+const title = `Аренда яхт на Санторини ${CURRENT_YEAR}: Катамараны | Гид Владимир`;
+const description = `Аренда яхт и катамаранов на Санторини: дневные и закатные круизы, Full Day. ${YACHTS.length} ${plural(YACHTS.length, 'судно', 'судна', 'судов')}, цены ${CURRENT_YEAR}, всё включено — трансфер, бар, обед на борту.`;
 
 const schema = [
   {
@@ -27,8 +30,8 @@ const schema = [
     offers: {
       '@type': 'AggregateOffer',
       priceCurrency: 'EUR',
-      lowPrice: minPrice,
-      highPrice: Math.max(...YACHTS.map((y) => y.high.full)),
+      lowPrice: YACHT_PRICE_FROM,
+      highPrice: YACHT_PRICE_TO,
       offerCount: YACHTS.length,
     },
   },
@@ -48,7 +51,6 @@ const schema = [
   },
 ];
 
-const eur = (n: number) => '€' + n.toLocaleString('ru-RU').replace(/,/g, ' ');
 ---
 
 <BaseLayout title={title} description={description} schema={schema}>
