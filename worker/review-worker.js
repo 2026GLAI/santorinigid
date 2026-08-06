@@ -11,8 +11,8 @@
  *  1. Гость заполняет форму на сайте → она шлёт данные сюда.
  *  2. Worker кладёт отзыв в хранилище KV и отправляет Владимиру письмо
  *     с полным текстом, фотографиями и двумя кнопками.
- *  3. Владимир жмёт «Опубликовать» → Worker дописывает отзыв в файл
- *     src/data/reviews.ts на GitHub.
+ *  3. Владимир жмёт «Опубликовать» (и подтверждает) → Worker дописывает
+ *     отзыв в файл src/data/reviews.json на GitHub.
  *  4. Изменение файла в ветке main запускает GitHub Actions → сайт
  *     пересобирается сам. Через 2–3 минуты отзыв на сайте.
  *  5. Жмёт «Удалить» → отзыв стирается из KV и никуда не попадает.
@@ -549,7 +549,7 @@ async function handleModerate(url, env) {
 /**
  * Кладём фотографии гостя в public/reviews/ отдельными файлами.
  *
- * Почему не прямо в reviews.ts: фото приходят строкой base64 длиной
+ * Почему не прямо в reviews.json: фото приходят строкой base64 длиной
  * в сотни тысяч знаков. Вписать их в исходный код — раздуть файл на
  * мегабайты, сломать его читаемость и заставить пересобирать сайт
  * на каждой картинке. Файлы в public/ отдаются как есть, без обработки.
@@ -591,11 +591,16 @@ async function uploadPhotos(review, env, headers, branch) {
 }
 
 /**
- * Дописываем отзыв в src/data/reviews.ts и коммитим на GitHub.
+ * Дописываем отзыв в src/data/reviews.json и коммитим на GitHub.
  * Коммит в main запускает GitHub Actions — сайт пересоберётся сам.
+ *
+ * С 06.08.2026 отзывы живут в JSON (не в reviews.ts): его же правит
+ * владелец через админку /admin. JSON разбирается и собирается честно
+ * (JSON.parse/stringify) — никакой текстовой хирургии, сломать формат
+ * файла кривой вставкой невозможно.
  */
 async function publishToGitHub(review, env) {
-  const path = 'src/data/reviews.ts';
+  const path = 'src/data/reviews.json';
   const api = `https://api.github.com/repos/${env.GITHUB_REPO}/contents/${path}`;
   const headers = {
     Authorization: `Bearer ${env.GITHUB_TOKEN}`,
@@ -620,31 +625,32 @@ async function publishToGitHub(review, env) {
     Uint8Array.from(atob(file.content.replace(/\n/g, '')), (c) => c.charCodeAt(0)),
   );
 
-  const marker = 'const ALL: Review[] = [';
-  const at = current.indexOf(marker);
-  if (at < 0) throw new Error('В файле не найден массив отзывов');
+  let json;
+  try {
+    json = JSON.parse(current);
+  } catch {
+    throw new Error('reviews.json повреждён — отзыв не записан');
+  }
+  if (!Array.isArray(json.reviews)) throw new Error('В файле не найден массив отзывов');
 
-  const q = (s) => JSON.stringify(String(s ?? '').replace(/\s+/g, ' ').trim());
-  const entry = `
-  {
-    id: ${q('own-' + review.id.slice(0, 8))},
-    author: ${q(review.author)},
-    text: ${q(review.text)},
-    tripDate: ${q(review.tripDate)},
-    tripWith: ${q(review.tripWith)},
-    published: ${q(review.published)},
-    datePublished: ${q(review.datePublished)},
-    source: ${q('santorinigid.com')},
-    sourceUrl: ${q((env.SITE_URL || 'https://santorinigid.com') + '/reviews/#review-own-' + review.id.slice(0, 8))},${
-      photoUrls.length
-        ? `
-    photos: [${photoUrls.map(q).join(', ')}],`
-        : ''
-    }
-  },`;
+  const clean = (s) => String(s ?? '').replace(/\s+/g, ' ').trim();
+  const entry = {
+    id: 'own-' + review.id.slice(0, 8),
+    author: clean(review.author),
+    text: clean(review.text),
+    tripDate: clean(review.tripDate),
+    tripWith: clean(review.tripWith),
+    published: clean(review.published),
+    datePublished: clean(review.datePublished),
+    source: 'santorinigid.com',
+    sourceUrl:
+      (env.SITE_URL || 'https://santorinigid.com') + '/reviews/#review-own-' + review.id.slice(0, 8),
+  };
+  if (photoUrls.length) entry.photos = photoUrls;
 
-  const insertAt = at + marker.length;
-  const updated = current.slice(0, insertAt) + entry + current.slice(insertAt);
+  // В начало массива; на сайте порядок всё равно задаёт сортировка по дате
+  json.reviews.unshift(entry);
+  const updated = JSON.stringify(json, null, 2) + '\n';
 
   // текст → base64 с поддержкой кириллицы
   const bytes = new TextEncoder().encode(updated);
@@ -666,14 +672,14 @@ async function publishToGitHub(review, env) {
 }
 
 /**
- * Снимает опубликованный отзыв с сайта: вырезает его блок из reviews.ts
+ * Снимает опубликованный отзыв с сайта: вырезает его объект из reviews.json
  * и удаляет файлы его фотографий. Владелец делает это сам, ссылкой из
  * письма или со страницы «Отзыв опубликован» — без правки файлов.
  * Возвращает false, если отзыва в файле уже нет.
  */
 async function unpublishFromGitHub(id, env) {
   const ownId = 'own-' + id.slice(0, 8);
-  const path = 'src/data/reviews.ts';
+  const path = 'src/data/reviews.json';
   const api = `https://api.github.com/repos/${env.GITHUB_REPO}/contents/`;
   const headers = {
     Authorization: `Bearer ${env.GITHUB_TOKEN}`,
@@ -690,33 +696,35 @@ async function unpublishFromGitHub(id, env) {
     Uint8Array.from(atob(file.content.replace(/\n/g, '')), (c) => c.charCodeAt(0)),
   );
 
-  // Блок отзыва ровно той формы, в которой его дописывает publishToGitHub
-  const re = new RegExp(`\\n  \\{\\n    id: ${JSON.stringify(ownId)},[\\s\\S]*?\\n  \\},`);
-  const m = re.exec(current);
-  if (!m) return false;
+  // С 06.08.2026 отзывы в JSON — ищем и вырезаем объект честным разбором
+  let json;
+  try {
+    json = JSON.parse(current);
+  } catch {
+    throw new Error('reviews.json повреждён — ничего не тронуто');
+  }
+  const idx = Array.isArray(json.reviews) ? json.reviews.findIndex((r) => r.id === ownId) : -1;
+  if (idx < 0) return false;
 
   // Файлы фотографий отзыва — тоже удаляем, мусора в репозитории не оставляем
-  const photosMatch = /photos: \[([^\]]*)\]/.exec(m[0]);
-  if (photosMatch) {
-    const urls = [...photosMatch[1].matchAll(/"([^"]+)"/g)].map((x) => x[1]);
-    for (const u of urls) {
-      const p = `public${u}`;
-      try {
-        const fr = await fetch(`${api}${p}?ref=${branch}`, { headers });
-        if (!fr.ok) continue;
-        const f = await fr.json();
-        await fetch(`${api}${p}`, {
-          method: 'DELETE',
-          headers: { ...headers, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: `Фото удалённого отзыва ${ownId}`, sha: f.sha, branch }),
-        });
-      } catch {
-        /* фото не удалилось — не страшно, главное убрать сам отзыв */
-      }
+  for (const u of json.reviews[idx].photos || []) {
+    const p = `public${u}`;
+    try {
+      const fr = await fetch(`${api}${p}?ref=${branch}`, { headers });
+      if (!fr.ok) continue;
+      const f = await fr.json();
+      await fetch(`${api}${p}`, {
+        method: 'DELETE',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: `Фото удалённого отзыва ${ownId}`, sha: f.sha, branch }),
+      });
+    } catch {
+      /* фото не удалилось — не страшно, главное убрать сам отзыв */
     }
   }
 
-  const updated = current.replace(m[0], '');
+  json.reviews.splice(idx, 1);
+  const updated = JSON.stringify(json, null, 2) + '\n';
   const bytes = new TextEncoder().encode(updated);
   let bin = '';
   bytes.forEach((b) => (bin += String.fromCharCode(b)));
