@@ -165,7 +165,7 @@ export default {
 
     // --- 3. Владимир нажал кнопку подтверждения ---
     if (url.pathname === '/moderate' && request.method === 'POST') {
-      return handleModerate(url, env);
+      return handleModerate(url, env, request);
     }
 
     return json({ error: 'Not found' }, 404, request);
@@ -447,7 +447,7 @@ async function confirmModerate(url, env) {
   }
 
   const KNOWN = {
-    approve: { title: 'Опубликовать отзыв?', btn: '✓ Да, опубликовать', color: '#1b6fa8', tone: 'ok' },
+    approve: { title: 'Опубликовать отзыв?', btn: '✓ Опубликовать отзыв на сайте', color: '#1b6fa8', tone: 'ok' },
     reject: { title: 'Удалить отзыв?', btn: 'Да, удалить', color: '#c0392b', tone: 'err' },
     unpublish: { title: 'Снять отзыв с сайта?', btn: 'Да, снять с сайта', color: '#c0392b', tone: 'err' },
   };
@@ -455,6 +455,8 @@ async function confirmModerate(url, env) {
   if (!known) return page('Непонятное действие', 'Такой команды нет.', 'err');
 
   let text;
+  let quote = '';
+  let replyField = '';
   if (action === 'unpublish') {
     text = 'Отзыв будет удалён со страницы отзывов; сайт пересоберётся за 2–3 минуты.';
   } else {
@@ -468,15 +470,41 @@ async function confirmModerate(url, env) {
       action === 'approve'
         ? `Отзыв от ${esc(review.author)} появится на сайте через 2–3 минуты после подтверждения.`
         : `Отзыв от ${esc(review.author)} будет стёрт и на сайт не попадёт.`;
+
+    // Текст отзыва перед глазами: решение принимается по словам гостя,
+    // а не по памяти о письме. Тем же взглядом пишется и благодарность.
+    quote = `<blockquote style="margin:1.25rem 0 0;padding:.9rem 1.1rem;text-align:left;
+      background:#f6f4ef;border-left:3px solid #1b6fa8;border-radius:0;
+      color:#43535e;font-size:.95rem">${esc(review.text)}</blockquote>`;
+
+    if (action === 'approve') {
+      // Благодарность публикуется вместе с отзывом — тем же коммитом.
+      // Пустое поле = отзыв выходит без ответа, как и раньше.
+      // Голубая рамка и подпись «для Владимира» — по его просьбе 06.08:
+      // владелец должен сразу видеть, что заполняет здесь именно он.
+      replyField = `<div style="margin-top:1.25rem;text-align:left;background:#eef5fb;
+      border:1.5px solid #1b6fa8;border-radius:14px;padding:.9rem 1rem">
+      <label style="display:block">
+      <span style="display:block;font-weight:600;font-size:.9rem;color:#1b6fa8;margin-bottom:.15rem">
+        💙 Окно для Владимира</span>
+      <span style="display:block;font-size:.85rem;color:#43535e;margin-bottom:.5rem">
+        Ваша благодарность гостю — по желанию. Появится на сайте под отзывом.
+        Оставите пустым — отзыв выйдет без ответа.</span>
+      <textarea name="reply" rows="4" maxlength="1000"
+        placeholder="Например: ${esc(review.author)}, спасибо за тёплые слова! Жду вас снова на острове."
+        style="width:100%;box-sizing:border-box;padding:.7rem .9rem;font:inherit;color:inherit;
+        background:#fff;border:1px solid #9dc3de;border-radius:10px;resize:vertical"></textarea>
+      </label></div>`;
+    }
   }
 
   /*
     Значения в адресе формы безопасны для HTML: подпись сверена выше
     (значит id и t — наши собственные), action взят из белого списка.
   */
-  const form = `<form method="post" action="/moderate?id=${id}&action=${action}&t=${token}"
-  style="margin-top:1.5rem">
-  <button type="submit" style="cursor:pointer;border:0;padding:.85em 2em;border-radius:999px;
+  const form = `${quote}<form method="post" action="/moderate?id=${id}&action=${action}&t=${token}"
+  style="margin-top:.25rem">${replyField}
+  <button type="submit" style="cursor:pointer;border:0;margin-top:1.25rem;padding:.85em 2em;border-radius:999px;
   background:${known.color};color:#fff;font:600 16px/1.2 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif">
     ${known.btn}
   </button></form>`;
@@ -484,7 +512,7 @@ async function confirmModerate(url, env) {
   return page(known.title, text, known.tone, form, false);
 }
 
-async function handleModerate(url, env) {
+async function handleModerate(url, env, request) {
   const id = url.searchParams.get('id');
   const action = url.searchParams.get('action');
   const token = url.searchParams.get('t');
@@ -528,6 +556,20 @@ async function handleModerate(url, env) {
   }
 
   if (action === 'approve') {
+    /*
+      Благодарность владельца из поля на странице подтверждения.
+      Старые письма шлют форму без этого поля — formData тогда пустая,
+      а на совсем пустом теле может и упасть, поэтому try/catch.
+    */
+    let reply = '';
+    try {
+      const fd = await request.formData();
+      reply = String(fd.get('reply') || '').replace(/\s+/g, ' ').trim().slice(0, 1000);
+    } catch {
+      /* тела нет — благодарности нет, отзыв публикуется без неё */
+    }
+    if (reply) review.reply = reply;
+
     try {
       await publishToGitHub(review, env);
     } catch (e) {
@@ -537,7 +579,9 @@ async function handleModerate(url, env) {
     const unpublishUrl = `${env.WORKER_URL}/moderate?id=${id}&action=unpublish&t=${token}`;
     return page(
       'Отзыв опубликован',
-      `Отзыв от ${esc(review.author)} появится на сайте через 2–3 минуты — сайт сейчас пересобирается.`,
+      reply
+        ? `Отзыв от ${esc(review.author)} и ваша благодарность появятся на сайте через 2–3 минуты — сайт сейчас пересобирается.`
+        : `Отзыв от ${esc(review.author)} появится на сайте через 2–3 минуты — сайт сейчас пересобирается.`,
       'ok',
       `Передумали? <a href="${unpublishUrl}">Удалить этот отзыв с сайта</a> — можно в любой момент.`,
     );
@@ -646,6 +690,9 @@ async function publishToGitHub(review, env) {
     sourceUrl:
       (env.SITE_URL || 'https://santorinigid.com') + '/reviews/#review-own-' + review.id.slice(0, 8),
   };
+  // Благодарность владельца — рисуется на сайте тем же блоком,
+  // что и его ответы у прежних отзывов с площадок.
+  if (review.reply) entry.reply = clean(review.reply);
   if (photoUrls.length) entry.photos = photoUrls;
 
   // В начало массива; на сайте порядок всё равно задаёт сортировка по дате
