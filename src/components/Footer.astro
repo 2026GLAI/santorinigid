@@ -1,8 +1,14 @@
 ---
 import { Image } from 'astro:assets';
-import { CONTACTS, FOOTER_NAV, COPYRIGHT, WHATSAPP, ISLAND_YEARS_TEXT } from '../data/site';
+import { CONTACTS, FOOTER_NAV, COPYRIGHT, WHATSAPP } from '../data/site';
 import { url } from '../data/url';
+import { fillDeep } from '../data/fill';
+import shared from '../data/pages/shared.json';
 import logo from '../assets/img/logo-dome.png';
+
+/* Тексты подвала — в shared.json (правит владелец через /admin);
+   стаж в слогане — метка {ЛЕТ_НА_ОСТРОВЕ}, считается сборкой. */
+const s = fillDeep(shared.footer);
 ---
 
 <footer class="site-footer">
@@ -17,19 +23,11 @@ import logo from '../assets/img/logo-dome.png';
           loading="lazy"
         />
         <span class="brand-text">
-          <strong>Санторини</strong>
-          <span>гид Владимир</span>
+          <strong>{shared.brand.top}</strong>
+          <span>{shared.brand.sub}</span>
         </span>
       </a>
-      {/*
-        Выражение стоит В СЕРЕДИНЕ строки намеренно: перенос строки перед
-        {…} Astro схлопывает в ничто, и на сайте выходило «острова.31 год»
-        без пробела. Не разбивать эту строку.
-      */}
-      <p class="footer-tagline">
-        Индивидуальные экскурсии, яхты, вертолёты и лучшие отели острова. {ISLAND_YEARS_TEXT} на
-        Санторини — для вашего безупречного дня.
-      </p>
+      <p class="footer-tagline">{s.tagline}</p>
       <div class="socials">
         <a href={WHATSAPP.general} target="_blank" rel="noopener" aria-label="WhatsApp" class="social">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -56,18 +54,18 @@ import logo from '../assets/img/logo-dome.png';
     </div>
 
     <nav class="footer-nav" aria-label="Навигация в подвале">
-      <h2>Разделы</h2>
+      <h2>{s.sectionsTitle}</h2>
       <ul>
         {FOOTER_NAV.map((i) => <li><a href={url(i.href)}>{i.label}</a></li>)}
       </ul>
     </nav>
 
     <div class="footer-contacts">
-      <h2>Контакты</h2>
+      <h2>{s.contactsTitle}</h2>
       <a href={CONTACTS.phoneHref} class="contact-line big">{CONTACTS.phone}</a>
       <p class="messengers">{CONTACTS.messengers}</p>
       <a href={CONTACTS.emailHref} class="contact-line">{CONTACTS.email}</a>
-      <p class="reply-note">Отвечаю в течение часа, на связи 24/7</p>
+      <p class="reply-note">{s.replyNote}</p>
     </div>
   </div>
 
@@ -77,12 +75,10 @@ import logo from '../assets/img/logo-dome.png';
         из-за отступа margin, но при копировании текст слипался). */}
     <p>
       {COPYRIGHT}{' '}
-      <a href={url('/privacy')} class="footer-service">Политика конфиденциальности</a>{' '}
-      <a href={url('/admin')} class="footer-service">Вход для владельца</a>
+      <a href={url('/privacy')} class="footer-service">{s.privacyLink}</a>{' '}
+      <a href={url('/admin')} class="footer-service">{s.ownerLink}</a>
     </p>
-    <p class="made">
-      Сайт работает на статических файлах — без подписок и платформ.
-    </p>
+    <p class="made">{s.made}</p>
   </div>
 </footer>
 

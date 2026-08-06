@@ -15,25 +15,23 @@ import {
   ISLAND_YEARS_TEXT,
   GUIDE_YEARS_TEXT,
   YEARS_AS_GUIDE,
-  CURRENT_YEAR,
-  eur,
   plural,
   pageUrl,
 } from '../data/site';
-import { YACHTS, YACHT_PRICE_FROM } from '../data/yachts';
-import { HOTELS } from '../data/hotels';
+import { YACHTS } from '../data/yachts';
+import { getImg } from '../data/images';
+import { fillDeep } from '../data/fill';
+import data from '../data/pages/index.json';
 
-import heroOia from '../assets/img/hero-oia.jpg';
-import portrait from '../assets/img/vladimir-portrait.jpg';
-import ferry from '../assets/img/ferry-seajets.jpg';
-import cruise from '../assets/img/cruise-tender.jpg';
-import yachtImg from '../assets/img/yacht-nautitech-46.jpg';
-import heliImg from '../assets/img/heli-hero.jpg';
-import hotelImg from '../assets/img/hotel-perivolas.webp';
-import tourImg from '../assets/img/tour-oia-couple.jpg';
+/*
+ * СОДЕРЖИМОЕ СТРАНИЦЫ ЖИВЁТ В src/data/pages/index.json — его правит
+ * владелец через админку /admin (этап 2, 06.08.2026). Здесь только каркас,
+ * вычисления и разметка для поисковиков. Метки {ГОД}, {ЛЕТ_НА_ОСТРОВЕ},
+ * {СУДОВ_ВО_ФЛОТЕ} и другие подставляет сборка — см. src/data/fill.ts.
+ */
+const t = fillDeep(data);
 
-const title = `Гид на Санторини | Экскурсии, яхты, вертолёты — ${CURRENT_YEAR}`;
-const description = `Русскоязычный гид на Санторини — на острове с ${ON_ISLAND_SINCE} года. Индивидуальные экскурсии, яхты, вертолёты. Для туристов с лайнеров и с Крита. Цены ${CURRENT_YEAR}.`;
+const heroOia = getImg(t.hero.image);
 
 /** Разметка для поисковиков: сайт + личность гида. */
 const schema = [
@@ -59,63 +57,39 @@ const schema = [
   },
 ];
 
-const services = [
-  {
-    href: '/tours',
-    img: tourImg,
-    title: 'Индивидуальные экскурсии',
-    text: 'Весь остров за один день: Ия, гора Пророка Ильи, древняя церковь и дегустация вина в подземном музее.',
-    tag: 'Основное',
-  },
-  {
-    href: '/vip-service/yacht-rent-santorini',
-    img: yachtImg,
-    title: 'Аренда яхт и катамаранов',
-    text: `Дневные и закатные круизы, Full Day. ${YACHTS.length} ${plural(YACHTS.length, 'судно', 'судна', 'судов')} на выбор, всё включено: трансфер, бар, обед на борту.`,
-    tag: `от ${eur(YACHT_PRICE_FROM)}`,
-  },
-  {
-    href: '/vip-service/helicopter-tours',
-    img: heliImg,
-    title: 'Вертолётные прогулки',
-    text: 'Кальдера с высоты птичьего полёта и VIP-трансферы на Миконос, Крит и в Афины.',
-    tag: 'VIP',
-  },
-  {
-    href: '/vip-service/santorini-hotels-2026',
-    img: hotelImg,
-    title: 'Лучшие отели острова',
-    text: `${HOTELS.length} ${plural(HOTELS.length, 'проверенный отель', 'проверенных отеля', 'проверенных отелей')} с видом на Кальдеру. Бронирование картами РФ и любыми картами мира.`,
-    tag: 'Подборка',
-  },
-];
-
+/*
+ * Плашки-факты СЧИТАЮТСЯ и в админку не выносятся намеренно: числа и
+ * склонения («14 лет как гид», «8 судов во флоте») обновляются сами —
+ * в 2033 году стаж станет 21 год, и «21 лет» выглядело бы ошибкой.
+ * Это единственный блок главной, который правится только в коде.
+ */
 const facts = [
   { n: String(ON_ISLAND_SINCE), label: 'год переезда на остров' },
-  /*
-    Слово «лет» склоняется вместе с числом, а не вписано намертво:
-    в 2033 году стаж станет 21 год, и «21 лет» выглядело бы ошибкой.
-  */
   { n: String(YEARS_AS_GUIDE), label: `${plural(YEARS_AS_GUIDE, 'год', 'года', 'лет')} как гид` },
   { n: String(YACHTS.length), label: plural(YACHTS.length, 'судно во флоте', 'судна во флоте', 'судов во флоте') },
   { n: '24/7', label: 'на связи' },
 ];
 ---
 
-<BaseLayout title={title} description={description} schema={schema}>
+<BaseLayout
+  title={t.seo.title}
+  description={t.seo.description}
+  schema={schema}
+  edit={[{ label: 'Тексты главной', entry: 'pages/main' }]}
+>
   <Hero
     image={heroOia}
-    alt="Панорама деревни Ия на Санторини: белые дома, синие купола церквей и Эгейское море"
+    alt={t.hero.alt}
     size="full"
     priority
-    eyebrow="Санторини · Греция"
-    title="Индивидуальные экскурсии на Санторини"
-    subtitle="Санторини. Так, как знаю его я."
-    text={`${ISLAND_YEARS_TEXT} жизни на острове и ${GUIDE_YEARS_TEXT} опыта — для вашего безупречного дня.`}
+    eyebrow={t.hero.eyebrow}
+    title={t.hero.title}
+    subtitle={t.hero.subtitle}
+    text={t.hero.text}
   >
-    <a href={url('/tours')} class="btn btn-primary btn-lg">Выбрать экскурсию</a>
+    <a href={url('/tours')} class="btn btn-primary btn-lg">{t.hero.buttonTour}</a>
     <a href={WHATSAPP.tour} class="btn btn-whatsapp btn-lg" target="_blank" rel="noopener">
-      Написать в WhatsApp
+      {t.hero.buttonWhatsApp}
     </a>
   </Hero>
 
@@ -124,31 +98,23 @@ const facts = [
     <div class="container about-grid">
       <div class="about-photo reveal-zoom">
         <Image
-          src={portrait}
-          alt="Владимир — русскоязычный гид на Санторини, на борту яхты"
+          src={getImg(t.about.photo)}
+          alt={t.about.photoAlt}
           widths={[380, 560, 760]}
           sizes="(min-width: 900px) 420px, 90vw"
           quality={82}
         />
         <div class="about-badge">
           <strong>{ISLAND_YEARS_TEXT}</strong>
-          <span>на Санторини</span>
+          <span>{t.about.badgeLabel}</span>
         </div>
       </div>
 
       <div class="about-text reveal">
-        <p class="eyebrow">Гид на Санторини</p>
-        <h2 class="section-title">Рад встрече! Меня зовут Владимир</h2>
-        <p class="lede">
-          Моя история с Санторини началась в {ON_ISLAND_SINCE} году — {ISLAND_YEARS_TEXT} назад.
-          За эти годы я изучил каждый его секрет.
-        </p>
-        <p>
-          Организация отдыха для меня — это прежде всего ответственность за ваши впечатления.
-          Я здесь, чтобы избавить вас от организационных забот, предложить честные рекомендации
-          и провести по маршрутам, проверенным временем. Если вы ищете надёжного проводника и
-          спокойную, дружескую атмосферу — нам по пути.
-        </p>
+        <p class="eyebrow">{t.about.eyebrow}</p>
+        <h2 class="section-title">{t.about.title}</h2>
+        <p class="lede">{t.about.lede}</p>
+        <p>{t.about.text}</p>
         <div class="facts">
           {
             facts.map((f) => (
@@ -159,7 +125,7 @@ const facts = [
             ))
           }
         </div>
-        <a href={url('/about')} class="btn btn-ghost">Подробнее обо мне</a>
+        <a href={url('/about')} class="btn btn-ghost">{t.about.button}</a>
       </div>
     </div>
   </section>
@@ -168,21 +134,18 @@ const facts = [
   <section class="section section-alt">
     <div class="container container-wide">
       <header class="section-head reveal">
-        <p class="eyebrow">Что я предлагаю</p>
-        <h2 class="section-title">Весь Санторини — под ключ</h2>
-        <p class="lede">
-          От обзорной экскурсии на автомобиле до яхты, вертолёта и подбора отеля.
-          Я позабочусь о каждой детали вашего отдыха.
-        </p>
+        <p class="eyebrow">{t.servicesSection.eyebrow}</p>
+        <h2 class="section-title">{t.servicesSection.title}</h2>
+        <p class="lede">{t.servicesSection.lede}</p>
       </header>
 
       <div class="grid-auto reveal-stagger">
         {
-          services.map((s) => (
+          t.services.map((s) => (
             <a href={url(s.href)} class="card service-card">
               <div class="service-media">
                 <Image
-                  src={s.img}
+                  src={getImg(s.image)}
                   alt={s.title}
                   widths={[380, 560, 760]}
                   sizes="(min-width: 1100px) 280px, (min-width: 700px) 45vw, 90vw"
@@ -193,7 +156,7 @@ const facts = [
               <div class="card-body">
                 <h3 class="card-title">{s.title}</h3>
                 <p class="card-text">{s.text}</p>
-                <span class="card-more">Подробнее →</span>
+                <span class="card-more">{t.servicesSection.moreLabel}</span>
               </div>
             </a>
           ))
@@ -207,39 +170,28 @@ const facts = [
     <div class="container split">
       <div class="split-media reveal-left">
         <Image
-          src={ferry}
-          alt="Скоростной паром SeaJets на фоне кальдеры Санторини"
+          src={getImg(t.crete.image)}
+          alt={t.crete.imageAlt}
           widths={[460, 700, 940]}
           sizes="(min-width: 900px) 520px, 90vw"
           quality={80}
         />
       </div>
       <div class="split-text reveal-right">
-        <p class="eyebrow">Однодневная поездка</p>
-        <h2 class="section-title">С Крита на Санторини: без очередей и суеты</h2>
-        <p>
-          Поездка на Санторини с Крита — это классика. Многие мои гости приезжают на один день
-          из портов Ираклиона или Ретимно. Чтобы ваша поездка была легкой, а наша встреча в
-          порту — быстрой, поделюсь парой профессиональных советов:
-        </p>
+        <p class="eyebrow">{t.crete.eyebrow}</p>
+        <h2 class="section-title">{t.crete.title}</h2>
+        <p>{t.crete.intro}</p>
         <ul class="tips">
-          <li>
-            <strong>Выбирайте скоростные паромы:</strong> самый быстрый способ оказаться на
-            острове — это скоростные катамараны (например, компании SeaJets). Путь по морю
-            занимает около 2–2,5 часов.
-          </li>
-          <li>
-            <strong>Бронируйте билеты заранее:</strong> в сезон места на утренние рейсы
-            разлетаются быстро. Лучше иметь электронный билет на руках, чтобы не стоять в
-            кассах порта в день отплытия.
-          </li>
-          <li>
-            <strong>Прибытие в порт Афиньос:</strong> ваш паром придёт в главный порт острова —
-            Афиньос. Это оживленное место, где важно не потеряться в потоке туристов и автобусов.
-          </li>
+          {
+            t.crete.tips.map((tip) => (
+              <li>
+                <strong>{tip.lead}</strong> {tip.text}
+              </li>
+            ))
+          }
         </ul>
         <a href={EXTERNAL.ferries} class="btn btn-ghost" target="_blank" rel="noopener">
-          Расписание паромов ↗
+          {t.crete.ferryButton}
         </a>
       </div>
     </div>
@@ -250,50 +202,34 @@ const facts = [
     <div class="container split split-reverse">
       <div class="split-media reveal-left">
         <Image
-          src={cruise}
-          alt="Круизный лайнер и тендерные лодки у кальдеры Санторини"
+          src={getImg(t.cruise.image)}
+          alt={t.cruise.imageAlt}
           widths={[460, 700, 940]}
           sizes="(min-width: 900px) 520px, 90vw"
           quality={80}
         />
       </div>
       <div class="split-text reveal-right">
-        <p class="eyebrow">Для пассажиров лайнеров</p>
-        <h2 class="section-title">Ваша высадка на берег: как не испортить начало дня</h2>
-        <p>
-          Поскольку крупные суда швартуются чуть дальше от берега, трансфер до порта
-          осуществляется на небольших катерах-тендерах. Чтобы избежать длительного ожидания и
-          начать экскурсию вовремя, настоятельно рекомендую получить номерок на тендерную лодку
-          заблаговременно. Это позволит вам попасть на первый поток.
-        </p>
-        <p>
-          Вы прибудете в Старый порт «Меса Ялос». Оттуда до города Фиры есть несколько вариантов
-          подъёма:
-        </p>
+        <p class="eyebrow">{t.cruise.eyebrow}</p>
+        <h2 class="section-title">{t.cruise.title}</h2>
+        <p>{t.cruise.intro1}</p>
+        <p>{t.cruise.intro2}</p>
         <ul class="tips">
-          <li>
-            <strong>Фуникулёр:</strong> самый быстрый и удобный способ с великолепными
-            панорамными видами (стоимость 10 евро).
-          </li>
-          <li>
-            <strong>Ослики:</strong> традиционный, но более медленный подъём (стоимость 10 евро).
-          </li>
-          <li>
-            <strong>Экстремальный:</strong> пешком по 588 ступеням. Предупреждаю сразу: это
-            сомнительное удовольствие. Идти по жаре в гору, лавируя между осликами и наслаждаясь
-            «ароматами» их жизнедеятельности — не лучшее начало идеального дня.
-          </li>
+          {
+            t.cruise.tips.map((tip) => (
+              <li>
+                <strong>{tip.lead}</strong> {tip.text}
+              </li>
+            ))
+          }
         </ul>
-        <p class="note">
-          Я буду ожидать вас непосредственно у выхода со станции фуникулёра, чтобы сразу же
-          начать нашу индивидуальную программу.
-        </p>
-        <a href={url('/tours')} class="btn btn-primary">Выбрать экскурсию</a>
+        <p class="note">{t.cruise.note}</p>
+        <a href={url('/tours')} class="btn btn-primary">{t.cruise.button}</a>
       </div>
     </div>
   </section>
 
-  <Reviews title="Что говорят мои гости" lede="" />
+  <Reviews title={t.reviewsSection.title} lede="" />
 
   <CtaBand />
 </BaseLayout>

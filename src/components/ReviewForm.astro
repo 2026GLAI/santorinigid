@@ -17,7 +17,16 @@
  * так отзыв не потеряется. Чтобы включить основной путь, впишите адрес
  * Worker в REVIEW_API ниже. Инструкция: docs/setup-reviews.md
  */
-import { CONTACTS, WA_BASE, CURRENT_YEAR } from '../data/site';
+import { CONTACTS, WA_BASE } from '../data/site';
+import { fillDeep } from '../data/fill';
+import shared from '../data/pages/shared.json';
+
+/*
+ * Все надписи формы — в shared.json (правит владелец через /admin);
+ * {ГОД} в подсказке даты считается сборкой. Тексты скрипта уходят
+ * в браузер ТОЛЬКО через define:vars (главная грабля проекта).
+ */
+const s = fillDeep(shared.reviewForm);
 
 /**
  * Адрес Worker модерации — включён 28.07.2026.
@@ -31,64 +40,61 @@ const REVIEW_API = 'https://santorinigid-reviews.2026glai.workers.dev/review';
 <section class="section section-alt" id="review-form">
   <div class="container container-narrow">
     <header class="rf-head reveal">
-      <p class="eyebrow">Ваш отзыв</p>
-      <h2 class="section-title">Расскажите, как прошла ваша поездка</h2>
-      <p class="lede">
-        Мне важно каждое слово — и оно помогает другим путешественникам сделать
-        выбор. Займёт пару минут.
-      </p>
+      <p class="eyebrow">{s.eyebrow}</p>
+      <h2 class="section-title">{s.title}</h2>
+      <p class="lede">{s.lede}</p>
     </header>
 
     <form class="rf-form reveal" id="reviewForm" novalidate>
 
       <div class="rf-row">
         <label class="field">
-          <span>Как вас зовут? <b aria-hidden="true">*</b></span>
+          <span>{s.nameLabel} <b aria-hidden="true">*</b></span>
           <input
             type="text"
             name="author"
             required
             autocomplete="name"
-            placeholder="Имя и фамилия"
+            placeholder={s.namePlaceholder}
           />
         </label>
 
         <label class="field">
-          <span>Когда были на Санторини?</span>
-          <input type="text" name="tripDate" placeholder={`Например: июль ${CURRENT_YEAR}`} />
+          <span>{s.dateLabel}</span>
+          <input type="text" name="tripDate" placeholder={s.datePlaceholder} />
         </label>
       </div>
 
       <div class="rf-row">
         <label class="field">
-          <span>С кем путешествовали?</span>
-          <input type="text" name="tripWith" placeholder="Семейная пара, 2 человека" />
+          <span>{s.withLabel}</span>
+          <input type="text" name="tripWith" placeholder={s.withPlaceholder} />
         </label>
 
         <label class="field">
-          <span>Email или телефон <b aria-hidden="true">*</b></span>
+          <span>{s.contactLabel} <b aria-hidden="true">*</b></span>
           <input
             type="text"
             name="contact"
             required
-            placeholder="чтобы я мог поблагодарить вас"
+            placeholder={s.contactPlaceholder}
           />
         </label>
       </div>
 
       <label class="field">
-        <span>Ваш отзыв <b aria-hidden="true">*</b></span>
+        <span>{s.textLabel} <b aria-hidden="true">*</b></span>
         <textarea
           name="text"
           rows="6"
           required
           minlength="30"
-          placeholder="Что понравилось, какие места запомнились, что было полезно…"></textarea>
-        <small class="rf-hint">Минимум 30 символов. Пишите свободно — я ничего не правлю.</small>
+          placeholder={s.textPlaceholder}></textarea>
+        <small class="rf-hint">{s.textHint}</small>
       </label>
 
       <div class="field">
-        <span class="field-label">Фотографии с поездки — до 3 штук</span>
+        <span class="field-label">{s.photosLabel}</span>
         <label class="rf-drop" for="rfPhotos">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="3" y="5" width="18" height="14" rx="2.5" />
@@ -96,8 +102,8 @@ const REVIEW_API = 'https://santorinigid-reviews.2026glai.workers.dev/review';
             <path d="M21 15.5l-4.5-4.5L7 20" />
           </svg>
           <span class="rf-drop-text">
-            <strong>Выберите фото</strong>
-            <small>JPG или PNG, до 5 МБ каждое. Необязательно, но приятно.</small>
+            <strong>{s.photosButton}</strong>
+            <small>{s.photosHint}</small>
           </span>
         </label>
         <input
@@ -113,31 +119,22 @@ const REVIEW_API = 'https://santorinigid-reviews.2026glai.workers.dev/review';
 
       <label class="rf-consent">
         <input type="checkbox" name="consent" required />
-        <span>
-          Согласен, что Владимир опубликует мой отзыв — и фотографии, если я их
-          приложу — на сайте с указанием имени и месяца поездки.
-          Контакты останутся скрытыми.
-        </span>
+        <span>{s.consent}</span>
       </label>
 
       <!-- Ловушка для спам-ботов: люди это поле не видят -->
       <input type="text" name="_gotcha" class="visually-hidden" tabindex="-1" autocomplete="off" />
 
-      <button type="submit" class="btn btn-primary btn-lg rf-submit">Отправить отзыв</button>
+      <button type="submit" class="btn btn-primary btn-lg rf-submit">{s.submit}</button>
 
       <p class="rf-status" id="rfStatus" role="status" aria-live="polite"></p>
 
-      <p class="rf-note">
-        Отзыв — и фотографии, если вы их приложите — появятся на сайте после
-        того, как я их прочитаю и одобрю. Обычно в течение суток. Никакой отзыв не публикуется
-        автоматически: так на страницу невозможно накидать спам, и вы видите
-        здесь только живые отзывы настоящих гостей.
-      </p>
+      <p class="rf-note">{s.note}</p>
     </form>
   </div>
 </section>
 
-<script define:vars={{ hasEndpoint: Boolean(REVIEW_API), REVIEW_API, PHONE: CONTACTS.phone, WA_BASE }}>
+<script define:vars={{ hasEndpoint: Boolean(REVIEW_API), REVIEW_API, PHONE: CONTACTS.phone, WA_BASE, txt: s.script }}>
   const form = document.getElementById('reviewForm');
   const status = document.getElementById('rfStatus');
 
@@ -196,11 +193,11 @@ const REVIEW_API = 'https://santorinigid-reviews.2026glai.workers.dev/review';
 
     for (const file of incoming) {
       if (photos.length >= MAX_PHOTOS) {
-        errors.push(`Можно приложить не больше ${MAX_PHOTOS} фото.`);
+        errors.push(txt.tooMany.replace('{N}', MAX_PHOTOS));
         break;
       }
       if (file.size > MAX_SIZE) {
-        errors.push(`«${file.name}» тяжелее 5 МБ — уменьшите или выберите другое.`);
+        errors.push(txt.tooHeavy.replace('{ФАЙЛ}', file.name));
         continue;
       }
       if (photos.some((p) => p.name === file.name && p.size === file.size)) continue;
@@ -238,30 +235,29 @@ const REVIEW_API = 'https://santorinigid-reviews.2026glai.workers.dev/review';
 
     if (!hasEndpoint) {
       // Worker ещё не подключён — не теряем отзыв, отправляем в WhatsApp.
+      // Все надписи приходят из данных через define:vars (объект txt).
       const msg = [
-        'Здравствуйте, Владимир! Хочу оставить отзыв о поездке.',
+        txt.waIntro,
         '',
-        `Имя: ${author}`,
-        d.get('tripDate') ? `Когда были: ${d.get('tripDate')}` : '',
-        d.get('tripWith') ? `С кем: ${d.get('tripWith')}` : '',
+        `${txt.msgName}: ${author}`,
+        d.get('tripDate') ? `${txt.msgWhen}: ${d.get('tripDate')}` : '',
+        d.get('tripWith') ? `${txt.msgWith}: ${d.get('tripWith')}` : '',
         '',
-        'Отзыв:',
+        txt.msgReview,
         text,
-        photos.length ? `\nПриложу ${photos.length} фото следующим сообщением.` : '',
+        photos.length ? `\n${txt.waPhotosFollow.replace('{N}', photos.length)}` : '',
       ]
         .filter(Boolean)
         .join('\n');
       window.open(WA_BASE + encodeURIComponent(msg), '_blank', 'noopener');
-      status.textContent = photos.length
-        ? 'Открыл WhatsApp с вашим отзывом — нажмите «отправить» и следом прикрепите фото.'
-        : 'Открыл WhatsApp с вашим отзывом — осталось нажать «отправить». Спасибо!';
+      status.textContent = photos.length ? txt.okNoEndpointPhotos : txt.okNoEndpoint;
       status.className = 'rf-status ok';
       return;
     }
 
     const submitBtn = form.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
-    status.textContent = photos.length ? 'Отправляю отзыв и фотографии…' : 'Отправляю…';
+    status.textContent = photos.length ? txt.sendingPhotos : txt.sending;
     status.className = 'rf-status';
 
     try {
@@ -287,17 +283,14 @@ const REVIEW_API = 'https://santorinigid-reviews.2026glai.workers.dev/review';
       photos = [];
       syncInput();
       renderPreviews();
-      status.textContent =
-        'Спасибо! Отзыв отправлен Владимиру. Он прочитает его и опубликует на сайте — обычно в течение суток.';
+      status.textContent = txt.sent;
       status.className = 'rf-status ok';
     } catch (err) {
       // replace(/\.$/ …) — у сообщений сервера своя точка на конце,
       // без среза выходило «…WhatsApp.. Напишите» с двумя точками
       status.innerHTML =
-        (err.message ? esc(err.message).replace(/\.\s*$/, '') + '. ' : 'Не получилось отправить. ') +
-        'Напишите отзыв, пожалуйста, в WhatsApp на номер ' +
-        PHONE +
-        ' — так он точно дойдёт.';
+        (err.message ? esc(err.message).replace(/\.\s*$/, '') + '. ' : txt.failDefault + ' ') +
+        txt.failTail.replace('{ТЕЛЕФОН}', PHONE);
       status.className = 'rf-status err';
     } finally {
       submitBtn.disabled = false;

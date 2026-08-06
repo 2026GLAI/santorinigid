@@ -185,3 +185,834 @@ collections:
                 widget: list
                 required: false
                 field: { name: photo, label: '📷 Путь к фото', widget: string }
+
+  # ═════════════════════ ТЕКСТЫ СТРАНИЦ (этап 2, 06.08.2026) ═════════════════════
+  # Каждая страница сайта — свой раздел. В текстах работают МЕТКИ в фигурных
+  # скобках: {ГОД}, {ЛЕТ_НА_ОСТРОВЕ}, {ЛЕТ_ГИДОМ}, {НА_ОСТРОВЕ_С}, {ГИД_С},
+  # {ЧИСЛО_СУДОВ}, {СУДОВ_ВО_ФЛОТЕ}, {ЧИСЛО_ОТЕЛЕЙ}, {ОТЕЛЕЙ_СЛОВОМ},
+  # {ПРОВЕРЕННЫХ_ОТЕЛЕЙ}, {ЧИСЛО_ОТЗЫВОВ}, {ОТЗЫВОВ_СЛОВОМ}, {ГОД_ОТЗЫВОВ_ОТ},
+  # {ГОД_ОТЗЫВОВ_ДО}, {ПЛОЩАДКИ_ОТЗЫВОВ}, {ЦЕНА_ЯХТ_ОТ}, {ЦЕНА_ЯХТ_ДО} —
+  # сборка заменяет их живыми числами (стаж, цены, количества считаются сами).
+  # Метки НЕ УДАЛЯТЬ — иначе число исчезнет из текста.
+  - name: pages
+    label: Тексты страниц
+    files:
+      - name: main
+        label: Главная страница
+        file: src/data/pages/index.json
+        fields:
+          - name: seo
+            label: 'СЕО: заголовок и описание для поисковиков'
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок вкладки (title), widget: string }
+              - { name: description, label: '📝 Описание для поисковиков', widget: text }
+          - name: hero
+            label: Шапка страницы
+            widget: object
+            collapsed: true
+            fields:
+              - { name: image, label: '📷 Файл фото шапки', widget: string }
+              - { name: alt, label: Описание фото для незрячих и поисковиков, widget: string }
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Главный заголовок, widget: string }
+              - { name: subtitle, label: Подзаголовок, widget: string }
+              - { name: text, label: '📝 Текст под заголовком', widget: text }
+              - { name: buttonTour, label: Кнопка «экскурсии», widget: string }
+              - { name: buttonWhatsApp, label: Кнопка WhatsApp, widget: string }
+          - name: about
+            label: Блок «Знакомство»
+            widget: object
+            collapsed: true
+            fields:
+              - { name: photo, label: '📷 Файл портрета', widget: string }
+              - { name: photoAlt, label: Описание фото, widget: string }
+              - { name: badgeLabel, label: Подпись плашки на фото (число считается само), widget: string }
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+              - { name: lede, label: '📝 Первый абзац', widget: text }
+              - { name: text, label: '📝 Второй абзац', widget: text }
+              - { name: button, label: Кнопка, widget: string }
+          - name: servicesSection
+            label: Блок «Услуги» — заголовки
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+              - { name: lede, label: '📝 Подводка', widget: text }
+              - { name: moreLabel, label: Надпись «Подробнее →», widget: string }
+          - name: services
+            label: Карточки услуг
+            label_singular: карточка
+            widget: list
+            collapsed: true
+            summary: '{{fields.title}}'
+            fields:
+              - { name: href, label: '🚫 Адрес страницы (НЕ МЕНЯТЬ)', widget: string }
+              - { name: image, label: '📷 Файл фото', widget: string }
+              - { name: title, label: Название, widget: string }
+              - { name: text, label: '📝 Описание', widget: text }
+              - { name: tag, label: Плашка на фото, widget: string }
+          - name: crete
+            label: Блок «С Крита»
+            widget: object
+            collapsed: true
+            fields:
+              - { name: image, label: '📷 Файл фото', widget: string }
+              - { name: imageAlt, label: Описание фото, widget: string }
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+              - { name: intro, label: '📝 Вступление', widget: text }
+              - name: tips
+                label: Советы
+                label_singular: совет
+                widget: list
+                summary: '{{fields.lead}}'
+                fields:
+                  - { name: lead, label: 'Жирное начало (с двоеточием)', widget: string }
+                  - { name: text, label: '📝 Продолжение', widget: text }
+              - { name: ferryButton, label: Кнопка расписания, widget: string }
+          - name: cruise
+            label: Блок «Круизным пассажирам»
+            widget: object
+            collapsed: true
+            fields:
+              - { name: image, label: '📷 Файл фото', widget: string }
+              - { name: imageAlt, label: Описание фото, widget: string }
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+              - { name: intro1, label: '📝 Первый абзац', widget: text }
+              - { name: intro2, label: '📝 Второй абзац', widget: text }
+              - name: tips
+                label: Варианты подъёма
+                label_singular: вариант
+                widget: list
+                summary: '{{fields.lead}}'
+                fields:
+                  - { name: lead, label: 'Жирное начало (с двоеточием)', widget: string }
+                  - { name: text, label: '📝 Продолжение', widget: text }
+              - { name: note, label: '📝 Врезка о встрече', widget: text }
+              - { name: button, label: Кнопка, widget: string }
+          - name: reviewsSection
+            label: Блок отзывов — заголовок
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+
+      - name: tours-page
+        label: Страница «Экскурсии»
+        file: src/data/pages/tours.json
+        fields:
+          - name: seo
+            label: 'СЕО: заголовок и описание'
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок вкладки, widget: string }
+              - { name: description, label: '📝 Описание для поисковиков', widget: text }
+          - name: hero
+            label: Шапка страницы
+            widget: object
+            collapsed: true
+            fields:
+              - { name: image, label: '📷 Файл фото', widget: string }
+              - { name: alt, label: Описание фото, widget: string }
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Главный заголовок, widget: string }
+              - { name: text, label: '📝 Текст под заголовком', widget: text }
+              - { name: button, label: Кнопка, widget: string }
+          - { name: intro, label: '📝 Вступительный абзац', widget: text }
+          - name: formatSection
+            label: Блок «Формат»
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: 'Заголовок («4 часа» связано с ценами!)', widget: string }
+              - { name: p1, label: '📝 Первый абзац', widget: text }
+              - { name: p2, label: '📝 Второй абзац', widget: text }
+          - name: routeSection
+            label: Блок «Маршрут» — заголовки
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+              - { name: lede, label: '📝 Подводка', widget: text }
+          - name: gallerySection
+            label: Блок «Фотографии» — заголовки
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+              - { name: lede, label: '📝 Подводка', widget: text }
+          - name: reviewsSection
+            label: Блок отзывов — заголовок
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+          - name: cta
+            label: Синяя полоса-призыв внизу
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+              - { name: text, label: '📝 Текст', widget: text }
+
+      - name: santorini
+        label: Страница «О Санторини»
+        file: src/data/pages/santorini.json
+        fields:
+          - name: seo
+            label: 'СЕО: заголовок и описание'
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок вкладки, widget: string }
+              - { name: description, label: '📝 Описание для поисковиков', widget: text }
+          - name: hero
+            label: Шапка страницы
+            widget: object
+            collapsed: true
+            fields:
+              - { name: image, label: '📷 Файл фото', widget: string }
+              - { name: alt, label: Описание фото, widget: string }
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Главный заголовок, widget: string }
+              - { name: text, label: '📝 Текст под заголовком', widget: text }
+              - { name: button, label: Кнопка, widget: string }
+          - { name: intro, label: '📝 Вступительный абзац', widget: text }
+          - name: sightsSection
+            label: Блок «Что посмотреть» — заголовки
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+              - { name: lede, label: '📝 Подводка', widget: text }
+          - name: sights
+            label: Достопримечательности
+            label_singular: место
+            widget: list
+            collapsed: true
+            summary: '{{fields.name}}'
+            fields:
+              - { name: name, label: Название, widget: string }
+              - { name: tag, label: Плашка на фото, widget: string }
+              - { name: image, label: '📷 Файл фото (пусто = карточка без фото; у горы Пророка Ильи пусто НАМЕРЕННО)', widget: string, required: false }
+              - { name: text, label: '📝 Описание (дословно со старого сайта)', widget: text }
+          - name: arrivalSection
+            label: Блок «Как попасть» — заголовки
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+              - { name: ferryButton, label: Кнопка расписания, widget: string }
+          - name: arrival
+            label: Способы добраться
+            label_singular: способ
+            widget: list
+            collapsed: true
+            summary: '{{fields.title}}'
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+              - { name: text, label: '📝 Текст', widget: text }
+          - name: faqSection
+            label: Блок вопросов — заголовки
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+          - name: faq
+            label: Вопросы и ответы
+            label_singular: вопрос
+            widget: list
+            collapsed: true
+            summary: '{{fields.q}}'
+            fields:
+              - { name: q, label: Вопрос, widget: string }
+              - { name: a, label: '📝 Ответ', widget: text }
+          - name: cta
+            label: Синяя полоса-призыв внизу
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+              - { name: text, label: '📝 Текст', widget: text }
+
+      - name: about
+        label: Страница «Обо мне»
+        file: src/data/pages/about.json
+        fields:
+          - name: seo
+            label: 'СЕО: заголовок и описание'
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок вкладки, widget: string }
+              - { name: description, label: '📝 Описание для поисковиков', widget: text }
+          - name: intro
+            label: Знакомство
+            widget: object
+            collapsed: true
+            fields:
+              - { name: photo, label: '📷 Файл портрета', widget: string }
+              - { name: photoAlt, label: Описание фото, widget: string }
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+              - { name: lede, label: '📝 Первый абзац', widget: text }
+              - { name: text, label: '📝 Второй абзац', widget: text }
+              - { name: buttonWrite, label: Кнопка «написать», widget: string }
+              - { name: buttonTours, label: Кнопка «экскурсии», widget: string }
+          - name: pathSection
+            label: Блок «Мой путь» — заголовки
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+          - name: timeline
+            label: Вехи пути
+            label_singular: веха
+            widget: list
+            collapsed: true
+            summary: '{{fields.label}}'
+            fields:
+              - { name: n, label: 'Год (метка {НА_ОСТРОВЕ_С}/{ГИД_С} = живой год)', widget: string }
+              - { name: label, label: Подпись, widget: string }
+              - { name: text, label: '📝 Текст', widget: text }
+          - name: principlesSection
+            label: Блок «Мой подход» — заголовки
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+          - name: principles
+            label: Принципы
+            label_singular: принцип
+            widget: list
+            collapsed: true
+            summary: '{{fields.title}}'
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+              - { name: text, label: '📝 Текст', widget: text }
+          - name: gallerySection
+            label: Блок «Фотографии» — заголовки
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+              - { name: instagramButton, label: Кнопка Instagram, widget: string }
+
+      - name: reviews-page
+        label: Страница «Отзывы» — тексты
+        file: src/data/pages/reviews-page.json
+        fields:
+          - name: seo
+            label: 'СЕО: заголовок и описание'
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок вкладки, widget: string }
+              - { name: description, label: '📝 Описание для поисковиков', widget: text }
+          - name: header
+            label: Шапка страницы
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+              - { name: lede, label: '📝 Подводка (числа — метками)', widget: text }
+              - { name: buttonLeave, label: Кнопка «оставить отзыв», widget: string }
+              - { name: buttonDiscuss, label: Кнопка «обсудить», widget: string }
+          - { name: listTitle, label: Заголовок списка отзывов, widget: string }
+
+      - name: contacts-page
+        label: Страница «Контакты»
+        file: src/data/pages/contacts.json
+        fields:
+          - name: seo
+            label: 'СЕО: заголовок и описание'
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок вкладки, widget: string }
+              - { name: description, label: '📝 Описание для поисковиков', widget: text }
+          - name: hero
+            label: Шапка страницы
+            widget: object
+            collapsed: true
+            fields:
+              - { name: image, label: '📷 Файл фото', widget: string }
+              - { name: alt, label: Описание фото, widget: string }
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Главный заголовок, widget: string }
+              - { name: text, label: '📝 Девиз', widget: text }
+          - name: ways
+            label: Блок «Как связаться»
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+              - { name: lede, label: '📝 Подводка', widget: text }
+              - { name: waNote, label: Подпись у WhatsApp, widget: string }
+              - { name: mailNote, label: Подпись у почты, widget: string }
+          - name: form
+            label: Форма заявки
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+              - { name: sub, label: Подзаголовок, widget: string }
+              - { name: nameLabel, label: Подпись поля имени, widget: string }
+              - { name: namePlaceholder, label: Подсказка в поле имени, widget: string }
+              - { name: emailLabel, label: Подпись поля почты, widget: string }
+              - { name: emailPlaceholder, label: Подсказка в поле почты, widget: string }
+              - { name: phoneLabel, label: Подпись поля телефона, widget: string }
+              - { name: phonePlaceholder, label: Подсказка в поле телефона, widget: string }
+              - { name: detailsLabel, label: Подпись поля дат, widget: string }
+              - { name: detailsPlaceholder, label: Подсказка в поле дат, widget: string }
+              - { name: submit, label: Кнопка отправки, widget: string }
+              - { name: privacyNote, label: '📝 Приписка о конфиденциальности', widget: text }
+          - name: script
+            label: Сообщения формы (статусы и шаблон WhatsApp)
+            widget: object
+            collapsed: true
+            fields:
+              - { name: msgGreeting, label: Приветствие в WhatsApp, widget: string }
+              - { name: msgName, label: 'Подпись «Меня зовут»', widget: string }
+              - { name: msgPhone, label: 'Подпись «Телефон»', widget: string }
+              - { name: msgEmail, label: 'Подпись «Email»', widget: string }
+              - { name: msgDetails, label: 'Подпись «Даты и гости»', widget: string }
+              - { name: okNoEndpoint, label: Статус после открытия WhatsApp, widget: string }
+              - { name: sending, label: 'Статус «отправляю»', widget: string }
+              - { name: sent, label: 'Статус «отправлено»', widget: string }
+              - { name: failBefore, label: 'Ошибка: начало (до ссылки)', widget: string }
+              - { name: failLink, label: 'Ошибка: текст ссылки', widget: string }
+              - { name: failAfter, label: 'Ошибка: конец (после ссылки)', widget: string }
+
+      - name: vip
+        label: Страница «VIP услуги»
+        file: src/data/pages/vip.json
+        fields:
+          - name: seo
+            label: 'СЕО: заголовок и описание'
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок вкладки, widget: string }
+              - { name: description, label: '📝 Описание для поисковиков', widget: text }
+          - name: hero
+            label: Шапка страницы
+            widget: object
+            collapsed: true
+            fields:
+              - { name: image, label: '📷 Файл фото', widget: string }
+              - { name: alt, label: Описание фото, widget: string }
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Главный заголовок, widget: string }
+              - { name: text, label: '📝 Текст под заголовком', widget: text }
+              - { name: button, label: Кнопка, widget: string }
+          - name: servicesSection
+            label: Блок направлений — заголовки
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+              - { name: moreLabel, label: Надпись «Подробнее», widget: string }
+          - name: services
+            label: Карточки направлений
+            label_singular: карточка
+            widget: list
+            collapsed: true
+            summary: '{{fields.title}}'
+            fields:
+              - { name: href, label: '🚫 Адрес (у «Фотосессий» — партнёрская ссылка)', widget: string }
+              - { name: image, label: '📷 Файл фото', widget: string }
+              - { name: title, label: Название, widget: string }
+              - { name: text, label: '📝 Описание', widget: text }
+              - { name: external, label: '🚫 Внешняя ссылка? (НЕ МЕНЯТЬ)', widget: boolean }
+
+      - name: helicopters
+        label: Страница «Вертолёты»
+        file: src/data/pages/helicopters.json
+        fields:
+          - name: seo
+            label: 'СЕО: заголовок и описание'
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок вкладки, widget: string }
+              - { name: description, label: '📝 Описание для поисковиков', widget: text }
+          - name: hero
+            label: Шапка страницы
+            widget: object
+            collapsed: true
+            fields:
+              - { name: image, label: '📷 Файл фото', widget: string }
+              - { name: alt, label: Описание фото, widget: string }
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Главный заголовок, widget: string }
+              - { name: text, label: '📝 Текст под заголовком', widget: text }
+              - { name: button, label: Кнопка, widget: string }
+          - { name: intro, label: '📝 Вступительный абзац', widget: text }
+          - name: fleetSection
+            label: Блок «Авиапарк» — заголовки
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+          - name: fleet
+            label: Борта (состав ждёт подтверждения владельца)
+            label_singular: борт
+            widget: list
+            collapsed: true
+            summary: '{{fields.name}}'
+            fields:
+              - { name: name, label: Название, widget: string }
+              - { name: image, label: '📷 Файл фото', widget: string }
+              - { name: alt, label: Описание фото, widget: string }
+              - { name: text, label: '📝 Описание', widget: text }
+          - name: panorama
+            label: Панорама с подписью
+            widget: object
+            collapsed: true
+            fields:
+              - { name: image, label: '📷 Файл фото', widget: string }
+              - { name: alt, label: Описание фото, widget: string }
+              - { name: caption, label: Подпись на фото, widget: string }
+          - name: routesSection
+            label: Блок «Маршруты» — заголовок
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+          - name: routes
+            label: Маршруты и время
+            label_singular: маршрут
+            widget: list
+            collapsed: true
+            summary: '{{fields.from}} — {{fields.time}}'
+            fields:
+              - { name: from, label: Маршрут, widget: string }
+              - { name: time, label: Время, widget: string }
+          - name: advantagesSection
+            label: Блок «Преимущества» — заголовок
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+          - name: advantages
+            label: Преимущества
+            label_singular: преимущество
+            widget: list
+            collapsed: true
+            summary: '{{fields.title}}'
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+              - { name: text, label: '📝 Текст', widget: text }
+          - name: faqSection
+            label: Блок вопросов — заголовок
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+          - name: faq
+            label: Вопросы и ответы
+            label_singular: вопрос
+            widget: list
+            collapsed: true
+            summary: '{{fields.q}}'
+            fields:
+              - { name: q, label: Вопрос, widget: string }
+              - { name: a, label: '📝 Ответ', widget: text }
+          - name: cta
+            label: Синяя полоса-призыв внизу
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+              - { name: text, label: '📝 Текст', widget: text }
+
+      - name: yachts-page
+        label: Страница «Яхты» — тексты
+        file: src/data/pages/yachts-page.json
+        fields:
+          - name: seo
+            label: 'СЕО: заголовок и описание'
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок вкладки, widget: string }
+              - { name: description, label: '📝 Описание для поисковиков', widget: text }
+          - name: hero
+            label: Шапка страницы
+            widget: object
+            collapsed: true
+            fields:
+              - { name: image, label: '📷 Файл фото', widget: string }
+              - { name: alt, label: Описание фото, widget: string }
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Главный заголовок, widget: string }
+              - { name: text, label: '📝 Текст под заголовком', widget: text }
+              - { name: button, label: Кнопка, widget: string }
+          - { name: intro, label: '📝 Вступительный абзац', widget: text }
+          - name: programsSection
+            label: Блок «Форматы» — заголовки
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+          - name: fleetSection
+            label: Блок «Флот» — заголовки
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: 'Заголовок (метка {СУДОВ_ВО_ФЛОТЕ} = живое число)', widget: string }
+              - { name: lede, label: '📝 Подводка', widget: text }
+              - { name: button, label: Кнопка у судна, widget: string }
+          - name: pricesTable
+            label: Таблица цен — подписи
+            widget: object
+            collapsed: true
+            fields:
+              - { name: colProgram, label: Колонка «Программа», widget: string }
+              - { name: colLow, label: Колонка «Низкий сезон», widget: string }
+              - { name: colHigh, label: Колонка «Высокий сезон», widget: string }
+              - { name: rowDay, label: Строка дневного тура, widget: string }
+              - { name: rowSunset, label: Строка закатного тура, widget: string }
+              - { name: rowFull, label: Строка «Весь день», widget: string }
+          - name: perks
+            label: Ярлыки «что включено» у судна
+            label_singular: ярлык
+            widget: list
+            collapsed: true
+            summary: '{{fields.label}}'
+            fields:
+              - { name: label, label: Надпись (с эмодзи), widget: string }
+              - { name: hint, label: Всплывающая подсказка, widget: string }
+          - name: includedSection
+            label: Блок «Всё включено» — заголовки
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+          - name: faqSection
+            label: Блок вопросов — заголовок
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+          - name: faq
+            label: Вопросы и ответы (цены — метками!)
+            label_singular: вопрос
+            widget: list
+            collapsed: true
+            summary: '{{fields.q}}'
+            fields:
+              - { name: q, label: Вопрос, widget: string }
+              - { name: a, label: '📝 Ответ', widget: text }
+          - name: cta
+            label: Синяя полоса-призыв внизу
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+              - { name: text, label: '📝 Текст', widget: text }
+
+      - name: hotels-page
+        label: Страница «Отели» — тексты
+        file: src/data/pages/hotels-page.json
+        fields:
+          - name: seo
+            label: 'СЕО: заголовок и описание'
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок вкладки, widget: string }
+              - { name: description, label: '📝 Описание для поисковиков', widget: text }
+          - name: hero
+            label: Шапка страницы
+            widget: object
+            collapsed: true
+            fields:
+              - { name: image, label: '📷 Файл фото', widget: string }
+              - { name: alt, label: Описание фото, widget: string }
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Главный заголовок, widget: string }
+              - { name: text, label: '📝 Текст под заголовком', widget: text }
+          - { name: intro, label: '📝 Вступительный абзац', widget: text }
+          - name: selectionSection
+            label: Блок «Подборка»
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: 'Заголовок (метка {ОТЕЛЕЙ_СЛОВОМ} = живое число)', widget: string }
+              - { name: hotelButton, label: Кнопка бронирования у отеля, widget: string }
+          - name: freedom
+            label: Блок «Ваш выбор — ваша свобода»
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+              - { name: text, label: '📝 Текст', widget: text }
+          - name: disclosure
+            label: Врезка «Честно о моей работе»
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+              - { name: text, label: '📝 Текст', widget: text }
+          - name: cta
+            label: Синяя полоса-призыв внизу
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+              - { name: text, label: '📝 Текст', widget: text }
+
+      - name: notfound
+        label: Страница «404»
+        file: src/data/pages/notfound.json
+        fields:
+          - name: seo
+            label: 'СЕО: заголовок и описание'
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок вкладки, widget: string }
+              - { name: description, label: '📝 Описание', widget: text }
+          - { name: code, label: Большие цифры, widget: string }
+          - { name: title, label: Заголовок, widget: string }
+          - { name: lede, label: '📝 Текст', widget: text }
+          - name: buttons
+            label: Кнопки
+            widget: object
+            collapsed: true
+            fields:
+              - { name: home, label: На главную, widget: string }
+              - { name: tours, label: Экскурсии, widget: string }
+              - { name: vip, label: VIP услуги, widget: string }
+              - { name: whatsapp, label: WhatsApp, widget: string }
+
+      - name: shared
+        label: Общие блоки (шапка, подвал, формы)
+        file: src/data/pages/shared.json
+        fields:
+          - name: brand
+            label: Название в шапке и подвале
+            widget: object
+            collapsed: true
+            fields:
+              - { name: top, label: Первая строка, widget: string }
+              - { name: sub, label: Вторая строка, widget: string }
+          - name: cta
+            label: Синяя полоса-призыв (обычная)
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+              - { name: text, label: '📝 Текст', widget: text }
+              - { name: buttonWhatsApp, label: Кнопка WhatsApp, widget: string }
+              - { name: buttonTelegram, label: Кнопка Telegram, widget: string }
+          - name: faqBlock
+            label: Блок вопросов — обычные заголовки
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+          - name: reviewsBlock
+            label: Блок отзывов на страницах
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Обычный заголовок, widget: string }
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: lede, label: '📝 Подводка', widget: text }
+              - { name: statReviews, label: Подпись числа отзывов, widget: string }
+              - { name: statYears, label: Подпись годов, widget: string }
+              - { name: statReplies, label: Подпись ответов, widget: string }
+              - { name: sourcePrefix, label: 'Текст до списка площадок', widget: string }
+              - { name: sourceSuffix, label: '📝 Текст после списка площадок', widget: text }
+              - { name: collapse, label: Кнопка «Свернуть», widget: string }
+              - name: cta
+                label: Призыв «Были со мной?»
+                widget: object
+                fields:
+                  - { name: title, label: Заголовок, widget: string }
+                  - { name: text, label: '📝 Текст', widget: text }
+                  - { name: buttonTourister, label: Кнопка Tourister, widget: string }
+                  - { name: buttonDirect, label: Кнопка «написать мне», widget: string }
+          - name: reviewForm
+            label: Форма «оставить отзыв»
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+              - { name: lede, label: '📝 Подводка', widget: text }
+              - { name: nameLabel, label: Подпись поля имени, widget: string }
+              - { name: namePlaceholder, label: Подсказка имени, widget: string }
+              - { name: dateLabel, label: Подпись поля даты, widget: string }
+              - { name: datePlaceholder, label: 'Подсказка даты (метка {ГОД})', widget: string }
+              - { name: withLabel, label: Подпись поля компании, widget: string }
+              - { name: withPlaceholder, label: Подсказка компании, widget: string }
+              - { name: contactLabel, label: Подпись поля связи, widget: string }
+              - { name: contactPlaceholder, label: Подсказка связи, widget: string }
+              - { name: textLabel, label: Подпись поля отзыва, widget: string }
+              - { name: textPlaceholder, label: Подсказка отзыва, widget: string }
+              - { name: textHint, label: Приписка под отзывом, widget: string }
+              - { name: photosLabel, label: Подпись блока фото, widget: string }
+              - { name: photosButton, label: Кнопка выбора фото, widget: string }
+              - { name: photosHint, label: Приписка о фото, widget: string }
+              - { name: consent, label: '📝 Текст согласия', widget: text }
+              - { name: submit, label: Кнопка отправки, widget: string }
+              - { name: note, label: '📝 Приписка о модерации', widget: text }
+              - name: script
+                label: Сообщения формы (статусы, WhatsApp)
+                widget: object
+                fields:
+                  - { name: tooMany, label: 'Ошибка «слишком много фото» ({N} = число)', widget: string }
+                  - { name: tooHeavy, label: 'Ошибка «тяжёлое фото» ({ФАЙЛ} = имя файла)', widget: string }
+                  - { name: waIntro, label: Приветствие в WhatsApp, widget: string }
+                  - { name: msgName, label: 'Подпись «Имя»', widget: string }
+                  - { name: msgWhen, label: 'Подпись «Когда были»', widget: string }
+                  - { name: msgWith, label: 'Подпись «С кем»', widget: string }
+                  - { name: msgReview, label: 'Подпись «Отзыв:»', widget: string }
+                  - { name: waPhotosFollow, label: 'Строка о фото ({N} = число)', widget: string }
+                  - { name: okNoEndpointPhotos, label: Статус WhatsApp с фото, widget: string }
+                  - { name: okNoEndpoint, label: Статус WhatsApp без фото, widget: string }
+                  - { name: sendingPhotos, label: 'Статус «отправляю с фото»', widget: string }
+                  - { name: sending, label: 'Статус «отправляю»', widget: string }
+                  - { name: sent, label: 'Статус «отправлено»', widget: string }
+                  - { name: failDefault, label: Ошибка по умолчанию, widget: string }
+                  - { name: failTail, label: 'Хвост ошибки ({ТЕЛЕФОН} = номер)', widget: string }
+          - name: footer
+            label: Подвал сайта
+            widget: object
+            collapsed: true
+            fields:
+              - { name: tagline, label: '📝 Слоган (метка {ЛЕТ_НА_ОСТРОВЕ})', widget: text }
+              - { name: sectionsTitle, label: Заголовок «Разделы», widget: string }
+              - { name: contactsTitle, label: Заголовок «Контакты», widget: string }
+              - { name: replyNote, label: Приписка о скорости ответа, widget: string }
+              - { name: privacyLink, label: Ссылка на политику, widget: string }
+              - { name: ownerLink, label: Ссылка входа владельца, widget: string }
+              - { name: made, label: Нижняя строка, widget: string }

@@ -151,10 +151,13 @@ export const WHATSAPP = {
   general: WA_BASE + encodeURIComponent('Здравствуйте, Владимир!'),
 } as const;
 
-/** Внешние ссылки-партнёры (сохранены с исходного сайта). */
+/**
+ * Внешние ссылки-партнёры (сохранены с исходного сайта).
+ * Ссылка фотосессий «летящее платье» переехала в данные карточки —
+ * src/data/pages/vip.json (этап 2 админки, 06.08.2026).
+ */
 export const EXTERNAL = {
   ferries: 'https://www.ferries.gr/ru/',
-  flyingDress: 'https://sunnyflyingdress.com',
 } as const;
 
 /** Навигация. URL сохранены 1:1 с сайтом на Wix ради SEO-истории. */

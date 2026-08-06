@@ -1,5 +1,13 @@
 ---
 import { WHATSAPP, CONTACTS } from '../data/site';
+import { fillDeep } from '../data/fill';
+import shared from '../data/pages/shared.json';
+
+/*
+ * Дефолтные тексты блока и подписи кнопок живут в src/data/pages/shared.json
+ * (правит владелец через /admin); страницы могут передать свои title/text.
+ */
+const s = fillDeep(shared.cta);
 
 interface Props {
   title?: string;
@@ -7,11 +15,7 @@ interface Props {
   waLink?: string;
 }
 
-const {
-  title = 'Готовы увидеть Санторини без суеты?',
-  text = 'Напишите мне в мессенджер — отвечу в течение часа и помогу составить программу под ваши даты.',
-  waLink = WHATSAPP.general,
-} = Astro.props;
+const { title = s.title, text = s.text, waLink = WHATSAPP.general } = Astro.props;
 ---
 
 <section class="cta-band">
@@ -22,10 +26,10 @@ const {
     </div>
     <div class="cta-actions">
       <a href={waLink} class="btn btn-whatsapp btn-lg" target="_blank" rel="noopener">
-        Написать в WhatsApp
+        {s.buttonWhatsApp}
       </a>
       <a href={CONTACTS.telegram} class="btn btn-ghost btn-lg" target="_blank" rel="noopener">
-        Telegram
+        {s.buttonTelegram}
       </a>
     </div>
   </div>

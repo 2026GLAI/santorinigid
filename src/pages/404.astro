@@ -2,27 +2,26 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { url } from '../data/url';
 import { WHATSAPP } from '../data/site';
+import { fillDeep } from '../data/fill';
+import data from '../data/pages/notfound.json';
+
+/* Тексты страницы — в src/data/pages/notfound.json (админка /admin). */
+const t = fillDeep(data);
 ---
 
-<BaseLayout
-  title="Страница не найдена — Гид на Санторини"
-  description="Такой страницы на сайте нет. Вернитесь на главную или напишите Владимиру напрямую."
-  noindex
->
+<BaseLayout title={t.seo.title} description={t.seo.description} noindex>
   <section class="section notfound">
     <div class="container container-narrow text-center">
-      <p class="code">404</p>
-      <h1>Такой страницы нет</h1>
-      <p class="lede mx-auto">
-        Ссылка устарела или в адресе опечатка. Вот куда можно пойти дальше:
-      </p>
+      <p class="code">{t.code}</p>
+      <h1>{t.title}</h1>
+      <p class="lede mx-auto">{t.lede}</p>
 
       <div class="links">
-        <a href={url('/')} class="btn btn-primary">На главную</a>
-        <a href={url('/tours')} class="btn btn-ghost">Экскурсии</a>
-        <a href={url('/vip-service')} class="btn btn-ghost">VIP услуги</a>
+        <a href={url('/')} class="btn btn-primary">{t.buttons.home}</a>
+        <a href={url('/tours')} class="btn btn-ghost">{t.buttons.tours}</a>
+        <a href={url('/vip-service')} class="btn btn-ghost">{t.buttons.vip}</a>
         <a href={WHATSAPP.general} class="btn btn-whatsapp" target="_blank" rel="noopener">
-          Написать в WhatsApp
+          {t.buttons.whatsapp}
         </a>
       </div>
     </div>

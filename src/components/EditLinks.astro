@@ -1,0 +1,95 @@
+---
+/**
+ * Кнопки «Изменить» для владельца — «как в Wix» (этап 2, 06.08.2026).
+ *
+ * КАК РАБОТАЕТ
+ * Гости этих кнопок НЕ ВИДЯТ: панель показывается только когда на <html>
+ * стоит класс .owner. Класс ставит крошечный скрипт в BaseLayout, если
+ * в браузере есть запись входа админки (localStorage «sveltia-cms.user» —
+ * админка и сайт живут на одном домене, хранилище у них общее).
+ * После автовыхода админки (10 минут покоя) запись стирается, и кнопки
+ * пропадают при следующей загрузке страницы.
+ *
+ * Это НЕ защита, а удобство: ссылки ведут в /admin, где чужого всё равно
+ * остановит вход через GitHub. Подделка класса даст чужаку лишь кнопку
+ * на страницу входа.
+ *
+ * Каждая ссылка открывает НУЖНЫЙ раздел админки глубокой ссылкой
+ * «/admin/#/collections/<раздел>/entries/<имя>» — формат маршрута
+ * подтверждён по коду Sveltia 0.180.1. Пункт «Общие блоки» добавляется
+ * на все страницы сам.
+ */
+interface EditTarget {
+  label: string;
+  /** «раздел/имя», например «pages/main» или «content/yachts». */
+  entry: string;
+}
+
+interface Props {
+  targets?: EditTarget[];
+}
+
+const { targets = [] } = Astro.props;
+
+const items = [
+  ...targets,
+  { label: 'Общие блоки (шапка, подвал)', entry: 'pages/shared' },
+];
+
+const href = (entry: string) => {
+  const [collection, name] = entry.split('/');
+  return `/admin/#/collections/${collection}/entries/${name}`;
+};
+---
+
+<nav class="edit-panel" aria-label="Правка страницы (видно только владельцу)">
+  {
+    items.map((i) => (
+      <a class="edit-link" href={href(i.entry)}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+        </svg>
+        {i.label}
+      </a>
+    ))
+  }
+</nav>
+
+<style>
+  /* Гостям панель не существует: display:none не занимает места. */
+  .edit-panel {
+    display: none;
+  }
+
+  :global(html.owner) .edit-panel {
+    position: fixed;
+    left: var(--sp-3);
+    bottom: var(--sp-3);
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-2);
+  }
+
+  .edit-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    padding: 0.45em 0.9em;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    backdrop-filter: blur(6px);
+    box-shadow: var(--shadow-sm);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .edit-link:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow);
+  }
+</style>

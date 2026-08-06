@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import { NAV, WHATSAPP } from '../data/site';
 import { url } from '../data/url';
+import shared from '../data/pages/shared.json';
 import logo from '../assets/img/logo-dome.png';
 
 /*
@@ -28,8 +29,8 @@ const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWit
         loading="eager"
       />
       <span class="brand-text">
-        <strong>Санторини</strong>
-        <span>гид Владимир</span>
+        <strong>{shared.brand.top}</strong>
+        <span>{shared.brand.sub}</span>
       </span>
     </a>
 

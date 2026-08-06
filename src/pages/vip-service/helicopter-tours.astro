@@ -6,73 +6,25 @@ import CtaBand from '../../components/CtaBand.astro';
 import Faq from '../../components/Faq.astro';
 import { WHATSAPP, SITE_URL, pageUrl } from '../../data/site';
 import { getImg } from '../../data/images';
+import { fillDeep } from '../../data/fill';
+import data from '../../data/pages/helicopters.json';
 
-import heroHeli from '../../assets/img/heli-hero.jpg';
+/*
+ * СОДЕРЖИМОЕ СТРАНИЦЫ ЖИВЁТ В src/data/pages/helicopters.json — его правит
+ * владелец через админку /admin (этап 2, 06.08.2026). Здесь только каркас.
+ *
+ * Борта (fleet): подтверждены разметкой старого сайта и alt-текстами фото.
+ * Точные ТТХ (число мест) не указаны — не выдумываем. Состав авиапарка
+ * (R44/H125/Bell 407) ждёт подтверждения владельца — см. очередь работ.
+ * FAQ: все факты — из содержимого этой же страницы (routes, advantages,
+ * текст cta). Разметку FAQPage отдаёт сам компонент Faq.
+ */
+const t = fillDeep(data);
+
+const heroHeli = getImg(t.hero.image);
 
 /* OG-картинка 1200×630 для превью ссылки в WhatsApp/Telegram. */
 const og = await getImage({ src: heroHeli, width: 1200, height: 630, format: 'jpeg' });
-
-const title = 'Вертолётные прогулки на Санторини | VIP трансферы в Греции';
-const description =
-  'Вертолётные прогулки над Кальдерой Санторини. Robinson R44 и Airbus H125. Обзорные туры 20–60 мин, трансферы на Миконос и Крит. Лицензированные пилоты.';
-
-/**
- * Борта: подтверждены разметкой страницы и alt-текстами фото на сайте.
- * Точные ТТХ (число мест) на странице не указаны — не выдумываем,
- * пишем только то, что подтверждено.
- */
-const FLEET = [
-  {
-    name: 'Robinson R44',
-    image: 'heli-robinson-r44.jpg',
-    alt: 'Вертолёт Robinson R44 для обзорных полётов над Санторини',
-    text: 'Классика частных обзорных полётов над Кальдерой. Панорамный обзор и манёвренность — идеально для короткой прогулки над Ией и вулканом.',
-  },
-  {
-    name: 'Airbus H125',
-    image: 'heli-airbus-h125.jpg',
-    alt: 'Вертолёт Airbus H125 для межостровных перелётов по Греции',
-    text: 'Мощная и устойчивая машина для межостровных перелётов. Уверенно держится в эгейских ветрах, комфортна на длинных маршрутах.',
-  },
-  {
-    name: 'Свадебные полёты и съёмка',
-    image: 'heli-wedding.jpg',
-    alt: 'Свадебный полёт на вертолёте над Санторини',
-    text: 'Эффектное появление на свадьбе, предложение руки и сердца в полёте, аэрофотосъёмка в труднодоступных локациях острова.',
-  },
-];
-
-/*
-  FAQ: все факты — из этой же страницы (ROUTES, ADVANTAGES и текст
-  CtaBand внизу). Разметку FAQPage отдаёт сам компонент Faq.
-*/
-const HELI_FAQ = [
-  {
-    q: 'Сколько длится вертолётная прогулка над Санторини?',
-    a: 'Обзорный полёт над Кальдерой — 20, 30 или 60 минут на выбор.',
-  },
-  {
-    q: 'Куда можно улететь с Санторини на вертолёте?',
-    a: 'VIP-трансферы: на Крит — 45 минут, на Миконос — 45 минут, в Афины — 75 минут. Вылет с частных площадок, без очередей аэропорта.',
-  },
-  {
-    q: 'Как узнать стоимость полёта?',
-    a: 'Стоимость зависит от борта, маршрута и даты. Напишите мне в WhatsApp или Telegram — подберу вариант и назову точную цену.',
-  },
-];
-
-const ROUTES = [
-  { from: 'Обзор Кальдеры', time: '20 / 30 / 60 минут' },
-  { from: 'Санторини — Крит', time: '45 минут' },
-  { from: 'Санторини — Миконос', time: '45 минут' },
-  { from: 'Санторини — Афины', time: '75 минут' },
-];
-
-const ADVANTAGES = [
-  { title: 'Лицензированные пилоты', text: 'Гарантия вашей безопасности и профессионализма.' },
-  { title: 'Частные площадки', text: 'Вылет без очередей и суеты аэропорта.' },
-  { title: 'Конфиденциальность', text: 'Полная приватность вашего перелёта.' },
-];
 
 const schema = [
   {
@@ -101,30 +53,30 @@ const schema = [
 ];
 ---
 
-<BaseLayout title={title} description={description} schema={schema} ogImage={og.src}>
+<BaseLayout
+  title={t.seo.title}
+  description={t.seo.description}
+  schema={schema}
+  ogImage={og.src}
+  edit={[{ label: 'Тексты и борта', entry: 'pages/helicopters' }]}
+>
   <Hero
     image={heroHeli}
-    alt="Вертолёт над деревней Ия и кальдерой Санторини на закате"
-    eyebrow="VIP услуги"
-    title="Вертолётные прогулки и VIP-трансферы на Санторини"
-    text="Испытайте незабываемые эмоции, взглянув на Кальдеру с высоты птичьего полёта, или доберитесь до соседних островов за считанные минуты."
+    alt={t.hero.alt}
+    eyebrow={t.hero.eyebrow}
+    title={t.hero.title}
+    text={t.hero.text}
   >
     <a href={WHATSAPP.helicopter} class="btn btn-whatsapp btn-lg" target="_blank" rel="noopener">
-      Узнать стоимость
+      {t.hero.button}
     </a>
   </Hero>
 
   <section class="section">
     <div class="container container-narrow reveal">
-      <p class="lede text-center">
-        {/* «Наша команда» заменено на первое лицо 06.08.2026: весь сайт
-            написан от «я», и этот абзац выбивался. Факт не изменился —
-            пилоты лицензированные, это подтверждено блоком преимуществ. */}
-        Я предлагаю эксклюзивный сервис частных авиаперелётов по всей Греции. Работаю с
-        лицензированными профессиональными пилотами — они обеспечат вашу безопасность и комфорт,
-        а современный авиапарк позволит подобрать идеальное решение — от короткой прогулки над
-        живописной Ией (Oia) до VIP-трансфера на Миконос или Крит.
-      </p>
+      {/* Абзац от первого лица («наша команда» убрано 06.08.2026):
+          весь сайт написан от «я». */}
+      <p class="lede text-center">{t.intro}</p>
     </div>
   </section>
 
@@ -132,12 +84,12 @@ const schema = [
   <section class="section section-alt">
     <div class="container">
       <header class="section-head reveal">
-        <p class="eyebrow">Авиапарк</p>
-        <h2 class="section-title">Борта и форматы полётов</h2>
+        <p class="eyebrow">{t.fleetSection.eyebrow}</p>
+        <h2 class="section-title">{t.fleetSection.title}</h2>
       </header>
       <div class="grid-auto">
         {
-          FLEET.map((f) => (
+          t.fleet.map((f) => (
             <article class="card heli reveal">
               <div class="heli-media">
                 <Image
@@ -164,24 +116,22 @@ const schema = [
     <div class="container">
       <div class="routes-hero reveal">
         <Image
-          src={getImg('heli-caldera.jpg')}
-          alt="Вертолёт над кальдерой Санторини: вид на вулкан и Эгейское море"
+          src={getImg(t.panorama.image)}
+          alt={t.panorama.alt}
           widths={[640, 960, 1320]}
           sizes="(min-width: 1200px) 1140px, 94vw"
           quality={80}
         />
-        <p class="routes-hero-caption">
-          Кальдера с высоты — то, ради чего стоит подняться в воздух
-        </p>
+        <p class="routes-hero-caption">{t.panorama.caption}</p>
       </div>
     </div>
 
     <div class="container two-panel">
       <div class="panel reveal">
-        <h2 class="panel-title">Маршруты и время</h2>
+        <h2 class="panel-title">{t.routesSection.title}</h2>
         <ul class="routes">
           {
-            ROUTES.map((r) => (
+            t.routes.map((r) => (
               <li>
                 <span class="route-name">{r.from}</span>
                 <span class="route-dots" aria-hidden="true" />
@@ -193,10 +143,10 @@ const schema = [
       </div>
 
       <div class="panel reveal">
-        <h2 class="panel-title">Ваши преимущества</h2>
+        <h2 class="panel-title">{t.advantagesSection.title}</h2>
         <ul class="advantages">
           {
-            ADVANTAGES.map((a) => (
+            t.advantages.map((a) => (
               <li>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M20 6L9 17l-5-5" />
@@ -213,13 +163,9 @@ const schema = [
     </div>
   </section>
 
-  <Faq items={HELI_FAQ} title="Вопросы о вертолётных турах" />
+  <Faq items={t.faq} title={t.faqSection.title} />
 
-  <CtaBand
-    title="Полетим над Кальдерой?"
-    text="Стоимость зависит от борта, маршрута и даты. Напишите мне — подберу вариант и назову точную цену."
-    waLink={WHATSAPP.helicopter}
-  />
+  <CtaBand title={t.cta.title} text={t.cta.text} waLink={WHATSAPP.helicopter} />
 </BaseLayout>
 
 <style>

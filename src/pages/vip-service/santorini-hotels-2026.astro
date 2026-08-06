@@ -3,25 +3,27 @@ import { getImage, Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Hero from '../../components/Hero.astro';
 import CtaBand from '../../components/CtaBand.astro';
-import { WHATSAPP, SITE_URL, CURRENT_YEAR, plural, pageUrl } from '../../data/site';
+import { WHATSAPP, SITE_URL, pageUrl } from '../../data/site';
 import { HOTELS } from '../../data/hotels';
 import { getImg } from '../../data/images';
+import { fillDeep } from '../../data/fill';
+import data from '../../data/pages/hotels-page.json';
 
 /*
-  Шапка страницы отелей — панорама Katikies над морем.
-  Раньше здесь стояло то же фото, что и на странице контактов; одно
-  изображение в двух местах выглядит как недоделка.
-*/
-import heroHotel from '../../assets/img/hotel-katikies.webp';
+ * СОДЕРЖИМОЕ СТРАНИЦЫ ЖИВЁТ В src/data/pages/hotels-page.json (тексты)
+ * и src/data/hotels.json (14 отелей с партнёрскими ссылками) — их правит
+ * владелец через админку /admin. Здесь только каркас.
+ *
+ * Год в ЗАГОЛОВКЕ живой ({ГОД}), а в АДРЕСЕ страницы (…-hotels-2026) — нет:
+ * адрес менять нельзя без 301-редиректа, это решение владельца на зиму.
+ * Шапка — панорама Katikies (раньше повторяла фото страницы контактов).
+ */
+const t = fillDeep(data);
+
+const heroHotel = getImg(t.hero.image);
 
 /* OG-картинка 1200×630 для превью ссылки в WhatsApp/Telegram. */
 const og = await getImage({ src: heroHotel, width: 1200, height: 630, format: 'jpeg' });
-
-/* Год в ЗАГОЛОВКЕ живой, а в АДРЕСЕ страницы (…-hotels-2026) — нет:
-   адрес менять нельзя без 301-редиректа, это решение владельца на зиму. */
-const title = `Лучшие отели Санторини 5 звёзд | Вид на Кальдеру ${CURRENT_YEAR}`;
-const description =
-  'Лучшие отели Санторини с видом на Кальдеру. Ия, Имеровигли, Фиростефани. Бронирование картами РФ и зарубежными. Только проверенные объекты.';
 
 const schema = [
   {
@@ -62,21 +64,27 @@ const schema = [
 ];
 ---
 
-<BaseLayout title={title} description={description} schema={schema} ogImage={og.src}>
+<BaseLayout
+  title={t.seo.title}
+  description={t.seo.description}
+  schema={schema}
+  ogImage={og.src}
+  edit={[
+    { label: 'Тексты страницы', entry: 'pages/hotels-page' },
+    { label: 'Сами отели', entry: 'content/hotels' },
+  ]}
+>
   <Hero
     image={heroHotel}
-    alt="Белоснежный отель на скалах Ии с бассейном над Эгейским морем"
-    eyebrow="VIP услуги"
-    title="Лучшие отели Санторини: мой выбор"
-    text="Я отобрал отели, за которые мне не стыдно."
+    alt={t.hero.alt}
+    eyebrow={t.hero.eyebrow}
+    title={t.hero.title}
+    text={t.hero.text}
   />
 
   <section class="section">
     <div class="container container-narrow reveal">
-      <p class="lede text-center">
-        Безупречный сервис, лучшие виды на Кальдеру и проверенное качество. Доступно моментальное
-        бронирование любыми картами мира (включая карты РФ и UnionPay).
-      </p>
+      <p class="lede text-center">{t.intro}</p>
     </div>
   </section>
 
@@ -85,10 +93,8 @@ const schema = [
       {/* h2 закрывает разрыв иерархии заголовков: раньше после h1 шли
           сразу 14 карточек с h3, без родительского раздела (аудит 06.08). */}
       <header class="section-head reveal">
-        <p class="eyebrow">Подборка</p>
-        <h2 class="section-title">
-          {HOTELS.length} {plural(HOTELS.length, 'отель', 'отеля', 'отелей')} с видом на Кальдеру
-        </h2>
+        <p class="eyebrow">{t.selectionSection.eyebrow}</p>
+        <h2 class="section-title">{t.selectionSection.title}</h2>
       </header>
       <div class="hotels">
         {
@@ -118,7 +124,7 @@ const schema = [
                   target="_blank"
                   rel="noopener sponsored"
                 >
-                  Смотреть на Ostrovok.ru →
+                  {t.selectionSection.hotelButton}
                 </a>
               </div>
             </article>
@@ -132,36 +138,18 @@ const schema = [
   <section class="section">
     <div class="container container-narrow">
       <div class="freedom reveal">
-        <h2 class="section-title">Ваш выбор — ваша свобода</h2>
-        <p>
-          На Санторини сотни прекрасных отелей, и каждый из них по-своему уникален. В этом гиде
-          я собрал лишь часть из них — те объекты, которые мне особенно близки по эстетике и
-          уровню сервиса. Моя цель — не ограничить ваш выбор, а предложить удобные и надёжные
-          способы бронирования через проверенные глобальные сервисы. Я ценю ваше доверие и
-          стремлюсь к тому, чтобы процесс организации отдыха был таким же прозрачным и приятным,
-          как и само путешествие по нашему острову.
-        </p>
+        <h2 class="section-title">{t.freedom.title}</h2>
+        <p>{t.freedom.text}</p>
       </div>
 
       <aside class="disclosure reveal">
-        <h3>Честно о моей работе</h3>
-        <p>
-          Я создал эту страницу как бесплатный навигатор для путешественников. Чтобы поддерживать
-          проект, я использую партнерские ссылки: если вы забронируете отель, перейдя по ним, я
-          могу получить комиссионное вознаграждение. Это не увеличивает стоимость вашего
-          бронирования, но позволяет мне оставаться независимым гидом и делиться с вами личным
-          опытом. Я благодарю вас за поддержку и всегда выступаю за открытость в отношениях с
-          моими гостями.
-        </p>
+        <h3>{t.disclosure.title}</h3>
+        <p>{t.disclosure.text}</p>
       </aside>
     </div>
   </section>
 
-  <CtaBand
-    title="Не знаете, какой отель выбрать?"
-    text="Напишите мне даты, бюджет и пожелания — подскажу, что подойдёт именно вам. Это бесплатно."
-    waLink={WHATSAPP.hotel}
-  />
+  <CtaBand title={t.cta.title} text={t.cta.text} waLink={WHATSAPP.hotel} />
 </BaseLayout>
 
 <style>

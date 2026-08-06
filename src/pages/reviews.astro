@@ -3,16 +3,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Reviews from '../components/Reviews.astro';
 import ReviewForm from '../components/ReviewForm.astro';
 import CtaBand from '../components/CtaBand.astro';
-import { WHATSAPP, plural, pageUrl } from '../data/site';
-import { REVIEWS, REVIEW_SOURCES, REVIEW_YEARS } from '../data/reviews';
+import { WHATSAPP, pageUrl } from '../data/site';
+import { REVIEWS } from '../data/reviews';
+import { fillDeep } from '../data/fill';
+import data from '../data/pages/reviews-page.json';
 
-/** Правильное склонение: 1 отзыв / 2 отзыва / 5 отзывов. */
-const reviewWord = (n: number) => plural(n, 'отзыв', 'отзыва', 'отзывов');
-
-/* Заголовок укорочен 06.08.2026 (был 63 знака — Google резал хвост)
-   и ведёт ключевой запрос владельца «гид на Санторини». */
-const title = `Отзывы о гиде на Санторини Владимире Лунгу — ${REVIEWS.length} ${reviewWord(REVIEWS.length)}`;
-const description = `Реальные отзывы туристов об экскурсиях с русскоязычным гидом Владимиром Лунгу на Санторини за ${REVIEW_YEARS.from}–${REVIEW_YEARS.to} годы. У каждого — ссылка на оригинал.`;
+/*
+ * ТЕКСТЫ СТРАНИЦЫ ЖИВУТ В src/data/pages/reviews-page.json, сами отзывы —
+ * в src/data/reviews.json; владелец правит и то и другое через /admin.
+ * Числа и годы в текстах — метки {ОТЗЫВОВ_СЛОВОМ}, {ГОД_ОТЗЫВОВ_ОТ} и др.:
+ * считаются из самих отзывов (fill.ts). Заголовок укорочен 06.08.2026
+ * (был 63 знака — Google резал хвост) и ведёт ключевой запрос владельца
+ * «гид на Санторини».
+ */
+const t = fillDeep(data);
 
 /**
  * Самый свежий отзыв выносим в шапку: пусть страницу открывает живой голос
@@ -57,22 +61,25 @@ const schema = [
 ];
 ---
 
-<BaseLayout title={title} description={description} schema={schema}>
+<BaseLayout
+  title={t.seo.title}
+  description={t.seo.description}
+  schema={schema}
+  edit={[
+    { label: 'Тексты страницы', entry: 'pages/reviews-page' },
+    { label: 'Сами отзывы', entry: 'content/reviews' },
+  ]}
+>
   <section class="section rv-hero">
     <div class="container rv-hero-grid">
       <div class="rv-hero-text">
-        <p class="eyebrow">Отзывы</p>
-        <h1>Что говорят мои гости</h1>
-        <p class="lede">
-          {REVIEWS.length} {reviewWord(REVIEWS.length)} от людей, которые провели день на Санторини вместе
-          со мной — с {REVIEW_YEARS.from} по {REVIEW_YEARS.to} год. Каждый оставлен на
-          площадке {REVIEW_SOURCES.map((s) => s.name).join(' или ')}, и у каждого есть
-          прямая ссылка на оригинал: можете проверить любой.
-        </p>
+        <p class="eyebrow">{t.header.eyebrow}</p>
+        <h1>{t.header.title}</h1>
+        <p class="lede">{t.header.lede}</p>
         <div class="rv-hero-actions">
-          <a href="#review-form" class="btn btn-primary">Оставить свой отзыв</a>
+          <a href="#review-form" class="btn btn-primary">{t.header.buttonLeave}</a>
           <a href={WHATSAPP.tour} class="btn btn-whatsapp" target="_blank" rel="noopener">
-            Обсудить экскурсию
+            {t.header.buttonDiscuss}
           </a>
         </div>
       </div>
@@ -99,7 +106,7 @@ const schema = [
       «Ещё N отзывов». Решение владельца 28.07.2026: отзывов будет
       становиться больше, страница не должна расти бесконечно.
       Скрытые физически лежат в HTML — поисковики видят все. */}
-  <Reviews title="Все отзывы" eyebrow="" lede="" visible={9} showForm={false} />
+  <Reviews title={t.listTitle} eyebrow="" lede="" visible={9} showForm={false} />
 
   <ReviewForm />
 

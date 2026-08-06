@@ -10,19 +10,26 @@ import {
   SITE_URL,
   OWNER_FULL_NAME,
   PROFILES,
-  ON_ISLAND_SINCE,
-  GUIDE_SINCE,
   ISLAND_YEARS_TEXT,
   GUIDE_YEARS_TEXT,
   pageUrl,
 } from '../data/site';
 import { GALLERY } from '../data/tours';
 import { getImg } from '../data/images';
+import { fillDeep } from '../data/fill';
+import data from '../data/pages/about.json';
 
-import portrait from '../assets/img/vladimir-portrait.jpg';
+/*
+ * СОДЕРЖИМОЕ СТРАНИЦЫ ЖИВЁТ В src/data/pages/about.json — его правит
+ * владелец через админку /admin (этап 2, 06.08.2026). Здесь только каркас.
+ * Метки {НА_ОСТРОВЕ_С}, {ЛЕТ_НА_ОСТРОВЕ}, {ЛЕТ_ГИДОМ} подставляет сборка
+ * (src/data/fill.ts) — даты подтверждены владельцем 2026-07-25, стаж
+ * считается от года. В колонке годов таймлайна — год, а не длительность:
+ * рядом стоят «1995» и «Сегодня», длительность читалась как сбой (аудит 06.08).
+ */
+const t = fillDeep(data);
 
-const title = `Обо мне — Владимир Лунгу, гид на Санторини с ${ON_ISLAND_SINCE} года`;
-const description = `Владимир — русскоязычный гид на Санторини. ${ISLAND_YEARS_TEXT} жизни на острове, ${GUIDE_YEARS_TEXT} профессионального опыта. Честные рекомендации, маршруты, проверенные временем.`;
+const portrait = getImg(t.intro.photo);
 
 const gallery = GALLERY.map((f) => getImg(f));
 
@@ -61,59 +68,20 @@ const schema = [
   },
 ];
 
-const principles = [
-  {
-    title: 'Честные рекомендации',
-    text: 'Я советую то, что действительно стоит вашего времени и денег. Если место переоценено — я скажу об этом прямо.',
-  },
-  {
-    title: 'Только ваша компания',
-    text: 'Никаких сборных групп и чужих людей рядом. Экскурсия проходит только для вас и ваших близких.',
-  },
-  {
-    title: 'Гибкость до последней минуты',
-    text: 'Программа корректируется под вас даже в день экскурсии. Устали — отдохнём, понравилось место — задержимся.',
-  },
-  {
-    title: 'Ответственность за впечатления',
-    text: 'Организация отдыха для меня — это прежде всего ответственность за то, каким вы запомните остров.',
-  },
-];
-
-/**
- * Даты подтверждены владельцем 2026-07-25: на острове с 1995 года,
- * гидом работает около 14 лет (в профиле NeedGuide — «опыт работы с 2012 года»).
- * Стаж не вписан цифрой, а считается от года — см. src/data/site.ts.
- */
-const timeline = [
-  {
-    n: String(ON_ISLAND_SINCE),
-    label: 'переехал на Санторини',
-    text: `Живу на острове с ${ON_ISLAND_SINCE} года — это уже ${ISLAND_YEARS_TEXT}. Знаю здесь каждый поворот дороги.`,
-  },
-  {
-    /* В колонке годов — год, а не длительность: рядом стоят «1995» и
-       «Сегодня», и «14 лет» между ними читалось как сбой (аудит 06.08).
-       Стаж не пропал — он переехал в текст и считается сам. */
-    n: String(GUIDE_SINCE),
-    label: 'работаю гидом',
-    text: `Уже ${GUIDE_YEARS_TEXT} профессионального опыта индивидуальных экскурсий: маршруты, проверенные временем.`,
-  },
-  {
-    n: 'Сегодня',
-    label: 'полный сервис',
-    text: 'Экскурсии, яхты, вертолёты, отели и фотосессии — организую под ключ.',
-  },
-];
 ---
 
-<BaseLayout title={title} description={description} schema={schema}>
+<BaseLayout
+  title={t.seo.title}
+  description={t.seo.description}
+  schema={schema}
+  edit={[{ label: 'Тексты страницы', entry: 'pages/about' }]}
+>
   <section class="section intro-section">
     <div class="container intro">
       <div class="intro-photo reveal">
         <Image
           src={portrait}
-          alt="Владимир — русскоязычный гид на Санторини"
+          alt={t.intro.photoAlt}
           widths={[420, 620, 840]}
           sizes="(min-width: 900px) 460px, 92vw"
           quality={84}
@@ -121,23 +89,15 @@ const timeline = [
         />
       </div>
       <div class="intro-text reveal">
-        <p class="eyebrow">Обо мне</p>
-        <h1>Рад встрече! Меня зовут Владимир</h1>
-        <p class="lede">
-          Моя история с Санторини началась в {ON_ISLAND_SINCE} году — {ISLAND_YEARS_TEXT} назад.
-          За эти годы я изучил каждый его секрет.
-        </p>
-        <p>
-          Организация отдыха для меня — это прежде всего ответственность за ваши впечатления.
-          Я здесь, чтобы избавить вас от организационных забот, предложить честные рекомендации
-          и провести по маршрутам, проверенным временем. Если вы ищете надёжного проводника и
-          спокойную, дружескую атмосферу — нам по пути.
-        </p>
+        <p class="eyebrow">{t.intro.eyebrow}</p>
+        <h1>{t.intro.title}</h1>
+        <p class="lede">{t.intro.lede}</p>
+        <p>{t.intro.text}</p>
         <div class="intro-actions">
           <a href={WHATSAPP.general} class="btn btn-whatsapp" target="_blank" rel="noopener">
-            Написать мне
+            {t.intro.buttonWrite}
           </a>
-          <a href={url('/tours')} class="btn btn-ghost">Мои экскурсии</a>
+          <a href={url('/tours')} class="btn btn-ghost">{t.intro.buttonTours}</a>
         </div>
       </div>
     </div>
@@ -147,16 +107,16 @@ const timeline = [
   <section class="section section-alt">
     <div class="container container-wide">
       <header class="section-head reveal">
-        <p class="eyebrow">Мой путь</p>
-        <h2 class="section-title">На одном острове с 1995 года</h2>
+        <p class="eyebrow">{t.pathSection.eyebrow}</p>
+        <h2 class="section-title">{t.pathSection.title}</h2>
       </header>
       <ol class="timeline">
         {
-          timeline.map((t) => (
+          t.timeline.map((item) => (
             <li class="tl-item reveal">
-              <span class="tl-year">{t.n}</span>
-              <h3>{t.label}</h3>
-              <p>{t.text}</p>
+              <span class="tl-year">{item.n}</span>
+              <h3>{item.label}</h3>
+              <p>{item.text}</p>
             </li>
           ))
         }
@@ -168,12 +128,12 @@ const timeline = [
   <section class="section">
     <div class="container">
       <header class="section-head reveal">
-        <p class="eyebrow">Мой подход</p>
-        <h2 class="section-title">Как я работаю</h2>
+        <p class="eyebrow">{t.principlesSection.eyebrow}</p>
+        <h2 class="section-title">{t.principlesSection.title}</h2>
       </header>
       <div class="grid-auto">
         {
-          principles.map((p) => (
+          t.principles.map((p) => (
             <article class="principle reveal">
               <h3>{p.title}</h3>
               <p>{p.text}</p>
@@ -190,8 +150,8 @@ const timeline = [
   <section class="section">
     <div class="container container-wide">
       <header class="section-head reveal">
-        <p class="eyebrow">Фотографии</p>
-        <h2 class="section-title">Мои гости на острове</h2>
+        <p class="eyebrow">{t.gallerySection.eyebrow}</p>
+        <h2 class="section-title">{t.gallerySection.title}</h2>
       </header>
       <div class="gallery reveal">
         {
@@ -210,7 +170,7 @@ const timeline = [
       </div>
       <p class="ig-link reveal">
         <a href={CONTACTS.instagram} class="btn btn-ghost" target="_blank" rel="noopener">
-          Больше фото в Instagram ↗
+          {t.gallerySection.instagramButton}
         </a>
       </p>
     </div>

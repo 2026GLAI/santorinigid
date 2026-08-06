@@ -2,12 +2,20 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import { CONTACTS, WHATSAPP, WA_BASE, SITE_URL, pageUrl } from '../data/site';
+import { getImg } from '../data/images';
+import { fillDeep } from '../data/fill';
+import data from '../data/pages/contacts.json';
 
-import heroContacts from '../assets/img/contacts-hero.jpg';
+/*
+ * СОДЕРЖИМОЕ СТРАНИЦЫ ЖИВЁТ В src/data/pages/contacts.json — его правит
+ * владелец через админку /admin (этап 2, 06.08.2026). Здесь только каркас.
+ * Тексты СКРИПТА формы (шаблон WhatsApp-сообщения, статусы) тоже в JSON —
+ * в браузер они попадают ТОЛЬКО через define:vars (главная грабля проекта:
+ * импорт в шапке .astro в браузере не существует).
+ */
+const t = fillDeep(data);
 
-const title = 'Контакты | Гид на Санторини Владимир — WhatsApp, Telegram';
-const description =
-  'Связаться с Владимиром — русскоязычным гидом на Санторини. WhatsApp, Telegram, Viber, email. На связи 24/7, отвечаю в течение часа.';
+const heroContacts = getImg(t.hero.image);
 
 const schema = [
   {
@@ -37,13 +45,18 @@ const FORMSPREE_ID = '';
 const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
 ---
 
-<BaseLayout title={title} description={description} schema={schema}>
+<BaseLayout
+  title={t.seo.title}
+  description={t.seo.description}
+  schema={schema}
+  edit={[{ label: 'Тексты страницы', entry: 'pages/contacts-page' }]}
+>
   <Hero
     image={heroContacts}
-    alt="Вечерний вид на Санторини: бассейн отеля и огни Ии на фоне заката"
-    eyebrow="Контакты"
-    title="Ваш персональный гид на Санторини"
-    text="Путешествия помогают понять красоту пространства и бесценность времени."
+    alt={t.hero.alt}
+    eyebrow={t.hero.eyebrow}
+    title={t.hero.title}
+    text={t.hero.text}
   />
 
   <section class="section">
@@ -52,12 +65,9 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
       <div class="ways reveal">
         {/* Заголовок не дублирует первую строку текста: раньше «Я на связи
             24/7» стояло и там, и там. Правка одобрена владельцем 28.07.2026. */}
-        <p class="eyebrow">Как связаться</p>
-        <h2 class="section-title">Всегда на связи</h2>
-        <p class="lede">
-          Я на связи 24/7, чтобы сделать ваше пребывание на острове безупречным. Пишите в любой
-          мессенджер — я отвечу в течение часа.
-        </p>
+        <p class="eyebrow">{t.ways.eyebrow}</p>
+        <h2 class="section-title">{t.ways.title}</h2>
+        <p class="lede">{t.ways.lede}</p>
 
         <ul class="channels">
           <li>
@@ -69,7 +79,7 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
               </span>
               <span class="channel-text">
                 <strong>WhatsApp</strong>
-                <span>Самый быстрый способ — отвечаю первым делом</span>
+                <span>{t.ways.waNote}</span>
               </span>
               <span class="channel-arrow">→</span>
             </a>
@@ -112,7 +122,7 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
               </span>
               <span class="channel-text">
                 <strong>{CONTACTS.email}</strong>
-                <span>Электронная почта</span>
+                <span>{t.ways.mailNote}</span>
               </span>
               <span class="channel-arrow">→</span>
             </a>
@@ -140,10 +150,8 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
       <div class="form-wrap reveal">
         {/* Заголовок не повторяет подпись первого поля («Как к вам
             обращаться?» стояло и тут, и там — читалось как ошибка). */}
-        <h2 class="form-title">Оставьте заявку</h2>
-        <p class="form-sub">
-          Заполните форму — я свяжусь с вами и лично подготовлю предложение.
-        </p>
+        <h2 class="form-title">{t.form.title}</h2>
+        <p class="form-sub">{t.form.sub}</p>
 
         {/*
           novalidate убран намеренно. Он отключал встроенную проверку
@@ -153,58 +161,56 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
         */}
         <form class="form" id="contactForm" action={formAction || undefined} method="POST">
           <label class="field">
-            <span>Как к вам обращаться?</span>
-            <input type="text" name="name" required autocomplete="name" placeholder="Ваше имя" />
+            <span>{t.form.nameLabel}</span>
+            <input type="text" name="name" required autocomplete="name" placeholder={t.form.namePlaceholder} />
           </label>
 
           <label class="field">
-            <span>Ваш Email</span>
+            <span>{t.form.emailLabel}</span>
             <input
               type="email"
               name="email"
               required
               autocomplete="email"
-              placeholder="you@example.com"
+              placeholder={t.form.emailPlaceholder}
             />
           </label>
 
           <label class="field">
-            <span>Ваш номер (WhatsApp/Telegram)</span>
-            <input type="tel" name="phone" autocomplete="tel" placeholder="+7 900 000-00-00" />
+            <span>{t.form.phoneLabel}</span>
+            <input type="tel" name="phone" autocomplete="tel" placeholder={t.form.phonePlaceholder} />
           </label>
 
           <label class="field">
-            <span>Дата отдыха и количество персон</span>
+            <span>{t.form.detailsLabel}</span>
             <textarea
               name="details"
               rows="3"
-              placeholder="Например: 12–18 августа, 2 взрослых и ребёнок"></textarea>
+              placeholder={t.form.detailsPlaceholder}></textarea>
           </label>
 
           <!-- Ловушка для спам-ботов: люди это поле не видят -->
           <input type="text" name="_gotcha" class="visually-hidden" tabindex="-1" autocomplete="off" />
 
-          <button type="submit" class="btn btn-primary btn-lg form-submit">Отправить</button>
+          <button type="submit" class="btn btn-primary btn-lg form-submit">{t.form.submit}</button>
 
           <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
         </form>
 
-        <p class="privacy">
-          Ваши данные конфиденциальны. Я использую их только для того, чтобы лично подготовить
-          для вас лучшее предложение по отдыху на Санторини.
-        </p>
+        <p class="privacy">{t.form.privacyNote}</p>
       </div>
     </div>
   </section>
 </BaseLayout>
 
-<script define:vars={{ hasEndpoint: Boolean(formAction), WA: WHATSAPP.general, WA_BASE }}>
+<script define:vars={{ hasEndpoint: Boolean(formAction), WA: WHATSAPP.general, WA_BASE, txt: t.script }}>
   const form = document.getElementById('contactForm');
   const status = document.getElementById('formStatus');
 
   form?.addEventListener('submit', async (e) => {
     // Пока владелец не подключил Formspree — не теряем заявку:
     // собираем текст и открываем WhatsApp с уже готовым сообщением.
+    // Все надписи приходят из данных через define:vars (объект txt).
     if (!hasEndpoint) {
       e.preventDefault();
       // Проверяем ВСЕ обязательные поля, а не только имя: у полей стоит
@@ -216,23 +222,23 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
       const d = new FormData(form);
       const name = String(d.get('name') || '').trim();
       const msg = [
-        'Здравствуйте, Владимир!',
-        `Меня зовут: ${name}`,
-        d.get('phone') ? `Телефон: ${d.get('phone')}` : '',
-        d.get('email') ? `Email: ${d.get('email')}` : '',
-        d.get('details') ? `Даты и гости: ${d.get('details')}` : '',
+        txt.msgGreeting,
+        `${txt.msgName}: ${name}`,
+        d.get('phone') ? `${txt.msgPhone}: ${d.get('phone')}` : '',
+        d.get('email') ? `${txt.msgEmail}: ${d.get('email')}` : '',
+        d.get('details') ? `${txt.msgDetails}: ${d.get('details')}` : '',
       ]
         .filter(Boolean)
         .join('\n');
       window.open(WA_BASE + encodeURIComponent(msg), '_blank', 'noopener');
-      status.textContent = 'Открыл WhatsApp с вашим сообщением — осталось нажать «отправить».';
+      status.textContent = txt.okNoEndpoint;
       status.className = 'form-status ok';
       return;
     }
 
     // Обычная отправка через Formspree без перезагрузки страницы
     e.preventDefault();
-    status.textContent = 'Отправляю…';
+    status.textContent = txt.sending;
     status.className = 'form-status';
     try {
       const r = await fetch(form.action, {
@@ -242,16 +248,20 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
       });
       if (r.ok) {
         form.reset();
-        status.textContent = 'Спасибо! Ваше сообщение отправлено — отвечу в течение часа.';
+        status.textContent = txt.sent;
         status.className = 'form-status ok';
       } else {
         throw new Error('bad response');
       }
     } catch {
       status.innerHTML =
-        'Не получилось отправить. Напишите мне, пожалуйста, в <a href="' +
+        txt.failBefore +
+        ' <a href="' +
         WA +
-        '" target="_blank" rel="noopener">WhatsApp</a> — так быстрее всего.';
+        '" target="_blank" rel="noopener">' +
+        txt.failLink +
+        '</a> ' +
+        txt.failAfter;
       status.className = 'form-status err';
     }
   });

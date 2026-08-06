@@ -10,6 +10,7 @@ import { url } from '../data/url';
 import Footer from '../components/Footer.astro';
 import ChatWidget from '../components/ChatWidget.astro';
 import ScrollTop from '../components/ScrollTop.astro';
+import EditLinks from '../components/EditLinks.astro';
 import {
   SITE_URL,
   SITE_NAME,
@@ -29,9 +30,18 @@ interface Props {
   /** Дополнительный JSON-LD, специфичный для страницы */
   schema?: Record<string, unknown> | Record<string, unknown>[];
   noindex?: boolean;
+  /** Кнопки «Изменить» для владельца: разделы админки этой страницы. */
+  edit?: { label: string; entry: string }[];
 }
 
-const { title, description, ogImage = '/og-default.jpg', schema, noindex = false } = Astro.props;
+const {
+  title,
+  description,
+  ogImage = '/og-default.jpg',
+  schema,
+  noindex = false,
+  edit = [],
+} = Astro.props;
 
 /*
   Настоящий адрес страницы для Google.
@@ -185,6 +195,20 @@ const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [
   </head>
 
   <body>
+    {/*
+      Кнопки «Изменить» для владельца: если в браузере есть запись входа
+      админки (общий localStorage домена), на <html> ставится класс .owner —
+      его читает панель EditLinks. Гостям класс не ставится, панели нет.
+      Скрипт инлайновый и стоит первым: класс должен появиться до отрисовки.
+    */}
+    <script is:inline>
+      try {
+        if (localStorage.getItem('sveltia-cms.user'))
+          document.documentElement.classList.add('owner');
+      } catch (e) {
+        /* приватный режим без localStorage — просто без кнопок */
+      }
+    </script>
     <a href="#main" class="skip-link">Перейти к содержимому</a>
     {/* Тонкая полоска прогресса чтения. Чисто CSS, без скриптов. */}
     <div class="scroll-progress" aria-hidden="true"></div>
@@ -199,6 +223,7 @@ const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [
         «наверх» и чат, обе справа. */}
     <ScrollTop />
     <ChatWidget />
+    <EditLinks targets={edit} />
 
     <script>
       /*

@@ -4,58 +4,25 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { url } from '../../data/url';
 import Hero from '../../components/Hero.astro';
 import CtaBand from '../../components/CtaBand.astro';
-import { WHATSAPP, EXTERNAL, SITE_URL, CURRENT_YEAR, pageUrl } from '../../data/site';
+import { WHATSAPP, pageUrl } from '../../data/site';
 import { getImg } from '../../data/images';
+import { fillDeep } from '../../data/fill';
+import data from '../../data/pages/vip.json';
 
 /*
-  Шапка раздела услуг — катамаран в бирюзовой воде, снятый сверху.
-  Раньше здесь стояло фото Targa 46, которое уже используется как
-  карточка судна на странице яхт: повтор выглядел небрежно.
-*/
-import heroVip from '../../assets/img/svc-yacht-aerial.webp';
-
-const title = `VIP услуги на Санторини | Яхты, вертолёты, отели — ${CURRENT_YEAR}`;
-const description =
-  'VIP-сервис на Санторини: аренда яхт и катамаранов, вертолётные прогулки, подбор лучших отелей с видом на Кальдеру и профессиональные фотосессии.';
-
-/**
- * Четыре направления. Фото подобраны по смыслу карточки:
- * катамаран с высоты, вертолёт над Ией, инфинити-бассейн отеля
- * и та самая съёмка в «летящем платье».
+ * СОДЕРЖИМОЕ СТРАНИЦЫ ЖИВЁТ В src/data/pages/vip.json — его правит
+ * владелец через админку /admin (этап 2, 06.08.2026). Здесь только каркас.
+ *
+ * Памятки по содержимому (не возвращать без слова владельца):
+ * — «групповых круизов» в карточке яхт УБРАНО 06.08.2026: групповой формат
+ *   (билет на человека) он не продаёт, цены на странице яхт — за судно;
+ * — шапка: катамаран с высоты (Targa 46 здесь повторяла карточку со
+ *   страницы яхт); заголовок «VIP услуги…» вместо «Аренда яхт…» — 28.07;
+ * — ссылка карточки «Фотосессии» — партнёрская (sunnyflyingdress.com).
  */
-const SERVICES = [
-  {
-    href: '/vip-service/yacht-rent-santorini',
-    image: 'yacht-targa-46.jpg',
-    title: 'Яхты',
-    /* «Групповых круизов» тут БЫЛО и убрано 06.08.2026 по слову владельца:
-       групповой формат (билет на человека) он не продаёт, все цены на
-       странице яхт — за судно целиком. Не возвращать. */
-    text: 'Морские прогулки: от закатных круизов до аренды приватных яхт',
-    external: false,
-  },
-  {
-    href: '/vip-service/helicopter-tours',
-    image: 'svc-helicopter.jpg',
-    title: 'Вертолёты',
-    text: 'Полёты над островом: обзорные туры и VIP-трансферы на другие острова Греции',
-    external: false,
-  },
-  {
-    href: '/vip-service/santorini-hotels-2026',
-    image: 'svc-hotel-pool.webp',
-    title: 'Отели',
-    text: 'Откройте для себя коллекцию лучших отелей острова. Уединение, роскошь и закаты, меняющие представление о красоте.',
-    external: false,
-  },
-  {
-    href: EXTERNAL.flyingDress,
-    image: 'svc-flying-dress.jpg',
-    title: 'Фотосессии',
-    text: 'Оставьте в памяти не только впечатления, но и безупречные снимки. Профессиональная съёмка на фоне белоснежной Ии, закатов Кальдеры или знаменитая фотосессия в «летящем платье».',
-    external: true,
-  },
-];
+const t = fillDeep(data);
+
+const heroVip = getImg(t.hero.image);
 
 const schema = {
   '@context': 'https://schema.org',
@@ -67,31 +34,34 @@ const schema = {
 };
 ---
 
-<BaseLayout title={title} description={description} schema={schema}>
-  {/* Прежний заголовок шапки «Аренда яхт…» говорил только про яхты, хотя
-      направлений четыре. Заменён 28.07.2026 с одобрения владельца. */}
+<BaseLayout
+  title={t.seo.title}
+  description={t.seo.description}
+  schema={schema}
+  edit={[{ label: 'Тексты страницы', entry: 'pages/vip' }]}
+>
   <Hero
     image={heroVip}
-    alt="Катамаран на якоре в прозрачной бирюзовой воде у Санторини, вид сверху"
-    eyebrow="Услуги"
-    title="VIP услуги на Санторини"
-    text="Санторини — это не только прогулки по узким улочкам. Это свобода в небе, комфорт на воде и уют в лучших отелях острова. Я позабочусь о каждой детали вашего отдыха"
+    alt={t.hero.alt}
+    eyebrow={t.hero.eyebrow}
+    title={t.hero.title}
+    text={t.hero.text}
   >
     <a href={WHATSAPP.general} class="btn btn-whatsapp btn-lg" target="_blank" rel="noopener">
-      Написать в WhatsApp
+      {t.hero.button}
     </a>
   </Hero>
 
   <section class="section">
     <div class="container container-wide">
       <header class="section-head reveal">
-        <p class="eyebrow">Услуги</p>
-        <h2 class="section-title">Четыре направления</h2>
+        <p class="eyebrow">{t.servicesSection.eyebrow}</p>
+        <h2 class="section-title">{t.servicesSection.title}</h2>
       </header>
 
       <div class="services">
         {
-          SERVICES.map((s) => (
+          t.services.map((s) => (
             <a
               href={s.external ? s.href : url(s.href)}
               class="card svc reveal"
@@ -111,7 +81,7 @@ const schema = {
                 <h3 class="card-title">{s.title}</h3>
                 <p class="card-text">{s.text}</p>
                 <span class="card-more">
-                  Подробнее {s.external ? '↗' : '→'}
+                  {t.servicesSection.moreLabel} {s.external ? '↗' : '→'}
                 </span>
               </div>
             </a>

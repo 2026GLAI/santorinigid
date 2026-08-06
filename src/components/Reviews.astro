@@ -14,6 +14,10 @@ import ReviewCard from './ReviewCard.astro';
 import { REVIEWS, REVIEW_SOURCES, REVIEWS_VISIBLE, LEAVE_REVIEW_URL, REVIEW_YEARS } from '../data/reviews';
 import { plural } from '../data/site';
 import { url } from '../data/url';
+import shared from '../data/pages/shared.json';
+
+/* Тексты блока — в shared.json (правит владелец через /admin). */
+const s = shared.reviewsBlock;
 
 interface Props {
   title?: string;
@@ -27,9 +31,9 @@ interface Props {
 }
 
 const {
-  title = 'Отзывы моих гостей',
-  eyebrow = 'Отзывы',
-  lede = 'Для меня каждая экскурсия — это не просто маршрут, а новая история. Я благодарен моим гостям за доверие и те улыбки, которые делают мою работу лучшей в мире!',
+  title = s.title,
+  eyebrow = s.eyebrow,
+  lede = s.lede,
   alt = false,
   visible = REVIEWS_VISIBLE,
   showForm = true,
@@ -46,11 +50,11 @@ const hidden = REVIEWS.slice(visible);
  * выглядят как цифра и занимают чужое место — такого здесь быть не должно.
  */
 const stats = [
-  { n: String(REVIEWS.length), label: 'отзывов гостей' },
-  { n: `${REVIEW_YEARS.from}–${REVIEW_YEARS.to}`, label: 'годы отзывов' },
+  { n: String(REVIEWS.length), label: s.statReviews },
+  { n: `${REVIEW_YEARS.from}–${REVIEW_YEARS.to}`, label: s.statYears },
   {
     n: String(REVIEWS.filter((r) => r.reply).length),
-    label: 'с моим ответом',
+    label: s.statReplies,
   },
 ];
 
@@ -85,20 +89,19 @@ const bySource = REVIEW_SOURCES.map((s) => ({
         «площадкахTourister.ru» и «(7)— у каждого» без пробелов.
       */}
       <p class="rv-source">
-        Отзывы оставлены на площадках{' '}
+        {s.sourcePrefix}{' '}
         {
-          bySource.map((s, i) => (
+          bySource.map((src, i) => (
             <>
               {i > 0 && ' и '}
-              <a href={s.url} target="_blank" rel="noopener nofollow">
-                {s.name}
+              <a href={src.url} target="_blank" rel="noopener nofollow">
+                {src.name}
               </a>
-              {' '}({s.count})
+              {' '}({src.count})
             </>
           ))
         }
-        {' '}— у каждого есть прямая ссылка на оригинал, вы можете проверить любой.
-        Оценок в звёздах эти площадки не используют, поэтому их здесь нет.
+        {' '}{s.sourceSuffix}
       </p>
     </header>
 
@@ -127,7 +130,7 @@ const bySource = REVIEW_SOURCES.map((s) => ({
             <span class="rv-more-open">
               Ещё {hidden.length} {plural(hidden.length, 'отзыв', 'отзыва', 'отзывов')}
             </span>
-            <span class="rv-more-close">Свернуть</span>
+            <span class="rv-more-close">{s.collapse}</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M6 9l6 6 6-6" />
             </svg>
@@ -139,12 +142,8 @@ const bySource = REVIEW_SOURCES.map((s) => ({
     {
       showForm && (
         <div class="rv-cta reveal">
-          <h3>Были со мной на Санторини?</h3>
-          <p>
-            Буду очень признателен за пару строк — они помогают другим
-            путешественникам решиться. Отзыв можно оставить на площадке, где я
-            работаю много лет, или написать мне напрямую.
-          </p>
+          <h3>{s.cta.title}</h3>
+          <p>{s.cta.text}</p>
           <div class="rv-cta-actions">
             <a
               href={LEAVE_REVIEW_URL}
@@ -152,12 +151,12 @@ const bySource = REVIEW_SOURCES.map((s) => ({
               target="_blank"
               rel="noopener"
             >
-              Оставить отзыв на Tourister
+              {s.cta.buttonTourister}
             </a>
             {/* Форма живёт только на /reviews — на остальных страницах
                 якорь #review-form сам по себе вёл бы в никуда. */}
             <a href={url('/reviews#review-form')} class="btn btn-ghost">
-              Написать отзыв мне
+              {s.cta.buttonDirect}
             </a>
           </div>
         </div>

@@ -5,18 +5,26 @@ import Hero from '../components/Hero.astro';
 import CtaBand from '../components/CtaBand.astro';
 import Faq from '../components/Faq.astro';
 import Reviews from '../components/Reviews.astro';
-import { WHATSAPP, SITE_URL, GUIDE_YEARS_TEXT, CURRENT_YEAR, pageUrl } from '../data/site';
+import { WHATSAPP, SITE_URL, pageUrl } from '../data/site';
 import { TOUR_STOPS, TOUR_DETAILS, FAQ, GALLERY } from '../data/tours';
 import { getImg } from '../data/images';
+import { fillDeep } from '../data/fill';
+import data from '../data/pages/tours.json';
 
-import heroTour from '../assets/img/tour-hero.jpg';
+/*
+ * СОДЕРЖИМОЕ СТРАНИЦЫ ЖИВЁТ В src/data/pages/tours.json — его правит
+ * владелец через админку /admin (этап 2, 06.08.2026). Здесь только каркас.
+ * «4 часа» в заголовке формата — подтверждено владельцем 06.08.2026
+ * (базовая программа, связано с ценами); «4,5 часа» старого сайта было
+ * неточностью. Метки {ГОД}/{ЛЕТ_ГИДОМ} подставляет сборка (fill.ts).
+ */
+const t = fillDeep(data);
+
+const heroTour = getImg(t.hero.image);
 
 /* OG-картинка 1200×630 для превью ссылки в WhatsApp/Telegram — своя у
    страницы, а не общая заглушка. Sharp кадрирует героя при сборке. */
 const og = await getImage({ src: heroTour, width: 1200, height: 630, format: 'jpeg' });
-
-const title = `Индивидуальная экскурсия по Санторини | Гид Владимир ${CURRENT_YEAR}`;
-const description = `Индивидуальная экскурсия по Санторини с русскоязычным гидом. Ия, Имеровигли, скрытые локации без толп. ${GUIDE_YEARS_TEXT} опыта. Цена ${CURRENT_YEAR} года.`;
 
 /** Галерея: фото гостей. */
 const gallery = GALLERY.map((f) => getImg(f));
@@ -54,26 +62,31 @@ const schema = [
 ];
 ---
 
-<BaseLayout title={title} description={description} schema={schema} ogImage={og.src}>
+<BaseLayout
+  title={t.seo.title}
+  description={t.seo.description}
+  schema={schema}
+  ogImage={og.src}
+  edit={[
+    { label: 'Тексты страницы', entry: 'pages/tours-page' },
+    { label: 'Маршрут, условия, вопросы', entry: 'content/tours' },
+  ]}
+>
   <Hero
     image={heroTour}
-    alt="Гости на обзорной экскурсии по Санторини с видом на кальдеру"
-    eyebrow="Экскурсии"
-    title="Индивидуальная обзорная экскурсия по Санторини на автомобиле"
-    text="Весь остров за один день: от синих куполов Санторини до красных пляжей Акротири"
+    alt={t.hero.alt}
+    eyebrow={t.hero.eyebrow}
+    title={t.hero.title}
+    text={t.hero.text}
   >
     <a href={WHATSAPP.tour} class="btn btn-whatsapp btn-lg" target="_blank" rel="noopener">
-      Обсудить экскурсию
+      {t.hero.button}
     </a>
   </Hero>
 
   <section class="section">
     <div class="container container-narrow text-block reveal">
-      <p class="lede">
-        Если вы хотите увидеть Санторини без суеты и толп, обзорная экскурсия — это
-        лучший выбор. Как ваш персональный гид, я не просто покажу вам «визитные карточки»
-        острова, а адаптирую маршрут под ваши интересы и темп.
-      </p>
+      <p class="lede">{t.intro}</p>
     </div>
   </section>
 
@@ -81,28 +94,14 @@ const schema = [
   <section class="section section-alt">
     <div class="container container-wide">
       <header class="section-head reveal">
-        <p class="eyebrow">Формат</p>
-        {/* «4,5 часа» со старого сайта было неточностью — владелец
-            подтвердил 06.08.2026: базовая программа 4 часа (как в ценах). */}
-        <h2 class="section-title">Сердце острова Санторини за 4 часа</h2>
+        <p class="eyebrow">{t.formatSection.eyebrow}</p>
+        <h2 class="section-title">{t.formatSection.title}</h2>
       </header>
       <div class="two-col reveal">
-        {/*
-          Раньше здесь стояли два абзаца, оба начинавшиеся с «Забудьте о…»
-          и говорившие одно и то же. На исходном сайте они лежали в разных
-          блоках и далеко друг от друга, а рядом повтор бросается в глаза.
-          Слиты в один: сохранены обе мысли, но без второго захода.
-        */}
-        <p>
-          Забудьте о стандартных маршрутах, тесных автобусах и строгих расписаниях. Я приглашаю
-          вас в путешествие, где сценарий пишете вы сами. Это индивидуальный формат, созданный
-          для тех, кто ценит комфорт, приватность и свободу выбора. Мы не следуем графику — мы
-          следуем за вашим вдохновением.
-        </p>
-        <p>
-          Санторини — это остров, где каждый поворот дороги открывает новую легенду, а каждый
-          миг становится частью вашей уникальной истории.
-        </p>
+        {/* Два абзаца «Забудьте о…» старого сайта слиты в один 06.08 —
+            сохранены обе мысли, но без повтора. */}
+        <p>{t.formatSection.p1}</p>
+        <p>{t.formatSection.p2}</p>
       </div>
 
       <dl class="details reveal">
@@ -122,12 +121,9 @@ const schema = [
   <section class="section">
     <div class="container">
       <header class="section-head reveal">
-        <p class="eyebrow">Маршрут</p>
-        <h2 class="section-title">Что мы увидим</h2>
-        <p class="lede">
-          Помимо главных достопримечательностей, наш маршрут пройдет через несколько особенных
-          локаций с захватывающими видами.
-        </p>
+        <p class="eyebrow">{t.routeSection.eyebrow}</p>
+        <h2 class="section-title">{t.routeSection.title}</h2>
+        <p class="lede">{t.routeSection.lede}</p>
       </header>
 
       <ol class="stops">
@@ -166,12 +162,9 @@ const schema = [
   <section class="section section-alt">
     <div class="container">
       <header class="section-head reveal">
-        <p class="eyebrow">Фотографии</p>
-        <h2 class="section-title">Отзывы и счастливые моменты моих гостей</h2>
-        <p class="lede">
-          Для меня каждая экскурсия — это не просто маршрут, а новая история. Я благодарен моим
-          гостям за доверие и те улыбки, которые делают мою работу лучшей в мире!
-        </p>
+        <p class="eyebrow">{t.gallerySection.eyebrow}</p>
+        <h2 class="section-title">{t.gallerySection.title}</h2>
+        <p class="lede">{t.gallerySection.lede}</p>
       </header>
 
       <div class="gallery reveal-stagger">
@@ -192,15 +185,11 @@ const schema = [
     </div>
   </section>
 
-  <Reviews title="Слова моих гостей" lede="" />
+  <Reviews title={t.reviewsSection.title} lede="" />
 
   <Faq items={FAQ} />
 
-  <CtaBand
-    title="Составим вашу программу?"
-    text="Напишите даты и число гостей — предложу маршрут и назову цену."
-    waLink={WHATSAPP.tour}
-  />
+  <CtaBand title={t.cta.title} text={t.cta.text} waLink={WHATSAPP.tour} />
 </BaseLayout>
 
 <style>
