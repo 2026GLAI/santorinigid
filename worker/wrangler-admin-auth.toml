@@ -8,6 +8,6 @@ main = "admin-auth-worker.js"
 compatibility_date = "2026-08-01"
 
 [vars]
-# Клиентский номер OAuth App (не секрет — виден в адресе входа GitHub).
-# Вписать после создания приложения на github.com.
-GITHUB_CLIENT_ID = ""
+# Клиентский номер OAuth App «Админка santorinigid» (создано 06.08.2026).
+# Не секрет — виден в адресе входа GitHub.
+GITHUB_CLIENT_ID = "Ov23liyjtNiREmfWCJTg"

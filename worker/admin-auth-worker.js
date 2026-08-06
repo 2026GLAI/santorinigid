@@ -35,8 +35,14 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    if (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET) {
-      return html('<p>Вход не настроен: нет GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET.</p>');
+    // Если чего-то не хватает — говорим, ЧЕГО ИМЕННО: это сразу видно
+    // при проверке и избавляет от гаданий, какая из двух настроек пуста.
+    const missing = [
+      !env.GITHUB_CLIENT_ID && 'GITHUB_CLIENT_ID',
+      !env.GITHUB_CLIENT_SECRET && 'GITHUB_CLIENT_SECRET',
+    ].filter(Boolean);
+    if (missing.length) {
+      return html(`<p>Вход не настроен: нет ${missing.join(' и ')}.</p>`);
     }
 
     // Шаг 1: админка открывает /auth — отправляем на GitHub за разрешением.
