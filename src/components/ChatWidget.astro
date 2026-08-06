@@ -19,24 +19,13 @@ import botLogo from '../assets/img/chat-bot.webp';
    Ии), прислана владельцем 29.07.2026. На кнопке остаётся прежний
    круглый логотип. */
 import headAvatar from '../assets/img/chat-avatar.png';
+import { WHATSAPP } from '../data/site';
 /*
-  Рисованные эмодзи (Twemoji, файлы в public/emoji/): в сообщениях чата
-  эмодзи показываются одинаковыми красивыми картинками у всех гостей,
-  а не по-разному системными символами («дешёвые», оценка владельца
-  29.07.2026). Символ вне списка остаётся обычным системным.
+  Рисованные эмодзи (Twemoji), контакты и стаж скрипт чата берёт сам —
+  обычными импортами внутри <script> ниже (с 06.08.2026 он бандлится,
+  и импорты в нём работают). В шапке компонента остался только WHATSAPP
+  для ссылки в разметке.
 */
-import { CHAT_EMOJI, twemojiFile } from '../data/chat-emoji';
-
-const EMOJI_MAP = Object.fromEntries(
-  CHAT_EMOJI.map((e) => [e, `/emoji/${twemojiFile(e)}.svg`]),
-);
-import {
-  WHATSAPP,
-  CONTACTS,
-  ON_ISLAND_SINCE,
-  ISLAND_YEARS_TEXT,
-  GUIDE_YEARS_TEXT,
-} from '../data/site';
 ---
 
 <div class="chat-root">
@@ -134,30 +123,30 @@ import {
 </div>
 
 {/*
-  ВНИМАНИЕ. Всё, что скрипт ниже использует, обязано быть перечислено
-  в define:vars. Импорт вверху этого файла работает ТОЛЬКО при сборке —
-  в браузер он не попадает.
+  ОБЛЕГЧЕНИЕ 06.08.2026: скрипт больше НЕ через define:vars. Раньше
+  ~34 КБ базы знаний вклеивались в КАЖДУЮ страницу; теперь это обычный
+  скрипт — Astro собирает его в один файл, браузер скачивает раз
+  и дальше берёт из кэша на всех страницах.
 
-  27.07.2026 здесь не хватало ON_ISLAND_SINCE, ISLAND_YEARS_TEXT и
-  GUIDE_YEARS_TEXT: браузер спотыкался на первом же обращении к ним,
-  ронял ВЕСЬ скрипт целиком, и кнопка чата переставала работать —
-  обработчик нажатия объявлен ниже по файлу и просто не успевал
-  навеситься. Кнопку из-за этого дважды переписывали впустую.
+  Заодно исчезла главная грабля проекта: в таком скрипте РАБОТАЮТ
+  импорты (Vite вбандлит значения при сборке), список define:vars
+  синхронизировать больше не нужно. Историческая справка: 27.07.2026
+  нехватка величины в define:vars роняла весь скрипт (ReferenceError),
+  и кнопку чата дважды переписывали впустую.
 
-  Добавляешь величину в скрипт — добавь её и сюда.
+  Скрипт модульный (defer): выполняется после разбора страницы, весь
+  DOM чата ему уже виден — как и раньше, когда он стоял в конце body.
 */}
-<script
-  define:vars={{
-    WA: WHATSAPP.general,
-    PHONE: CONTACTS.phone,
-    TG: CONTACTS.telegram,
-    VIBER: CONTACTS.viberHref,
-    ON_ISLAND_SINCE,
-    ISLAND_YEARS_TEXT,
-    GUIDE_YEARS_TEXT,
-    EMOJI_MAP,
-  }}
->
+<script>
+  import { WHATSAPP, CONTACTS, ON_ISLAND_SINCE, ISLAND_YEARS_TEXT, GUIDE_YEARS_TEXT } from '../data/site';
+  import { CHAT_EMOJI, twemojiFile } from '../data/chat-emoji';
+
+  const WA = WHATSAPP.general;
+  const PHONE = CONTACTS.phone;
+  const TG = CONTACTS.telegram;
+  const VIBER = CONTACTS.viberHref;
+  const EMOJI_MAP = Object.fromEntries(CHAT_EMOJI.map((e) => [e, `/emoji/${twemojiFile(e)}.svg`]));
+
   // ---------------------------------------------------------------------
   // База знаний. КАЖДЫЙ факт взят с сайта santorinivip.com (снято 2026-07-25).
   // Ничего вымышленного: если ответа нет — отправляем к Владимиру.
