@@ -11,6 +11,7 @@ import Footer from '../components/Footer.astro';
 import ChatWidget from '../components/ChatWidget.astro';
 import ScrollTop from '../components/ScrollTop.astro';
 import EditLinks from '../components/EditLinks.astro';
+import OwnerBeacon from '../components/OwnerBeacon.astro';
 import {
   SITE_URL,
   SITE_NAME,
@@ -196,15 +197,44 @@ const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [
 
   <body>
     {/*
-      Кнопки «Изменить» для владельца: если в браузере есть запись входа
-      админки (общий localStorage домена), на <html> ставится класс .owner —
-      его читает панель EditLinks. Гостям класс не ставится, панели нет.
-      Скрипт инлайновый и стоит первым: класс должен появиться до отрисовки.
+      Кнопки «Изменить» для владельца: если в браузере есть СВЕЖАЯ запись
+      входа админки (общий localStorage домена), на <html> ставится класс
+      .owner — его читает панель EditLinks и фонарик служебного входа.
+      Свежесть — как в банке (просьба владельца 07.08.2026): метку времени
+      admin-last-active ведёт открытая вкладка админки; спустя 5 минут
+      после выхода из неё запись входа протухает, и сайт сам её стирает —
+      владелец видит обычный сайт, как все гости. Гостям класс не ставится.
+      Число 5 минут живёт В ДВУХ ФАЙЛАХ — здесь и в public/admin/index.html.
+      Менять только парой. Скрипт инлайновый и стоит первым: класс должен
+      появиться до отрисовки.
     */}
     <script is:inline>
       try {
-        if (localStorage.getItem('sveltia-cms.user'))
-          document.documentElement.classList.add('owner');
+        const applyOwner = () => {
+          let fresh = false;
+          if (localStorage.getItem('sveltia-cms.user')) {
+            const last = Number(localStorage.getItem('admin-last-active')) || 0;
+            const idle = Date.now() - last;
+            // idle < -60000 — «метка из будущего» (часы переводили назад):
+            // тоже протухла, иначе держала бы вход часами.
+            if (last && idle <= 5 * 60 * 1000 && idle >= -60000) {
+              fresh = true;
+            } else {
+              localStorage.removeItem('sveltia-cms.user');
+              localStorage.removeItem('sveltia-cms.auth');
+              localStorage.removeItem('admin-last-active');
+            }
+          }
+          document.documentElement.classList.toggle('owner', fresh);
+        };
+        applyOwner();
+        // Кнопка «Назад» достаёт страницу из кэша браузера БЕЗ перезапуска
+        // скриптов — класс пересчитываем заново, иначе после входа в
+        // админку кнопки «Изменить» не появлялись бы (а после протухания —
+        // не гасли) до ручной перезагрузки.
+        addEventListener('pageshow', (e) => {
+          if (e.persisted) applyOwner();
+        });
       } catch (e) {
         /* приватный режим без localStorage — просто без кнопок */
       }
@@ -224,6 +254,7 @@ const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [
     <ScrollTop />
     <ChatWidget />
     <EditLinks targets={edit} />
+    <OwnerBeacon />
 
     <script>
       /*

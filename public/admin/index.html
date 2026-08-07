@@ -10,39 +10,81 @@
   </head>
   <body>
     <!--
-      Автовыход «как в банке» (просьба владельца 06.08.2026): 10 минут
-      без действий в админке — вход забывается, при возврате Sveltia
-      снова просит кнопку GitHub (секунда, но чужого за компьютером
-      не пустит). Ключи входа подсмотрены в sveltia-cms.js:596 —
-      sveltia-cms.user и sveltia-cms.auth. Скрипт обязан стоять ВЫШЕ
-      подключения CMS: скрипты выполняются по порядку в документе,
-      и очистка должна успеть до старта самой CMS.
+      Автовыход «как в банке», уточнён владельцем 07.08.2026: пока
+      вкладка админки ПЕРЕД ГЛАЗАМИ — сессия живёт хоть два часа
+      (владелец может читать и диктовать, не трогая мышь). Время тикает
+      только после ВЫХОДА (вкладка закрыта или свёрнута): через 5 минут
+      вход забывается — сайт снова обычный, админка снова просит кнопку
+      GitHub (секунда, но чужого за устройством не пустит).
+      Ключи входа подсмотрены в sveltia-cms.js:596 — sveltia-cms.user
+      и sveltia-cms.auth. Скрипт обязан стоять ВЫШЕ подключения CMS:
+      скрипты выполняются по порядку в документе, и очистка должна
+      успеть до старта самой CMS.
+      Число 5 минут живёт В ДВУХ ФАЙЛАХ — здесь и в скрипте кнопок
+      владельца в src/layouts/BaseLayout.astro. Менять только парой.
     -->
     <script>
       (() => {
         const KEY = 'admin-last-active';
-        const LIMIT = 10 * 60 * 1000;
-        const last = Number(localStorage.getItem(KEY)) || 0;
-        if (last && Date.now() - last > LIMIT) {
+        const LIMIT = 5 * 60 * 1000;
+        // Допуск на «метку из будущего»: если часы устройства перевели
+        // назад, старая метка оказывается впереди Date.now() и без этой
+        // проверки держала бы вход часами.
+        const AHEAD = 60 * 1000;
+        const gone = () => {
           localStorage.removeItem('sveltia-cms.user');
           localStorage.removeItem('sveltia-cms.auth');
-        }
-        let stamped = -Infinity;
-        const stamp = () => {
-          const now = Date.now();
-          if (now - stamped > 30000) {
-            stamped = now;
-            localStorage.setItem(KEY, String(now));
-          }
         };
+        // Метки нет (старый вход, чищенный браузер) — считаем протухшим.
+        const stale = () => {
+          const last = Number(localStorage.getItem(KEY)) || 0;
+          return !last || Date.now() - last > LIMIT || last - Date.now() > AHEAD;
+        };
+        if (stale()) gone();
+        const stamp = () => localStorage.setItem(KEY, String(Date.now()));
         stamp();
-        for (const ev of ['click', 'keydown', 'pointermove'])
-          addEventListener(ev, stamp, { passive: true });
-        // Вкладка осталась открытой без дела — перезагрузка сама
-        // приведёт к проверке выше и экрану входа.
+        // Видимая вкладка = работа: метка обновляется сама, без событий.
+        // Но большой разрыв между тиками при видимой вкладке — это сон
+        // компьютера, не работа: таймеры во сне замирают, visibilitychange
+        // не приходит, и без этой проверки первый тик после пробуждения
+        // затирал бы многочасовую метку — чужой без пароля Windows
+        // получал бы войденную админку.
         setInterval(() => {
-          if (Date.now() - (Number(localStorage.getItem(KEY)) || 0) > LIMIT) location.reload();
-        }, 60000);
+          if (document.hidden) return;
+          if (stale()) {
+            gone();
+            location.reload();
+          } else {
+            stamp();
+          }
+        }, 30000);
+        // Токен входа приходит сообщением-рукопожатием от окна GitHub
+        // (см. worker/admin-auth-worker.js) — это тоже работа владельца.
+        // Без штампа первый вход с телефона дольше 5 минут (пароль, код
+        // из почты; окно GitHub там — отдельная вкладка, админка скрыта
+        // и метку не обновляет) сам себя стирал бы при возврате.
+        addEventListener('message', (e) => {
+          if (typeof e.data === 'string' && e.data.indexOf('authorization:') === 0) stamp();
+        });
+        // Момент выхода фиксируем и при сворачивании, и при закрытии.
+        addEventListener('pagehide', stamp);
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) {
+            stamp();
+          } else if (stale()) {
+            // Вернулся к свёрнутой админке после перерыва — как в банке:
+            // перезагрузка приводит к очистке выше и экрану входа.
+            // Несохранённый текст не гибнет: Sveltia держит черновик
+            // (IndexedDB, включено по умолчанию) и после нового входа
+            // предлагает «Восстановить черновик» при открытии записи.
+            gone();
+            location.reload();
+          } else {
+            // Возврат в срок — тоже активность: без штампа здесь метка
+            // могла бы протухнуть в первые ~30 с до тика интервала.
+            stamp();
+          }
+        });
       })();
     </script>
     <!--

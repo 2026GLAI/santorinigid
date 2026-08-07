@@ -73,10 +73,11 @@ const s = fillDeep(shared.footer);
     {/* Пробел задан явно: перенос строки перед тегом Astro схлопывает,
         и в тексте страницы выходило «защищены.Политика» (глазу не видно
         из-за отступа margin, но при копировании текст слипался). */}
+    {/* Текстовой ссылки на /admin больше нет (07.08.2026): вход для
+        владельца — зелёный фонарик в левом нижнем углу (OwnerBeacon). */}
     <p>
       {COPYRIGHT}{' '}
-      <a href={url('/privacy')} class="footer-service">{s.privacyLink}</a>{' '}
-      <a href={url('/admin')} class="footer-service">{s.ownerLink}</a>
+      <a href={url('/privacy')} class="footer-service">{s.privacyLink}</a>
     </p>
     <p class="made">{s.made}</p>
   </div>
@@ -228,15 +229,18 @@ const s = fillDeep(shared.footer);
     color: #7ea8c4;
   }
 
-  /* Контраст 11.21 на тёмном фоне подвала — проверено расчётом */
-  .footer-privacy {
-    margin-left: var(--sp-3);
+  /* Контраст 11.21 на тёмном фоне подвала — проверено расчётом.
+     Имя класса обязано совпадать с разметкой выше: до 07.08.2026 правило
+     звалось .footer-privacy при классе .footer-service в разметке —
+     стиль был мёртв, и ссылка сливалась с текстом копирайта. */
+  .footer-service {
+    margin-left: var(--sp-2);
     color: #dceaf3;
     text-decoration: underline;
     text-underline-offset: 3px;
   }
 
-  .footer-privacy:hover {
+  .footer-service:hover {
     color: #fff;
   }
 

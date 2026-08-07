@@ -1013,5 +1013,4 @@ collections:
               - { name: contactsTitle, label: Заголовок «Контакты», widget: string }
               - { name: replyNote, label: Приписка о скорости ответа, widget: string }
               - { name: privacyLink, label: Ссылка на политику, widget: string }
-              - { name: ownerLink, label: Ссылка входа владельца, widget: string }
               - { name: made, label: Нижняя строка, widget: string }
