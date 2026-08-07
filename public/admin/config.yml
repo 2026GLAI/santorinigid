@@ -39,6 +39,79 @@ collections:
   - name: content
     label: Содержимое сайта
     files:
+      # ─────────────────────── ЭКСКУРСИЯ ───────────────────────
+      - name: tours
+        label: Экскурсия
+        file: src/data/tours.json
+        fields:
+          - name: TOUR_STOPS
+            label: Точки маршрута
+            label_singular: точка
+            widget: list
+            collapsed: true
+            summary: '{{fields.title}}'
+            fields:
+              - { name: title, label: Название, widget: string }
+              - { name: subtitle, label: Подзаголовок, widget: string }
+              - { name: text, label: '📝 Описание', widget: text }
+              - { name: image, label: '📷 Файл фото (пусто = карточка без фото)', widget: string, required: false }
+          - name: TOUR_DETAILS
+            label: Условия экскурсии
+            label_singular: условие
+            widget: list
+            collapsed: true
+            summary: '{{fields.label}}: {{fields.value}}'
+            fields:
+              - { name: label, label: Подпись, widget: string }
+              - { name: value, label: Значение, widget: string }
+          - name: FAQ
+            label: Вопросы и ответы
+            label_singular: вопрос
+            widget: list
+            collapsed: true
+            summary: '{{fields.q}}'
+            fields:
+              - { name: q, label: Вопрос, widget: string }
+              - { name: a, label: '📝 Ответ', widget: text }
+          - name: GALLERY
+            label: 📷 Галерея (имена файлов фото)
+            label_singular: фото
+            widget: list
+            field: { name: image, label: '📷 Файл фото', widget: string }
+
+      # ───────────────────────── ОТЗЫВЫ ─────────────────────────
+      - name: reviews
+        label: Отзывы
+        file: src/data/reviews.json
+        fields:
+          - name: reviews
+            label: 'Отзывы. ⚠️ Тексты гостей ДОСЛОВНЫЕ — чужие слова не редактируем, только удаляем отзыв целиком при необходимости'
+            label_singular: отзыв
+            widget: list
+            # Свёрнутый список: каждый отзыв — одна строка «Автор — дата»,
+            # раскрывается щелчком. Иначе 23 отзыва — сплошная простыня.
+            collapsed: true
+            summary: '{{fields.author}} — {{fields.published}}'
+            fields:
+              - { name: id, label: 'Служебный номер (НЕ МЕНЯТЬ)', widget: string }
+              - { name: author, label: Автор, widget: string }
+              - { name: text, label: 'Текст (дословный!)', widget: text }
+              # Благодарность — сразу под текстом: единственное поле,
+              # которое владелец реально правит у отзывов.
+              - { name: reply, label: '💙 Ваша благодарность гостю (появится под отзывом на сайте)', widget: text, required: false }
+              - { name: tripDate, label: 'Месяц поездки', widget: string, required: false }
+              - { name: tripWith, label: 'Состав компании', widget: string, required: false }
+              - { name: published, label: 'Дата публикации словами', widget: string }
+              - { name: datePublished, label: 'Дата публикации ГГГГ-ММ-ДД', widget: string }
+              - { name: source, label: Площадка, widget: string }
+              - { name: sourceUrl, label: 'Ссылка на оригинал', widget: string }
+              - { name: dislikes, label: 'Поле площадки «Что не понравилось»', widget: string, required: false }
+              - name: photos
+                label: 📷 Фотографии отзыва
+                widget: list
+                required: false
+                field: { name: photo, label: '📷 Путь к фото', widget: string }
+
       # ───────────────────────── ЯХТЫ ─────────────────────────
       - name: yachts
         label: Яхты и цены
@@ -112,79 +185,6 @@ collections:
               - name: link
                 label: '⚠️ ПАРТНЁРСКАЯ ССЫЛКА — ваш доход. Не менять без крайней необходимости'
                 widget: string
-
-      # ─────────────────────── ЭКСКУРСИЯ ───────────────────────
-      - name: tours
-        label: Экскурсия
-        file: src/data/tours.json
-        fields:
-          - name: TOUR_STOPS
-            label: Точки маршрута
-            label_singular: точка
-            widget: list
-            collapsed: true
-            summary: '{{fields.title}}'
-            fields:
-              - { name: title, label: Название, widget: string }
-              - { name: subtitle, label: Подзаголовок, widget: string }
-              - { name: text, label: '📝 Описание', widget: text }
-              - { name: image, label: '📷 Файл фото (пусто = карточка без фото)', widget: string, required: false }
-          - name: TOUR_DETAILS
-            label: Условия экскурсии
-            label_singular: условие
-            widget: list
-            collapsed: true
-            summary: '{{fields.label}}: {{fields.value}}'
-            fields:
-              - { name: label, label: Подпись, widget: string }
-              - { name: value, label: Значение, widget: string }
-          - name: FAQ
-            label: Вопросы и ответы
-            label_singular: вопрос
-            widget: list
-            collapsed: true
-            summary: '{{fields.q}}'
-            fields:
-              - { name: q, label: Вопрос, widget: string }
-              - { name: a, label: '📝 Ответ', widget: text }
-          - name: GALLERY
-            label: 📷 Галерея (имена файлов фото)
-            label_singular: фото
-            widget: list
-            field: { name: image, label: '📷 Файл фото', widget: string }
-
-      # ───────────────────────── ОТЗЫВЫ ─────────────────────────
-      - name: reviews
-        label: Отзывы
-        file: src/data/reviews.json
-        fields:
-          - name: reviews
-            label: 'Отзывы. ⚠️ Тексты гостей ДОСЛОВНЫЕ — чужие слова не редактируем, только удаляем отзыв целиком при необходимости'
-            label_singular: отзыв
-            widget: list
-            # Свёрнутый список: каждый отзыв — одна строка «Автор — дата»,
-            # раскрывается щелчком. Иначе 23 отзыва — сплошная простыня.
-            collapsed: true
-            summary: '{{fields.author}} — {{fields.published}}'
-            fields:
-              - { name: id, label: 'Служебный номер (НЕ МЕНЯТЬ)', widget: string }
-              - { name: author, label: Автор, widget: string }
-              - { name: text, label: 'Текст (дословный!)', widget: text }
-              # Благодарность — сразу под текстом: единственное поле,
-              # которое владелец реально правит у отзывов.
-              - { name: reply, label: '💙 Ваша благодарность гостю (появится под отзывом на сайте)', widget: text, required: false }
-              - { name: tripDate, label: 'Месяц поездки', widget: string, required: false }
-              - { name: tripWith, label: 'Состав компании', widget: string, required: false }
-              - { name: published, label: 'Дата публикации словами', widget: string }
-              - { name: datePublished, label: 'Дата публикации ГГГГ-ММ-ДД', widget: string }
-              - { name: source, label: Площадка, widget: string }
-              - { name: sourceUrl, label: 'Ссылка на оригинал', widget: string }
-              - { name: dislikes, label: 'Поле площадки «Что не понравилось»', widget: string, required: false }
-              - name: photos
-                label: 📷 Фотографии отзыва
-                widget: list
-                required: false
-                field: { name: photo, label: '📷 Путь к фото', widget: string }
 
   # ═════════════════════ ТЕКСТЫ СТРАНИЦ (этап 2, 06.08.2026) ═════════════════════
   # Каждая страница сайта — свой раздел. В текстах работают МЕТКИ в фигурных
@@ -536,71 +536,6 @@ collections:
               - { name: buttonDiscuss, label: Кнопка «обсудить», widget: string }
           - { name: listTitle, label: Заголовок списка отзывов, widget: string }
 
-      - name: contacts-page
-        label: Страница «Контакты»
-        file: src/data/pages/contacts.json
-        fields:
-          - name: seo
-            label: 'СЕО: заголовок и описание'
-            widget: object
-            collapsed: true
-            fields:
-              - { name: title, label: Заголовок вкладки, widget: string }
-              - { name: description, label: '📝 Описание для поисковиков', widget: text }
-          - name: hero
-            label: Шапка страницы
-            widget: object
-            collapsed: true
-            fields:
-              - { name: image, label: '📷 Файл фото', widget: string }
-              - { name: alt, label: Описание фото, widget: string }
-              - { name: eyebrow, label: Надзаголовок, widget: string }
-              - { name: title, label: Главный заголовок, widget: string }
-              - { name: text, label: '📝 Девиз', widget: text }
-          - name: ways
-            label: Блок «Как связаться»
-            widget: object
-            collapsed: true
-            fields:
-              - { name: eyebrow, label: Надзаголовок, widget: string }
-              - { name: title, label: Заголовок, widget: string }
-              - { name: lede, label: '📝 Подводка', widget: text }
-              - { name: waNote, label: Подпись у WhatsApp, widget: string }
-              - { name: mailNote, label: Подпись у почты, widget: string }
-          - name: form
-            label: Форма заявки
-            widget: object
-            collapsed: true
-            fields:
-              - { name: title, label: Заголовок, widget: string }
-              - { name: sub, label: Подзаголовок, widget: string }
-              - { name: nameLabel, label: Подпись поля имени, widget: string }
-              - { name: namePlaceholder, label: Подсказка в поле имени, widget: string }
-              - { name: emailLabel, label: Подпись поля почты, widget: string }
-              - { name: emailPlaceholder, label: Подсказка в поле почты, widget: string }
-              - { name: phoneLabel, label: Подпись поля телефона, widget: string }
-              - { name: phonePlaceholder, label: Подсказка в поле телефона, widget: string }
-              - { name: detailsLabel, label: Подпись поля дат, widget: string }
-              - { name: detailsPlaceholder, label: Подсказка в поле дат, widget: string }
-              - { name: submit, label: Кнопка отправки, widget: string }
-              - { name: privacyNote, label: '📝 Приписка о конфиденциальности', widget: text }
-          - name: script
-            label: Сообщения формы (статусы и шаблон WhatsApp)
-            widget: object
-            collapsed: true
-            fields:
-              - { name: msgGreeting, label: Приветствие в WhatsApp, widget: string }
-              - { name: msgName, label: 'Подпись «Меня зовут»', widget: string }
-              - { name: msgPhone, label: 'Подпись «Телефон»', widget: string }
-              - { name: msgEmail, label: 'Подпись «Email»', widget: string }
-              - { name: msgDetails, label: 'Подпись «Даты и гости»', widget: string }
-              - { name: okNoEndpoint, label: Статус после открытия WhatsApp, widget: string }
-              - { name: sending, label: 'Статус «отправляю»', widget: string }
-              - { name: sent, label: 'Статус «отправлено»', widget: string }
-              - { name: failBefore, label: 'Ошибка: начало (до ссылки)', widget: string }
-              - { name: failLink, label: 'Ошибка: текст ссылки', widget: string }
-              - { name: failAfter, label: 'Ошибка: конец (после ссылки)', widget: string }
-
       - name: vip
         label: Страница «VIP услуги»
         file: src/data/pages/vip.json
@@ -886,6 +821,71 @@ collections:
             fields:
               - { name: title, label: Заголовок, widget: string }
               - { name: text, label: '📝 Текст', widget: text }
+
+      - name: contacts-page
+        label: Страница «Контакты»
+        file: src/data/pages/contacts.json
+        fields:
+          - name: seo
+            label: 'СЕО: заголовок и описание'
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок вкладки, widget: string }
+              - { name: description, label: '📝 Описание для поисковиков', widget: text }
+          - name: hero
+            label: Шапка страницы
+            widget: object
+            collapsed: true
+            fields:
+              - { name: image, label: '📷 Файл фото', widget: string }
+              - { name: alt, label: Описание фото, widget: string }
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Главный заголовок, widget: string }
+              - { name: text, label: '📝 Девиз', widget: text }
+          - name: ways
+            label: Блок «Как связаться»
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: Надзаголовок, widget: string }
+              - { name: title, label: Заголовок, widget: string }
+              - { name: lede, label: '📝 Подводка', widget: text }
+              - { name: waNote, label: Подпись у WhatsApp, widget: string }
+              - { name: mailNote, label: Подпись у почты, widget: string }
+          - name: form
+            label: Форма заявки
+            widget: object
+            collapsed: true
+            fields:
+              - { name: title, label: Заголовок, widget: string }
+              - { name: sub, label: Подзаголовок, widget: string }
+              - { name: nameLabel, label: Подпись поля имени, widget: string }
+              - { name: namePlaceholder, label: Подсказка в поле имени, widget: string }
+              - { name: emailLabel, label: Подпись поля почты, widget: string }
+              - { name: emailPlaceholder, label: Подсказка в поле почты, widget: string }
+              - { name: phoneLabel, label: Подпись поля телефона, widget: string }
+              - { name: phonePlaceholder, label: Подсказка в поле телефона, widget: string }
+              - { name: detailsLabel, label: Подпись поля дат, widget: string }
+              - { name: detailsPlaceholder, label: Подсказка в поле дат, widget: string }
+              - { name: submit, label: Кнопка отправки, widget: string }
+              - { name: privacyNote, label: '📝 Приписка о конфиденциальности', widget: text }
+          - name: script
+            label: Сообщения формы (статусы и шаблон WhatsApp)
+            widget: object
+            collapsed: true
+            fields:
+              - { name: msgGreeting, label: Приветствие в WhatsApp, widget: string }
+              - { name: msgName, label: 'Подпись «Меня зовут»', widget: string }
+              - { name: msgPhone, label: 'Подпись «Телефон»', widget: string }
+              - { name: msgEmail, label: 'Подпись «Email»', widget: string }
+              - { name: msgDetails, label: 'Подпись «Даты и гости»', widget: string }
+              - { name: okNoEndpoint, label: Статус после открытия WhatsApp, widget: string }
+              - { name: sending, label: 'Статус «отправляю»', widget: string }
+              - { name: sent, label: 'Статус «отправлено»', widget: string }
+              - { name: failBefore, label: 'Ошибка: начало (до ссылки)', widget: string }
+              - { name: failLink, label: 'Ошибка: текст ссылки', widget: string }
+              - { name: failAfter, label: 'Ошибка: конец (после ссылки)', widget: string }
 
       - name: notfound
         label: Страница «404»
