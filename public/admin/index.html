@@ -46,6 +46,183 @@
       })();
     </script>
     <!--
+      Индикатор публикации (просьба владельца 07.08.2026): после кнопки
+      «Сохранить» видно, что сайт пересобирается и когда опубликован —
+      жёлтый «Публикуется…» → зелёный «Сайт опубликован · время».
+      Спрашивает GitHub напрямую (открытые данные открытого репозитория);
+      после входа — с ключом владельца из записи Sveltia (лимиты не грозят),
+      до входа — без ключа и заметно реже. Щелчок по плашке открывает
+      журнал сборок GitHub.
+    -->
+    <div id="pub-status" role="status" aria-live="polite" hidden
+         title="Состояние публикации сайта. Щелчок — журнал сборок на GitHub">
+      <span id="pub-dot"></span><span id="pub-text"></span>
+    </div>
+    <style>
+      /* На этой странице нет сброса стилей сайта: display:flex ниже
+         перебил бы атрибут hidden — прячем явно. */
+      #pub-status[hidden] { display: none; }
+      #pub-status {
+        position: fixed;
+        left: 12px;
+        bottom: 12px;
+        z-index: 2147483000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        max-width: min(560px, calc(100vw - 24px));
+        padding: 8px 14px 8px 11px;
+        border-radius: 18px;
+        background: rgba(15, 23, 42, 0.92);
+        color: #fff;
+        font: 13px/1.35 system-ui, sans-serif;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+        cursor: pointer;
+        user-select: none;
+      }
+      /* На телефоне (<768px) Sveltia рисует внизу панель навигации
+         высотой 56px — плашка встаёт НАД ней, не перекрывая кнопки. */
+      @media (max-width: 767.98px) {
+        #pub-status { bottom: calc(56px + 10px); }
+      }
+      #pub-dot {
+        width: 10px;
+        height: 10px;
+        flex: none;
+        border-radius: 50%;
+        background: #94a3b8;
+      }
+      #pub-status[data-state='building'] #pub-dot {
+        background: #eab308;
+        animation: pub-pulse 1.2s ease-in-out infinite;
+      }
+      #pub-status[data-state='ok'] #pub-dot { background: #22c55e; }
+      #pub-status[data-state='fail'] #pub-dot { background: #ef4444; }
+      @keyframes pub-pulse {
+        50% { opacity: 0.35; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #pub-status[data-state='building'] #pub-dot { animation: none; }
+      }
+    </style>
+    <script>
+      (() => {
+        const RUNS_PAGE = 'https://github.com/2026GLAI/santorinigid/actions';
+        const API =
+          'https://api.github.com/repos/2026GLAI/santorinigid/actions/workflows/deploy.yml/runs?per_page=5';
+        const box = document.getElementById('pub-status');
+        const text = document.getElementById('pub-text');
+        let url = RUNS_PAGE;
+        let timer;
+        box.addEventListener('click', () => window.open(url, '_blank', 'noopener'));
+
+        // Ключ владельца из записи входа Sveltia; до входа — null.
+        const token = () => {
+          try {
+            const u = JSON.parse(localStorage.getItem('sveltia-cms.user') || 'null');
+            return u && typeof u.token === 'string' && u.token ? u.token : null;
+          } catch {
+            return null;
+          }
+        };
+
+        const show = (state, message, runUrl) => {
+          box.dataset.state = state;
+          text.textContent = message;
+          url = runUrl || RUNS_PAGE;
+          box.hidden = false;
+        };
+
+        const when = (iso) => {
+          const d = new Date(iso);
+          const time = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+          return d.toDateString() === new Date().toDateString()
+            ? 'сегодня в ' + time
+            : d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }) + ' в ' + time;
+        };
+
+        // busy: пока один опрос в полёте, второй не начинаем (возврат на
+        // вкладку во время запроса плодил бы параллельные цепочки таймеров).
+        // deadToken: ключ, на который GitHub ответил 401/403, — больше его
+        // не подаём и считаем режим анонимным, пока вход не даст новый ключ.
+        let busy = false;
+        let deadToken = '';
+
+        async function check() {
+          if (busy) return;
+          clearTimeout(timer);
+          // Свёрнутая вкладка не опрашивает — очнётся при возврате.
+          let next = 120000;
+          if (!document.hidden) {
+            busy = true;
+            try {
+              let key = token();
+              if (key && key === deadToken) key = null;
+              let res = await fetch(API, {
+                headers: key
+                  ? { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + key }
+                  : { Accept: 'application/vnd.github+json' },
+              });
+              // Ключ протух — помечаем и тихо переспрашиваем без ключа.
+              if (!res.ok && key && (res.status === 401 || res.status === 403)) {
+                deadToken = key;
+                key = null;
+                res = await fetch(API, { headers: { Accept: 'application/vnd.github+json' } });
+              }
+              if (!res.ok) throw new Error('HTTP ' + res.status);
+              const authed = !!key;
+              const runs = (await res.json()).workflow_runs || [];
+              const active = runs.find((r) => r.status !== 'completed');
+              if (active) {
+                const long = Date.now() - new Date(active.run_started_at) > 15 * 60 * 1000;
+                show(
+                  'building',
+                  long
+                    ? 'Публикуется дольше обычного — если через час не позеленеет, покажите агенту'
+                    : 'Публикуется… обычно 2–4 минуты',
+                  active.html_url
+                );
+                // Анонимно — не чаще 40 раз в час: лимит GitHub без ключа
+                // всего 60 запросов в час с адреса.
+                next = authed ? 15000 : 90000;
+              } else {
+                // Отменённые и пропущенные сборки — это замены, не итог.
+                // Любой другой финал, кроме успеха (failure, timed_out,
+                // startup_failure…), честно показываем красным.
+                const done = runs.find(
+                  (r) =>
+                    r.status === 'completed' &&
+                    r.conclusion !== 'cancelled' &&
+                    r.conclusion !== 'skipped'
+                );
+                if (done && done.conclusion === 'success') {
+                  show('ok', 'Сайт опубликован · ' + when(done.updated_at), done.html_url);
+                } else if (done) {
+                  show('fail', 'Сборка не прошла — покажите это агенту', done.html_url);
+                } else {
+                  show('idle', 'Состояние публикации неизвестно', RUNS_PAGE);
+                }
+                // После входа проверяем чаще: нажатие «Сохранить» должно
+                // пожелтеть на плашке за полминуты, не за две.
+                next = authed ? 30000 : 120000;
+              }
+            } catch {
+              // Нет сети или лимит — оставляем прежнюю надпись, попробуем позже.
+              next = 180000;
+            } finally {
+              busy = false;
+            }
+          }
+          timer = setTimeout(check, next);
+        }
+
+        document.addEventListener('visibilitychange', () => {
+          if (!document.hidden) check();
+        });
+        check();
+      })();
+    </script>
+    <!--
       Sveltia CMS, версия 0.180.1, скачана 06.08.2026 из официального
       реестра npm и живёт ЗДЕСЬ, в папке сайта — никаких загрузок с чужих
       серверов при входе. Обновлять только осознанно: заменить файл
