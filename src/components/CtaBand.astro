@@ -39,7 +39,7 @@ const { title = s.title, text = s.text, waLink = WHATSAPP.general } = Astro.prop
   .cta-band {
     padding-block: clamp(2.5rem, 6vw, 4.5rem);
     background:
-      radial-gradient(120% 140% at 15% 0%, rgb(63 159 212 / 0.16), transparent 55%),
+      radial-gradient(120% 140% at 15% 0%, rgb(201 169 106 / 0.2), transparent 55%),
       var(--bg-alt);
     border-block: 1px solid var(--border);
   }
@@ -66,7 +66,7 @@ const { title = s.title, text = s.text, waLink = WHATSAPP.general } = Astro.prop
     gap: var(--sp-3);
   }
 
-  @media (min-width: 860px) {
+  @container page (min-width: 860px) {
     .cta-inner {
       grid-template-columns: 1fr auto;
       gap: var(--sp-7);

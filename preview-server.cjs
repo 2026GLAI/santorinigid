@@ -13,7 +13,9 @@ const path = require('path');
 const os = require('os');
 
 const ROOT = path.join(__dirname, 'dist');
-const PORT = 4600;
+/* Версия 2 слушает 4601: первая версия (папка santorinigid) — 4600,
+   обе можно открыть рядом и сравнить. */
+const PORT = Number(process.env.PORT) || 4601;
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',

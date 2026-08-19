@@ -1243,8 +1243,8 @@ import { WHATSAPP } from '../data/site';
     align-items: stretch;
     gap: var(--sp-3);
     padding: 0 var(--sp-2) 0 0;
-    background: linear-gradient(135deg, var(--c-aegean-600), var(--c-aegean-800));
-    color: #fff;
+    background: linear-gradient(135deg, var(--c-graphite-2), var(--c-black));
+    color: var(--c-ivory);
   }
 
   /*
@@ -1409,7 +1409,8 @@ import { WHATSAPP } from '../data/site';
   }
 
   .chat-log :global(.msg-me .bubble) {
-    background: var(--c-aegean-600);
+    /* Синий купола — реплики гостя; белый на нём 7.40:1 */
+    background: var(--c-blue);
     color: #fff;
     border-bottom-right-radius: 5px;
   }
@@ -1492,7 +1493,7 @@ import { WHATSAPP } from '../data/site';
     align-items: center;
     padding: 0.45em 1em;
     border-radius: var(--radius-full);
-    background: var(--c-aegean-600);
+    background: var(--c-blue);
     color: #fff;
     font-size: 0.82rem;
     font-weight: 600;
@@ -1500,7 +1501,7 @@ import { WHATSAPP } from '../data/site';
   }
 
   .chat-log :global(.chat-contacts a:hover) {
-    background: var(--c-aegean-800);
+    background: var(--c-blue-dark);
   }
 
   /* Фирменные цвета мессенджеров — по просьбе владельца 03.08.2026 */
@@ -1611,13 +1612,13 @@ import { WHATSAPP } from '../data/site';
     height: 42px;
     flex-shrink: 0;
     border-radius: var(--radius-full);
-    background: var(--c-aegean-600);
+    background: var(--c-blue);
     color: #fff;
     transition: background-color var(--dur) var(--ease);
   }
 
   .chat-form button:hover {
-    background: var(--c-aegean-800);
+    background: var(--c-blue-dark);
   }
 
   .chat-foot {

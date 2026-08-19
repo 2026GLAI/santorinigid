@@ -98,24 +98,41 @@ export default defineConfig({
     subsets — латиница и кириллица: тексты русские, но названия отелей
     и яхт латинские.
   */
+  /*
+    ВЕРСИЯ 2 (ветка v2, редакционный стиль): три шрифта вместо пары
+    Inter + Playfair. Заголовки — Cormorant Garamond (высокий контраст
+    штрихов, «журнальная» гарнитура), текст — Lora (читаемая антиква
+    с кириллицей), подпись «Ваш гид, Владимир» — рукописный Marck Script.
+  */
   fonts: [
     {
       provider: fontProviders.google(),
-      name: 'Inter',
-      cssVariable: '--font-inter',
-      weights: [400, 500, 600, 700],
+      name: 'Cormorant Garamond',
+      cssVariable: '--font-cormorant',
+      weights: [300, 400, 500, 600],
       subsets: ['latin', 'cyrillic'],
-      styles: ['normal'],
-      fallbacks: ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+      styles: ['normal', 'italic'],
+      fallbacks: ['Georgia', 'Times New Roman', 'serif'],
     },
     {
       provider: fontProviders.google(),
-      name: 'Playfair Display',
-      cssVariable: '--font-playfair',
-      weights: [500, 600, 700],
+      name: 'Lora',
+      cssVariable: '--font-lora',
+      weights: [400, 500, 600],
       subsets: ['latin', 'cyrillic'],
+      /* Курсив Lora на сайте не используется (курсив — только Cormorant):
+         без него на каждой странице на 63 КБ меньше предзагрузки */
       styles: ['normal'],
       fallbacks: ['Georgia', 'Times New Roman', 'serif'],
+    },
+    {
+      provider: fontProviders.google(),
+      name: 'Marck Script',
+      cssVariable: '--font-script',
+      weights: [400],
+      subsets: ['latin', 'cyrillic'],
+      styles: ['normal'],
+      fallbacks: ['cursive'],
     },
   ],
 });

@@ -284,8 +284,11 @@ const schema = [
 
   .yacht {
     display: grid;
+    /* minmax(0,1fr): иначе колонка растёт до min-content таблицы цен и
+       на 320px правый столбец срезается рамкой карточки */
+    grid-template-columns: minmax(0, 1fr);
     gap: 0;
-    scroll-margin-top: 90px;
+    /* scroll-margin-top — общее правило [id] в global.css */
   }
 
   /*
@@ -313,8 +316,8 @@ const schema = [
     left: var(--sp-3);
     padding: 0.3rem 0.8rem;
     border-radius: var(--radius-full);
-    background: var(--c-sunset-500);
-    color: #fff;
+    background: var(--gold);
+    color: var(--c-black);
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.05em;
@@ -359,7 +362,9 @@ const schema = [
 
   .prices {
     width: 100%;
-    min-width: 17rem;
+    /* min-width не нужен: таблица держит ширину своим содержимым, а на
+       узком экране прокручивается внутри .prices-scroll */
+    min-width: 0;
     border-collapse: collapse;
     font-size: var(--fs-sm);
   }
@@ -472,9 +477,9 @@ const schema = [
     color: var(--text-soft);
   }
 
-  @media (min-width: 820px) {
+  @container page (min-width: 820px) {
     .yacht {
-      grid-template-columns: 45% 1fr;
+      grid-template-columns: 45% minmax(0, 1fr);
     }
   }
 </style>

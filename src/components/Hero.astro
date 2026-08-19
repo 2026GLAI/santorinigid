@@ -1,4 +1,15 @@
 ---
+/**
+ * Первый экран страницы — версия 2 (редакционный стиль).
+ *
+ * Два вида, тот же набор свойств, что и раньше (страницы не переписывались):
+ *  • size="full"    — главная: фотография на весь экран, крупная антиква
+ *                     поверх, снизу слот `bar` для тёмной плашки-фактов;
+ *  • size="compact" — подстраницы: разворот «текст слева — фото справа»
+ *                     на слоновой кости, как в брифе. Фото не тянется на
+ *                     всю ширину экрана: исходники старого сайта
+ *                     маленькие (600–1000 px), во весь экран они мылятся.
+ */
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 
@@ -9,33 +20,9 @@ interface Props {
   title: string;
   subtitle?: string;
   text?: string;
-  /** Высокий вариант для главной, компактный — для внутренних страниц */
   size?: 'full' | 'compact';
-  /**
-   * Точка внимания кадра НА ТЕЛЕФОНЕ (значение CSS object-position).
-   *
-   * Узкий экран обрезает широкую панораму по бокам, и главный сюжет
-   * фото может «уехать» за край: у панорамы Ии на главной синие купола
-   * стояли правее центра и на телефоне прятались (замечание владельца
-   * 06.08.2026). «70% 50%» = смотреть на точку в 70% ширины фото.
-   * На компьютере не влияет: там действует обычный центр.
-   */
+  /** Точка внимания кадра на узких экранах, напр. "76% 50%" (только full). */
   focusMobile?: string;
-
-  /**
-   * Грузить картинку в первую очередь.
-   *
-   * По умолчанию ДА — и это не перестраховка: шапка занимает верх экрана,
-   * её картинка видна сразу при открытии и почти всегда является тем самым
-   * «главным элементом», по которому Google меряет скорость сайта (LCP).
-   * Ленивая загрузка для неё — прямая потеря: браузер сначала разбирает всю
-   * страницу и только потом начинает качать то, что человек уже видит.
-   *
-   * Раньше умолчанием было «нет», и приоритет проставили только на главной.
-   * Остальные 7 страниц с шапкой грузили её лениво.
-   *
-   * Ставить false осмысленно только там, где Hero уехал ниже первого экрана.
-   */
   priority?: boolean;
 }
 
@@ -50,77 +37,93 @@ const {
   focusMobile,
   priority = true,
 } = Astro.props;
+
+const isFull = size === 'full';
 ---
 
 <section class:list={['hero', `hero-${size}`]}>
-  <div class="hero-media parallax-slow" style={focusMobile ? `--hero-focus-mobile: ${focusMobile}` : undefined}>
-    <Image
-      src={image}
-      alt={alt}
-      widths={[640, 960, 1440, 1920, 2400]}
-      sizes="100vw"
-      loading={priority ? 'eager' : 'lazy'}
-      fetchpriority={priority ? 'high' : 'auto'}
-      quality={80}
-      format="avif"
-    />
-    <div class="hero-scrim"></div>
-  </div>
-
-  <div class="container hero-content hero-depth">
-    {eyebrow && <p class="hero-eyebrow">{eyebrow}</p>}
-    <h1 class="hero-title">{title}</h1>
-    {subtitle && <p class="hero-subtitle">{subtitle}</p>}
-    {text && <p class="hero-text">{text}</p>}
-    <div class="hero-actions">
-      <slot />
-    </div>
-  </div>
-
   {
-    size === 'full' && (
-      <a href="#content" class="hero-scroll" aria-label="Листать вниз">
-        <span />
-      </a>
-    )
+    isFull ? (
+      <div class="hero-media parallax-slow" style={focusMobile ? `--hero-focus-mobile: ${focusMobile}` : undefined}>
+        <Image
+          src={image}
+          alt={alt}
+          widths={[640, 960, 1440, 1920, 2400, 3000]}
+          sizes="(min-width: 1024px) calc(100vw - 232px), 100vw"
+          loading={priority ? 'eager' : 'lazy'}
+          fetchpriority={priority ? 'high' : 'auto'}
+          quality={86}
+          format="avif"
+        />
+        <div class="hero-scrim" />
+      </div>
+    ) : null
   }
+
+  <div class="container hero-inner">
+    <div class:list={['hero-content', { 'hero-depth': isFull }]}>
+      {eyebrow && <p class="hero-eyebrow">{eyebrow}</p>}
+      <h1 class="hero-title">{title}</h1>
+      {subtitle && <p class="hero-subtitle">{subtitle}</p>}
+      <span class="hero-rule" aria-hidden="true" />
+      {text && <p class="hero-text">{text}</p>}
+      <div class="hero-actions">
+        <slot />
+      </div>
+    </div>
+
+    {
+      !isFull && (
+        <figure class="hero-photo reveal-zoom">
+          <Image
+            src={image}
+            alt={alt}
+            widths={[640, 960, 1280, 1600]}
+            sizes="(min-width: 1024px) 46vw, 100vw"
+            loading={priority ? 'eager' : 'lazy'}
+            fetchpriority={priority ? 'high' : 'auto'}
+            quality={84}
+          />
+        </figure>
+      )
+    }
+  </div>
+
+  {isFull && <slot name="bar" />}
 </section>
 
 <style>
   .hero {
     position: relative;
-    display: grid;
-    align-items: end;
     isolation: isolate;
     overflow: hidden;
   }
 
-  /*
-    Высота шапки.
-    Считаем от высоты окна, а не жёсткими пикселями: на ноутбуке 768px
-    шапка не должна занимать весь экран, а на мониторе 1440px — выглядеть
-    узкой полоской. Верхний предел не даёт шапке стать бесконечной
-    на очень высоких экранах.
-  */
+  /* ---------- главная: фото на весь экран ---------- */
   .hero-full {
-    min-height: clamp(30rem, 88dvh, 68rem);
+    display: grid;
+    grid-template-rows: 1fr auto;
+    /* Высота — от окна, не пикселями: на ноутбуке не съедает весь экран,
+       на большом мониторе не превращается в полоску. */
+    min-height: clamp(34rem, 100dvh, 72rem);
+    /* Фото уходит под плашку TopBar к самому верху: снимаем отступ main */
+    margin-top: calc(-1 * var(--main-top));
+    color: var(--c-ivory);
+    /* Всегда тёмный блок: кольцо фокуса золотое (бронза здесь тонет) */
+    --focus-ring: var(--c-gold);
   }
 
-  .hero-compact {
-    min-height: clamp(20rem, 56dvh, 40rem);
+  /* Телефон: над героем стоит полоска панели (64px) — экран считаем без неё,
+     иначе низ героя с плашкой-фактами всегда на 64px ниже сгиба */
+  @media (max-width: 1023px) {
+    .hero-full {
+      min-height: calc(100dvh - var(--topbar-h));
+    }
   }
 
-  /*
-    Телефон в горизонтальном положении: экран низкий, шапка на весь
-    экран не оставит места контенту — уменьшаем.
-  */
   @media (max-height: 520px) and (orientation: landscape) {
     .hero-full {
-      min-height: 26rem;
-    }
-
-    .hero-compact {
-      min-height: 18rem;
+      min-height: 28rem;
     }
   }
 
@@ -128,6 +131,7 @@ const {
     position: absolute;
     inset: 0;
     z-index: -1;
+    background: var(--c-graphite);
   }
 
   .hero-media :global(img) {
@@ -136,21 +140,16 @@ const {
     object-fit: cover;
   }
 
-  /* Точка внимания кадра на узких экранах — см. проп focusMobile выше. */
   @media (max-width: 700px) {
     .hero-media :global(img) {
       object-position: var(--hero-focus-mobile, 50% 50%);
     }
   }
 
-  /*
-    «Кен-бёрнс» — медленный наплыв на фото. Включаем только там, где НЕТ
-    параллакса при прокрутке: иначе две анимации будут бороться за transform
-    и картинка задёргается. Где параллакс есть — он и создаёт движение.
-  */
+  /* «Кен-бёрнс» только там, где нет параллакса — иначе борьба за transform */
   @supports not (animation-timeline: view()) {
     .hero-media :global(img) {
-      animation: kenburns 24s var(--ease) infinite alternate;
+      animation: kenburns 26s var(--ease) infinite alternate;
     }
 
     @keyframes kenburns {
@@ -158,7 +157,7 @@ const {
         transform: scale(1);
       }
       to {
-        transform: scale(1.07);
+        transform: scale(1.06);
       }
     }
   }
@@ -169,124 +168,247 @@ const {
     }
   }
 
+  /* Затемнение слева и снизу — там лежит текст; правая часть кадра чистая */
   .hero-scrim {
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(to top, rgb(6 30 48 / 0.88) 0%, rgb(6 30 48 / 0.45) 42%, rgb(6 30 48 / 0.12) 75%),
-      linear-gradient(to right, rgb(6 30 48 / 0.4), transparent 60%);
+      linear-gradient(to right, rgb(11 13 14 / 0.78) 0%, rgb(11 13 14 / 0.64) 55%, rgb(11 13 14 / 0.18) 85%, rgb(11 13 14 / 0.06) 100%),
+      linear-gradient(to top, rgb(11 13 14 / 0.55) 0%, transparent 45%);
+    /* Затемнение доведено до конца текстовой колонки (первая строка h1
+       тянется до ~77% ширины): пересчёт по пикселям кадра — слоновая кость
+       на любом участке текста ≥3:1, хвост строки ≥2.3:1 (ревизия 19.08). */
   }
 
-  .hero-content {
-    padding-block: clamp(2.5rem, 7vw, 6rem);
-    color: #fff;
+  /* Телефон: текст лежит поперёк всего кадра, а не в тёмной левой части —
+     затемняем ровнее и сильнее, иначе заголовок тонет в белых стенах */
+  @media (max-width: 700px) {
+    .hero-scrim {
+      background:
+        linear-gradient(to top, rgb(11 13 14 / 0.82) 0%, rgb(11 13 14 / 0.6) 45%, rgb(11 13 14 / 0.3) 100%);
+    }
   }
 
-  /*
-    Ограничиваем длину строки, но НЕ шире экрана.
-    min(…, 100%) обязателен: единица ch зависит от размера шрифта, а он
-    на больших экранах крупный — без ограничения по 100% заголовок
-    вылезал за край телефона на 378 пикселей.
-  */
+  .hero-full .hero-inner {
+    display: grid;
+    /* minmax(0,1fr): иначе единственная колонка растёт до самого длинного
+       слова («ИНДИВИДУАЛЬНЫЕ» капителью) и хвост срезается overflow:hidden */
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    padding-block: clamp(6rem, 12vh, 9rem) clamp(2.5rem, 6vh, 4rem);
+  }
+
+  /* Телефон: наложенной плашки TopBar нет — лишний воздух сверху не нужен */
+  @media (max-width: 1023px) {
+    .hero-full .hero-inner {
+      padding-top: clamp(2.5rem, 6vh, 4rem);
+    }
+  }
+
+  .hero-full .hero-eyebrow {
+    /* Слоновая кость, не песок: мелкая капитель на фото иначе не добирает 4.5:1 */
+    color: var(--c-ivory);
+  }
+
+  .hero-full .hero-title {
+    /* Крупнее общей шкалы — единственная надпись такого масштаба на сайте.
+       Верхняя граница выверена по слову «ИНДИВИДУАЛЬНЫЕ» (14 знаков
+       капителью): при 1280px оно обязано помещаться в колонку текста. */
+    /* Второй предел 7.4vw — для телефонов: слово «ИНДИВИДУАЛЬНЫЕ» обязано
+       помещаться в ширину содержимого (320px → 236 из 250px) */
+    font-size: min(clamp(2.5rem, 1.1rem + 4.3vw, 6rem), 7.4vw);
+    color: var(--c-ivory);
+    text-shadow: 0 2px 30px rgb(0 0 0 / 0.35);
+    /* ch считается по цифре «0», прописная кириллица шире — запас нужен,
+       иначе слово ломается посреди (проверено: 16ch ломало) */
+    max-width: min(24ch, 100%);
+  }
+
+  .hero-full .hero-subtitle {
+    color: var(--c-ivory);
+    font-size: clamp(1.35rem, 0.9rem + 1.8vw, 2.6rem);
+  }
+
+  .hero-full .hero-text {
+    color: rgb(244 240 232 / 0.92);
+  }
+
+  /* Контурные кнопки поверх фото — с лёгкой матовой подложкой, иначе
+     тонкая линия и надпись тонут в светлых участках кадра */
+  .hero-full .hero-actions :global(.btn-whatsapp),
+  .hero-full .hero-actions :global(.btn-ghost) {
+    color: var(--c-ivory);
+    background: rgb(11 13 14 / 0.32);
+    backdrop-filter: blur(6px);
+  }
+
+  .hero-full .hero-actions :global(.btn-whatsapp:hover),
+  .hero-full .hero-actions :global(.btn-ghost:hover) {
+    color: var(--c-ivory);
+    background: rgb(11 13 14 / 0.55);
+    border-color: var(--gold);
+  }
+
+  /* Невысокое окно компьютера (ноутбук 1366×768, 1280×720): текст и
+     плашка-факты обязаны уместиться в первый экран — ужимаем отступы и
+     масштаб заголовка от высоты окна */
+  @media (min-width: 1024px) and (max-height: 900px) {
+    .hero-full .hero-inner {
+      padding-block: clamp(3.5rem, 7vh, 5rem) clamp(1.25rem, 3vh, 2.5rem);
+    }
+    .hero-full .hero-title {
+      font-size: min(clamp(2.5rem, 1.1rem + 4.3vw, 6rem), 7.6vh);
+    }
+    .hero-full .hero-subtitle {
+      font-size: min(clamp(1.35rem, 0.9rem + 1.8vw, 2.6rem), 4vh);
+    }
+    .hero-full .hero-text {
+      font-size: var(--fs-base);
+    }
+    .hero-full .hero-rule {
+      margin-block: var(--sp-3);
+    }
+    .hero-full .hero-actions {
+      margin-top: var(--sp-4);
+    }
+  }
+  /* Проверено CDP 19.08: 1366×768 и 1280×720 — плашка-факты целиком в
+     первом экране (до правки уходила за край на 36 и 77px) */
+
+  /* (блок стоит ПОСЛЕ базовых правил героя: при равной специфичности
+     побеждает порядок — иначе переопределение от высоты окна не сработало бы) */
+
+  /* ---------- подстраницы: разворот текст + фото ---------- */
+  .hero-compact {
+    background: var(--bg);
+  }
+
+  .hero-compact .hero-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(2rem, 4vw, 4rem);
+    align-items: center;
+    /* Сверху немного: отступ под плашку TopBar уже даёт main (--main-top) */
+    padding-block: clamp(2rem, 4vw, 3.5rem) clamp(2.5rem, 6vw, 5rem);
+  }
+
+  /* Две колонки — от ширины СОДЕРЖИМОГО (.page — контейнер), а не окна:
+     при боковой панели окно 1024px даёт лишь 792px под текст и фото */
+  @container page (min-width: 880px) {
+    .hero-compact .hero-inner {
+      /* Текст шире фото: заголовки страниц длинные («…экскурсия по
+         Санторини на автомобиле»), им нужна колонка */
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    }
+  }
+
+  .hero-photo {
+    position: relative;
+    margin: 0;
+  }
+
+  .hero-photo :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  /* Тонкая золотая рамка со сдвигом — как паспарту у фотографии */
+  .hero-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    translate: 14px 14px;
+    border: 1px solid var(--gold);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  @container page (max-width: 879px) {
+    .hero-photo::after {
+      translate: 10px 10px;
+    }
+  }
+
+  /* ---------- общее ---------- */
   .hero-content > * {
-    max-width: min(34ch, 100%);
-  }
-
-  .hero-text {
-    max-width: min(52ch, 100%);
+    max-width: min(40ch, 100%);
   }
 
   .hero-eyebrow {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+    font-family: var(--font-body);
     font-size: var(--fs-xs);
-    font-weight: 600;
-    letter-spacing: 0.18em;
+    font-weight: 500;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: var(--c-sunset-200);
-    margin-bottom: var(--sp-3);
+    color: var(--accent);
+  }
+
+  .hero-eyebrow::after {
+    content: '';
+    width: 36px;
+    height: 1px;
+    background: var(--gold);
   }
 
   .hero-title {
-    font-size: var(--fs-4xl);
-    color: #fff;
-    text-shadow: 0 2px 24px rgb(0 0 0 / 0.35);
-    max-width: min(18ch, 100%);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--fs-3xl);
+    line-height: 1.02;
+    letter-spacing: var(--track-caps);
+    text-transform: uppercase;
+    max-width: min(20ch, 100%);
   }
 
   .hero-compact .hero-title {
-    font-size: var(--fs-3xl);
-    max-width: min(22ch, 100%);
+    /* Заголовки подстраниц — длинные SEO-фразы: масштаб умереннее, чем у
+       главной, и колонка до 26 знаков — чтобы слово «ИНДИВИДУАЛЬНАЯ» не
+       ломалось посреди (проверено скриншотом 1280px) */
+    font-size: min(clamp(1.9rem, 1.15rem + 2.1vw, 3.3rem), 7.4vw);
+    max-width: min(26ch, 100%);
   }
 
   .hero-subtitle {
     margin-top: var(--sp-3);
     font-family: var(--font-display);
-    font-size: var(--fs-xl);
-    font-weight: 500;
-    font-style: italic;
-    color: var(--c-aegean-100);
+    font-weight: 300;
+    font-size: var(--fs-2xl);
+    line-height: 1.1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text);
+    max-width: min(24ch, 100%);
+  }
+
+  .hero-rule {
+    display: block;
+    width: 44px;
+    height: 1px;
+    margin-block: var(--sp-5);
+    background: var(--gold);
   }
 
   .hero-text {
-    margin-top: var(--sp-4);
-    max-width: min(54ch, 100%);
+    max-width: min(50ch, 100%);
     font-size: var(--fs-lg);
-    color: rgb(255 255 255 / 0.9);
+    line-height: 1.55;
+    color: var(--text-soft);
   }
 
   .hero-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--sp-3);
+    align-items: center;
+    gap: var(--sp-4);
     margin-top: var(--sp-6);
   }
 
   .hero-actions:empty {
     display: none;
-  }
-
-  .hero-scroll {
-    position: absolute;
-    left: 50%;
-    bottom: var(--sp-5);
-    translate: -50% 0;
-    width: 26px;
-    height: 42px;
-    border: 2px solid rgb(255 255 255 / 0.5);
-    border-radius: var(--radius-full);
-    display: grid;
-    place-items: start center;
-    padding-top: 7px;
-  }
-
-  .hero-scroll span {
-    width: 3px;
-    height: 8px;
-    border-radius: 2px;
-    background: #fff;
-    animation: scrollDot 1.8s var(--ease) infinite;
-  }
-
-  @keyframes scrollDot {
-    0% {
-      opacity: 0;
-      transform: translateY(0);
-    }
-    35% {
-      opacity: 1;
-    }
-    70% {
-      opacity: 0;
-      transform: translateY(12px);
-    }
-    100% {
-      opacity: 0;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .hero-scroll span {
-      animation: none;
-    }
   }
 </style>

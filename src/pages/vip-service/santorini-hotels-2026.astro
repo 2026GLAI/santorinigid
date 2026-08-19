@@ -165,7 +165,6 @@ const schema = [
 
   .hotel {
     display: grid;
-    scroll-margin-top: 90px;
   }
 
   .hotel-media {
@@ -207,7 +206,7 @@ const schema = [
     left: var(--sp-3);
     padding: 0.28rem 0.75rem;
     border-radius: var(--radius-full);
-    background: color-mix(in srgb, var(--c-aegean-900) 78%, transparent);
+    background: color-mix(in srgb, var(--c-black) 72%, transparent);
     backdrop-filter: blur(6px);
     color: #fff;
     font-size: 0.74rem;
@@ -247,7 +246,7 @@ const schema = [
     margin-top: var(--sp-6);
     padding: var(--sp-5);
     border: 1px solid var(--border);
-    border-left: 4px solid var(--c-sunset-500);
+    border-left: 2px solid var(--gold);
     border-radius: 0 var(--radius) var(--radius) 0;
     background: var(--bg-alt);
   }
@@ -255,7 +254,7 @@ const schema = [
   .disclosure h3 {
     font-family: var(--font-body);
     font-size: var(--fs-base);
-    color: var(--c-sunset-600);
+    color: var(--accent);
     margin-bottom: var(--sp-3);
   }
 
@@ -265,7 +264,7 @@ const schema = [
     line-height: 1.7;
   }
 
-  @media (min-width: 860px) {
+  @container page (min-width: 860px) {
     .hotel {
       grid-template-columns: 42% 1fr;
     }

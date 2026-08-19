@@ -353,8 +353,10 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow);
+    /* Липнет под верхней полоской телефона/планшета; на широком экране
+       (≥1024px) сверху ничего закреплённого нет — к самому краю */
     position: sticky;
-    top: 92px;
+    top: calc(var(--topbar-h) + var(--sp-5));
   }
 
   .form-title {
@@ -443,15 +445,21 @@ const formAction = FORMSPREE_ID ? `https://formspree.io/f/${FORMSPREE_ID}` : '';
     line-height: 1.6;
   }
 
-  @media (min-width: 940px) {
+  @container page (min-width: 940px) {
     .contacts-grid {
-      grid-template-columns: 1fr 440px;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 440px);
     }
   }
 
-  @media (max-width: 939px) {
+  @container page (max-width: 939px) {
     .form-wrap {
       position: static;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .form-wrap {
+      top: var(--sp-5);
     }
   }
 </style>

@@ -1,7 +1,8 @@
 /* =========================================================================
-   Дизайн-система «Санторини»
-   Палитра взята с самого острова: белёная извёстка, синие купола, вулкан,
-   закат над Кальдерой. Никаких «тяжёлых» библиотек — чистый CSS.
+   Дизайн-система «Санторини» — ВЕРСИЯ 2 (ветка v2, редакционный стиль)
+   Палитра: почти чёрный и графит боковой панели, слоновая кость и песок
+   страницы, шампань-золото для акцентов (дозированно), синий купола.
+   Никаких «тяжёлых» библиотек — чистый CSS.
    ========================================================================= */
 
 @layer reset, tokens, base, layout, components, utilities;
@@ -158,73 +159,73 @@
 /* ---------- дизайн-токены ---------- */
 @layer tokens {
   :root {
-    /* Цвета острова */
-    --c-white: #ffffff;
-    --c-lime: #fbfaf7; /* белёная стена, тёплый оттенок извести */
-    --c-sand: #f4f1ea; /* песок / камень */
-
-    --c-aegean-100: #d6ecf7;
-    --c-aegean-200: #a9d8ef;
-    --c-aegean-400: #3f9fd4;
-    --c-aegean-600: #1b6fa8; /* синий купол */
-    --c-aegean-800: #0e4570;
-    --c-aegean-900: #0a2f4d; /* глубокое море */
-
-    --c-sunset-200: #ffd9c2;
-    --c-sunset-500: #f2793f; /* закат над Кальдерой */
-    --c-sunset-600: #d95f28;
+    /* ---- Палитра версии 2 ---------------------------------------------
+       Из брифа: почти чёрный #0B0D0E, графит #15181A, слоновая кость
+       #F4F0E8, тёплый песок #D8C5A3, шампань-золото #C9A96A, синий
+       Санторини #315A72. Остальные оттенки выведены из них. */
+    --c-black: #0b0d0e;
+    --c-graphite: #15181a;
+    --c-graphite-2: #1d2124;
+    --c-ivory: #f4f0e8;
+    --c-ivory-2: #fbf8f2; /* поверхность карточки на слоновой кости */
+    --c-sand: #ece5d6; /* фон чередующихся секций */
+    --c-sand-2: #d8c5a3; /* тёплый песок из брифа: линии, наведение */
+    --c-gold: #c9a96a; /* шампань-золото — ТОЛЬКО поверхности и линии */
+    /* Золото как ТЕКСТ на светлом фоне не читается (#c9a96a на слоновой
+       кости — 1.97:1). Для надписей — бронза: 5.04:1 на слоновой кости,
+       4.56:1 на песке [расчёт 19.08.2026]. */
+    --c-bronze: #7d6234;
+    --c-blue: #315a72; /* синий купола: 6.51:1 на слоновой кости */
+    --c-blue-dark: #274a5e; /* наведение на синие элементы чата */
     /* Цвет пульсации кнопки чата — «транспортный красный» (RAL 3020),
        выбран владельцем лично 28.07.2026 (вечер, замена «шапки Деда
        Мороза» #ca3a27). Не подбирать на глаз. */
     --c-pulse: #cc0605;
 
-    --c-ink: #12222e;
-    --c-ink-soft: #43535e;
-    /* Приглушённый серый с лёгким уклоном в синеву палитры.
-       Затемнён до контраста 4.6:1 на светлом фоне — мелкие подписи
-       (даты, «опубликован», состав компании) должны читаться. */
-    --c-ink-muted: #5f6e78;
+    --c-ink-soft: #3f4144; /* 9.01:1 на слоновой кости */
+    /* Приглушённый тёплый серый для мелких подписей:
+       5.07:1 на слоновой кости, 4.60:1 на песке. */
+    --c-ink-muted: #6b655c;
 
     /* Семантические */
-    --bg: var(--c-lime);
+    --bg: var(--c-ivory);
     --bg-alt: var(--c-sand);
-    --surface: var(--c-white);
-    --text: var(--c-ink);
+    --surface: var(--c-ivory-2);
+    --text: var(--c-black);
     --text-soft: var(--c-ink-soft);
     --text-muted: var(--c-ink-muted);
-    --accent: var(--c-aegean-600);
-    --border: #e3ded4;
+    --accent: var(--c-bronze);
+    --gold: var(--c-gold);
+    --focus-ring: var(--c-bronze);
+    --border: #d9d1c2;
+    /* Тонкая линия на тёмных поверхностях (панель, подвал, плашка героя) */
+    --border-dark: rgb(244 240 232 / 0.14);
 
     /* ---- Цвета кнопок ---------------------------------------------------
-       Текст на цветной кнопке нельзя задавать намертво: фон --accent
-       в тёмной теме становится СВЕТЛЫМ, и белая надпись на нём пропадает.
-       Поэтому пара «фон + текст» задаётся вместе для каждой темы.
-       Значения подобраны расчётом контраста, не на глаз.
-
-       Светлая тема:
-         покой:    белый на #1b6fa8  → 5.40:1 ✓
-         наведение: белый на #0e4570 → 9.98:1 ✓                         */
-    --on-accent: var(--c-white);
-    --accent-hover: var(--c-aegean-800);
-    --on-accent-hover: var(--c-white);
+       Главная кнопка — золото с почти чёрной надписью, как в брифе:
+         покой:     #0b0d0e на #c9a96a → 8.69:1 ✓
+         наведение: #0b0d0e на #d8c5a3 → 11.53:1 ✓
+       Пара «фон + текст» задаётся вместе для каждой темы.              */
+    --btn-bg: var(--c-gold);
+    --on-accent: var(--c-black);
+    --btn-bg-hover: var(--c-sand-2);
+    --on-accent-hover: var(--c-black);
 
     /* ---- Цвета сообщений в формах ---------------------------------------
-       «Отправлено» и «Ошибка» раньше были вписаны в каждую форму напрямую
-       и не менялись вместе с темой. Считали контраст на фоне формы
-       (--surface, а не фон страницы — текст лежит внутри формы):
-         зелёный  #1a9e4b → 3.48 светлая / 4.15 тёмная — оба провал
-         красный  #c0392b → 5.44 светлая / 2.66 тёмная — провал в тёмной
-       Теперь для каждой темы свой оттенок, все ≥ 4.5:
-         светлая: зелёный 5.44 · красный 5.44 · звёздочка 5.18          */
-    --ok: #0f7a37;
-    --err: #c0392b;
-    --required: #c2410c;
+       Считаем на фоне формы (--surface #fbf8f2):
+         светлая: зелёный #2a6f3f 5.75 · красный #b3372b 5.66 [расчёт 19.08.2026] */
+    --ok: #2a6f3f;
+    --err: #b3372b;
+    --required: #b3372b;
 
     /* Типографика — плавная, зависит от ширины экрана */
     /* Имена шрифтов приходят из astro.config.mjs: там же перечислены
        запасные варианты на случай, если файл не успел загрузиться. */
-    --font-display: var(--font-playfair);
-    --font-body: var(--font-inter);
+    --font-display: var(--font-cormorant);
+    --font-body: var(--font-lora);
+    --font-hand: var(--font-script);
+    /* Заголовки — капителью с разрядкой, как в редакционной вёрстке */
+    --track-caps: 0.06em;
 
     /* ---- Размеры шрифта ------------------------------------------------
        Считаются от ширины экрана: на телефоне мельче, на большом мониторе
@@ -241,7 +242,10 @@
     --fs-lg: clamp(1.12rem, 1.02rem + 0.45vw, 1.42rem);
     --fs-xl: clamp(1.32rem, 1.14rem + 0.8vw, 1.9rem);
     --fs-2xl: clamp(1.65rem, 1.32rem + 1.5vw, 2.75rem);
-    --fs-3xl: clamp(2rem, 1.5rem + 2.3vw, 3.9rem);
+    /* Версия 2: заголовки набраны капителью, слова шире — верхняя граница
+       ниже прежней (3.9rem): h1 «Обо мне», «Отзывы», шапки подстраниц
+       не должны ломать длинные слова посреди (проверено скриншотами) */
+    --fs-3xl: clamp(1.9rem, 1.35rem + 2.1vw, 3.3rem);
     --fs-4xl: clamp(2.4rem, 1.6rem + 3.6vw, 5.4rem);
 
     /* Ритм */
@@ -254,15 +258,27 @@
     --sp-7: 3rem;
     --sp-8: 4rem;
 
-    --radius-sm: 8px;
-    --radius: 14px;
-    --radius-lg: 22px;
-    --radius-xl: 32px;
+    /* Версия 2: углы прямые, тени почти невидимые — «матовые поверхности,
+       тонкие линии» из брифа. Имена оставлены, чтобы страницы не менять:
+       все их скругления и тени гаснут через эти же переменные. */
+    --radius-sm: 0px;
+    --radius: 0px;
+    --radius-lg: 0px;
+    --radius-xl: 0px;
     --radius-full: 999px;
 
-    --shadow-sm: 0 1px 2px rgb(10 47 77 / 0.06), 0 2px 6px rgb(10 47 77 / 0.05);
-    --shadow: 0 4px 12px rgb(10 47 77 / 0.07), 0 12px 28px rgb(10 47 77 / 0.07);
-    --shadow-lg: 0 10px 24px rgb(10 47 77 / 0.1), 0 28px 60px rgb(10 47 77 / 0.12);
+    --shadow-sm: 0 1px 2px rgb(11 13 14 / 0.04);
+    --shadow: 0 2px 10px rgb(11 13 14 / 0.06);
+    --shadow-lg: 0 12px 40px rgb(11 13 14 / 0.12);
+
+    /* Ширина боковой панели (широкий экран) и высота верхней полоски
+       (телефон). Их читают body, панель, плавающие кнопки владельца. */
+    --sidebar-w: 232px;
+    --topbar-h: 64px;
+    /* Отступ первого блока страницы сверху на широком экране — под плашку
+       «телефон + кнопка», лежащую поверх (TopBar). На телефоне 0: там
+       место занимает верхняя полоска панели (padding-top у body). */
+    --main-top: 0px;
 
     /* ---- Ширины контента ----------------------------------------------
        Сайт должен одинаково хорошо выглядеть и на телефоне 320px, и на
@@ -310,30 +326,28 @@
   }
 
   /* Уважаем выбор пользователя: тёмная тема */
+  /* Тёмная тема версии 2: графит и почти чёрный, надписи — слоновая
+     кость, акцент — само золото (на #0b0d0e читается: 8.69:1).
+       приглушённый #a39a8c → 7.01:1 на фоне, 6.42:1 на поверхности
+       зелёный #6fcf97 → 9.38:1 · красный #ff8a80 → 7.81:1 на поверхности */
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme='light']) {
-      --bg: #0c1a24;
-      --bg-alt: #102532;
-      --surface: #142c3b;
-      --text: #eaf2f7;
-      --text-soft: #b8cad6;
-      --text-muted: #8ba3b2;
-      --accent: var(--c-aegean-200);
-      --border: #1e3d50;
-
-      /* Кнопки в тёмной теме: фон светлый, значит текст должен быть тёмным.
-           покой:     #0a2f4d на #a9d8ef → 9.01:1 ✓ (было белым: 1.53:1)
-           наведение: #0a2f4d на #d6ecf7 → 11.27:1 ✓
-         При наведении фон СВЕТЛЕЕТ, а не темнеет: светлую кнопку затемнять
-         нельзя, иначе она сливается с тёмным фоном страницы. */
-      --on-accent: var(--c-aegean-900);
-      --accent-hover: var(--c-aegean-100);
-      --on-accent-hover: var(--c-aegean-900);
-
-      /* Тёмная тема: цвета сообщений светлее — на тёмном фоне формы
-         (#142c3b) тёмно-зелёный и тёмно-красный не читались.
-         зелёный 8.29 · красный 6.33 */
-      --ok: #4ade80;
+      --bg: var(--c-black);
+      --bg-alt: #111416;
+      --surface: var(--c-graphite);
+      --text: var(--c-ivory);
+      --text-soft: #cfc8bc;
+      --text-muted: #a39a8c;
+      --accent: var(--c-gold);
+      --focus-ring: var(--c-gold);
+      --border: #2a2e31;
+      --border-dark: rgb(244 240 232 / 0.14);
+      /* Кнопка остаётся золотой с тёмной надписью — тот же расчёт 8.69:1 */
+      --btn-bg: var(--c-gold);
+      --on-accent: var(--c-black);
+      --btn-bg-hover: var(--c-sand-2);
+      --on-accent-hover: var(--c-black);
+      --ok: #6fcf97;
       --err: #ff8a80;
       --required: #ff8a80;
       --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
@@ -342,25 +356,28 @@
     }
   }
 
-  /* Тот же набор, но по выбору человека через кнопку в шапке —
+  /* Тот же набор, но по выбору человека через кнопку в панели —
      независимо от настройки устройства. Значения обязаны совпадать
      с блоком выше, иначе тема «по кнопке» и «по устройству» разойдутся. */
   :root[data-theme='dark'] {
     /* Гость выбрал тёмную кнопкой — красим и части браузера (полосу
        прокрутки, списки) в тёмный, не спрашивая настройку устройства. */
     color-scheme: dark;
-    --bg: #0c1a24;
-    --bg-alt: #102532;
-    --surface: #142c3b;
-    --text: #eaf2f7;
-    --text-soft: #b8cad6;
-    --text-muted: #8ba3b2;
-    --accent: var(--c-aegean-200);
-    --border: #1e3d50;
-    --on-accent: var(--c-aegean-900);
-    --accent-hover: var(--c-aegean-100);
-    --on-accent-hover: var(--c-aegean-900);
-    --ok: #4ade80;
+    --bg: var(--c-black);
+    --bg-alt: #111416;
+    --surface: var(--c-graphite);
+    --text: var(--c-ivory);
+    --text-soft: #cfc8bc;
+    --text-muted: #a39a8c;
+    --accent: var(--c-gold);
+    --focus-ring: var(--c-gold);
+    --border: #2a2e31;
+    --border-dark: rgb(244 240 232 / 0.14);
+    --btn-bg: var(--c-gold);
+    --on-accent: var(--c-black);
+    --btn-bg-hover: var(--c-sand-2);
+    --on-accent-hover: var(--c-black);
+    --ok: #6fcf97;
     --err: #ff8a80;
     --required: #ff8a80;
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
@@ -387,6 +404,48 @@
     font-feature-settings: 'kern' 1, 'liga' 1;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    /* Место под боковую панель (широкий экран) или верхнюю полоску (телефон) */
+    padding-top: var(--topbar-h);
+  }
+
+  @media (min-width: 1024px) {
+    body {
+      --main-top: clamp(4.75rem, 8vh, 6.5rem);
+      padding-top: 0;
+      padding-left: var(--sidebar-w);
+    }
+  }
+
+  /* Первый блок каждой страницы начинается ниже плашки TopBar.
+     Полноэкранное фото главной поднимается обратно к краю (Hero.astro). */
+  main {
+    padding-top: var(--main-top);
+  }
+
+  /* Открытое меню телефона: страница под ним не прокручивается */
+  html.menu-open {
+    overflow: hidden;
+  }
+
+  /*
+    Плавная смена страниц без единой строки скрипта: браузер сам делает
+    перекрёстное растворение между документами одного сайта, а боковая
+    панель и плашка (у них есть view-transition-name) остаются на месте.
+    Кто просил меньше движения — получает мгновенную смену.
+  */
+  @view-transition {
+    navigation: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    @view-transition {
+      navigation: none;
+    }
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 340ms;
   }
 
   /*
@@ -430,22 +489,47 @@
     }
   }
 
+  /* Заголовки — светлая антиква капителью с разрядкой: так набраны
+     все заголовки брифа («ЭКСКУРСИИ НА САНТОРИНИ»). Вес 400, не 600. */
   h1,
   h2,
   h3 {
     font-family: var(--font-display);
-    letter-spacing: -0.015em;
+    font-weight: 400;
+    letter-spacing: var(--track-caps);
+    text-transform: uppercase;
+    line-height: 1.08;
+  }
+
+  h4 {
+    font-weight: 500;
   }
 
   ::selection {
-    background: var(--c-aegean-200);
-    color: var(--c-aegean-900);
+    background: var(--c-sand-2);
+    color: var(--c-black);
   }
 
+  /* Кольцо фокуса — по токену --focus-ring: бронза на светлом (5.04:1 на
+     слоновой кости), золото в тёмной теме и внутри всегда-тёмных блоков
+     (панель, подвал, фото главной) — там золото 7.96–8.69:1. Само золото
+     на светлом фоне дало бы 1.97:1 — ниже нормы 3:1 для индикатора. */
   :focus-visible {
-    outline: 3px solid var(--accent);
+    outline: 3px solid var(--focus-ring);
     outline-offset: 3px;
-    border-radius: var(--radius-sm);
+  }
+
+  /* Якорные переходы (#reviews, #form…): цель не прячется под верхней
+     полоской телефона; на широком экране сверху ничего закреплённого нет.
+     Одно правило вместо разрозненных «90px» под старую шапку. */
+  [id] {
+    scroll-margin-top: calc(var(--topbar-h) + 0.75rem);
+  }
+
+  @media (min-width: 1024px) {
+    [id] {
+      scroll-margin-top: 0.75rem;
+    }
   }
 
   /* Кто просил меньше анимации — тот её не получит */
@@ -543,34 +627,45 @@
 /* ---------- компоненты ---------- */
 @layer components {
   /* Заголовок секции */
+  /* Надзаголовок «ОБО МНЕ ——»: бронзовая капитель и золотая черта СПРАВА,
+     как в брифе */
   .eyebrow {
     display: inline-flex;
     align-items: center;
-    gap: var(--sp-2);
+    gap: var(--sp-3);
     font-size: var(--fs-xs);
-    font-weight: 600;
-    letter-spacing: 0.14em;
+    font-weight: 500;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--accent);
   }
 
-  .eyebrow::before {
+  .eyebrow::after {
     content: '';
-    width: 28px;
+    width: 36px;
     height: 1px;
-    background: currentColor;
-    opacity: 0.6;
+    background: var(--gold);
+  }
+
+  /* Пустой надзаголовок (страница передала eyebrow="") — ни текста,
+     ни одинокой черты */
+  .eyebrow:empty {
+    display: none;
   }
 
   .section-title {
     font-size: var(--fs-2xl);
     margin-top: var(--sp-3);
+    /* ch — ширина цифры «0»; прописная кириллица шире, поэтому запас:
+       «КОНФИДЕНЦИАЛЬНОСТИ» = 13,8em, 32ch ≈ 15,3em (метрики Cormorant) */
+    max-width: min(32ch, 100%);
   }
 
   .lede {
     font-size: var(--fs-lg);
+    line-height: 1.55;
     color: var(--text-soft);
-    max-width: min(62ch, 100%);
+    max-width: min(58ch, 100%);
   }
 
   /*
@@ -586,99 +681,91 @@
   }
 
   /* Кнопки */
+  /* Кнопки версии 2: прямоугольник, капитель с разрядкой, без «прыжка»
+     при наведении — только смена тона. Так в брифе: «СМОТРЕТЬ ТУРЫ →». */
   .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--sp-2);
-    padding: 0.85em 1.75em;
-    border-radius: var(--radius-full);
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    gap: 0.7em;
+    padding: 0.95em 1.9em;
+    font-family: var(--font-body);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
     text-align: center;
-    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease),
-      background-color var(--dur) var(--ease), color var(--dur) var(--ease);
-    will-change: transform;
+    line-height: 1.2;
+    border: 1px solid transparent;
+    transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease),
+      border-color var(--dur) var(--ease);
   }
 
-  .btn:hover {
-    transform: translateY(-2px);
-  }
-
-  .btn:active {
-    transform: translateY(0);
-  }
-
-  /*
-    Цвет текста берётся из токена, а не вписан белым намертво.
-
-    Почему это важно: фон кнопки — var(--accent), а он в тёмной теме
-    подменяется на светло-голубой #a9d8ef. Белый текст на нём давал
-    контраст 1.53:1 при норме 4.5:1 — надпись почти не читалась на всех
-    24 кнопках сайта. На компьютере дефект был незаметен: при наведении
-    кнопка темнеет и контраст подскакивает до 9.98:1. А на телефоне
-    наведения нет вовсе — там кнопка так и оставалась нечитаемой.
-
-    Теперь --on-accent задан для каждой темы своим значением
-    (см. блок токенов): белый на тёмно-синем в светлой теме,
-    тёмно-синий на светло-голубом в тёмной.
-  */
+  /* Главная — золото с почти чёрной надписью (8.69:1), при наведении
+     светлеет до песочного (11.53:1). Пара «фон + текст» из токенов. */
   .btn-primary {
-    background: var(--accent);
+    background: var(--btn-bg);
     color: var(--on-accent);
-    box-shadow: var(--shadow);
+    border-color: var(--btn-bg);
   }
 
   .btn-primary:hover {
-    background: var(--accent-hover);
+    background: var(--btn-bg-hover);
     color: var(--on-accent-hover);
-    box-shadow: var(--shadow-lg);
+    border-color: var(--btn-bg-hover);
   }
 
-  .btn-whatsapp {
-    background: #25d366;
-    color: #06301a;
-    box-shadow: 0 4px 14px rgb(37 211 102 / 0.35);
-  }
-
-  .btn-whatsapp:hover {
-    background: #1fbe5a;
-    box-shadow: 0 8px 24px rgb(37 211 102 / 0.45);
-  }
-
+  /*
+    WhatsApp — контурная кнопка, а не зелёная заливка: фирменная зелень
+    #25d366 на слоновой кости даёт 1.74:1 и спорит с золотом. Мессенджер
+    и так назван словом в надписи кнопки («Написать в WhatsApp»).
+  */
+  .btn-whatsapp,
   .btn-ghost {
-    border: 1.5px solid var(--border);
+    background: transparent;
     color: var(--text);
-    background: var(--surface);
+    border-color: currentColor;
   }
 
+  .btn-whatsapp:hover,
   .btn-ghost:hover {
-    border-color: var(--accent);
     color: var(--accent);
+    border-color: var(--gold);
+  }
+
+  /* На тёмном фоне (первый экран главной, подвал, тёмные плашки)
+     контурные кнопки светлые: наследуют цвет текста родителя. */
+  /* Узкий телефон (≤400px): разрядку и поля ужимаем, иначе длинная
+     надпись-одно-слово («Достопримечательности», 21 знак) не помещается
+     в ширину содержимого 250px и кнопка вылезает за край */
+  @media (max-width: 400px) {
+    .btn {
+      letter-spacing: 0.1em;
+      padding-inline: 1.3em;
+      max-width: 100%;
+    }
   }
 
   .btn-lg {
-    padding: 1em 2.25em;
-    font-size: var(--fs-base);
+    padding: 1.1em 2.4em;
+    font-size: var(--fs-sm);
+    letter-spacing: 0.16em;
   }
 
-  /* Карточка */
+  /* Карточка: матовая поверхность, тонкая линия, без подъёма */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+    transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
     height: 100%;
     display: flex;
     flex-direction: column;
   }
 
   .card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
+    border-color: var(--gold);
+    box-shadow: var(--shadow);
   }
 
   .card-body {
@@ -689,8 +776,11 @@
     flex: 1;
   }
 
+  /* Заголовок карточки капителью — умереннее общего h3: в узкой колонке
+     длинное имя («Кутсуяннопулос») иначе ломается посреди слова */
   .card-title {
-    font-size: var(--fs-xl);
+    font-size: var(--fs-lg);
+    letter-spacing: 0.04em;
   }
 
   .card-text {
@@ -842,9 +932,14 @@
       left: 0;
       z-index: 200;
       width: 100%;
-      height: 3px;
+      height: 2px;
       transform-origin: 0 50%;
-      background: linear-gradient(90deg, var(--c-aegean-400), var(--c-sunset-500));
+      background: var(--gold);
+      /* Покой — нулевая ширина. Когда странице некуда прокручиваться
+         (короткая страница на большом мониторе), лента прокрутки неактивна
+         и анимация не применяется: без этой строки полоска рисовалась бы
+         во всю ширину поверх верха страницы (проверено скриншотами). */
+      transform: scaleX(0);
       animation: progressGrow linear both;
       animation-timeline: scroll(root block);
     }
@@ -996,4 +1091,25 @@
     bottom: 0;
     left: 0;
   }
+}
+
+/* =========================================================================
+   БОКОВАЯ ПАНЕЛЬ (версия 2): полоска прочитанного на широком экране
+   начинается ПРАВЕЕ панели, а не под ней. Служебные элементы владельца
+   (фонарик, панель «Изменить») сдвигают себя сами — в своих компонентах.
+   ========================================================================= */
+@media (min-width: 1024px) {
+  .scroll-progress {
+    left: var(--sidebar-w);
+    right: 0;
+    width: auto;
+  }
+}
+
+/* Открытое меню телефона закрывает всё, включая плавающие кнопки чата и
+   «наверх» — иначе кнопка чата (z-index 250) висит поверх пунктов меню
+   (проверено скриншотом 480px). Меню закрывается по нажатию на пункт. */
+html.menu-open .chat-root,
+html.menu-open .to-top {
+  visibility: hidden;
 }

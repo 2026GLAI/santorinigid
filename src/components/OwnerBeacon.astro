@@ -29,6 +29,11 @@ import { url } from '../data/url';
     z-index: 55;
     left: max(clamp(0.6rem, 2vw, 1.2rem), env(safe-area-inset-left, 0px));
     bottom: max(clamp(0.6rem, 2vw, 1.2rem), env(safe-area-inset-bottom, 0px));
+    /* Версия 2: на широком экране слева стоит боковая панель — фонарик
+       встаёт правее неё, у края страницы, а не поверх меню. */
+    @media (min-width: 1024px) {
+      left: calc(var(--sidebar-w) + 1rem);
+    }
     display: grid;
     place-items: center;
     width: 44px;

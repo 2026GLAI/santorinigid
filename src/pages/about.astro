@@ -273,7 +273,7 @@ const schema = [
     (дизайн-осмотр 06.08.2026). Всегда ровно 2×2 — и карточки шире,
     текст читается свободнее.
   */
-  @media (min-width: 640px) {
+  @container page (min-width: 640px) {
     .principles-grid {
       grid-template-columns: 1fr 1fr;
     }
@@ -327,7 +327,7 @@ const schema = [
     text-align: center;
   }
 
-  @media (min-width: 900px) {
+  @container page (min-width: 900px) {
     .intro {
       grid-template-columns: 440px 1fr;
     }

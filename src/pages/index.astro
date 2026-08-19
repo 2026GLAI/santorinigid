@@ -12,6 +12,7 @@ import {
   OWNER_FULL_NAME,
   PROFILES,
   ON_ISLAND_SINCE,
+  CURRENT_YEAR,
   ISLAND_YEARS_TEXT,
   GUIDE_YEARS_TEXT,
   YEARS_AS_GUIDE,
@@ -62,14 +63,29 @@ const schema = [
  * склонения («14 лет как гид», «8 судов во флоте») обновляются сами —
  * в 2033 году стаж станет 21 год, и «21 лет» выглядело бы ошибкой.
  * Это единственный блок главной, который правится только в коде.
+ * Версия 2: плашка лежит тёмной полосой в низу первого экрана (как в
+ * брифе), а не в блоке «Знакомство».
  */
+const YEARS_ON_ISLAND = CURRENT_YEAR - ON_ISLAND_SINCE;
 const facts = [
-  { n: String(ON_ISLAND_SINCE), label: 'год переезда на остров' },
-  { n: String(YEARS_AS_GUIDE), label: `${plural(YEARS_AS_GUIDE, 'год', 'года', 'лет')} как гид` },
-  { n: String(YACHTS.length), label: plural(YACHTS.length, 'судно во флоте', 'судна во флоте', 'судов во флоте') },
+  {
+    n: String(YEARS_ON_ISLAND),
+    label: `${plural(YEARS_ON_ISLAND, 'год', 'года', 'лет')} на Санторини`,
+    sub: `с ${ON_ISLAND_SINCE} года`,
+  },
+  {
+    n: String(YEARS_AS_GUIDE),
+    label: `${plural(YEARS_AS_GUIDE, 'год', 'года', 'лет')} как гид`,
+    sub: 'индивидуальные экскурсии',
+  },
+  {
+    n: String(YACHTS.length),
+    label: plural(YACHTS.length, 'судно во флоте', 'судна во флоте', 'судов во флоте'),
+    sub: 'яхты и катамараны',
+  },
   /* «24/7 на связи» было про Владимира — неправда для живого человека
      (его замечание 06.08.2026): круглосуточно дежурит ИИ-помощник. */
-  { n: '24/7', label: 'ИИ-помощник на связи' },
+  { n: '24/7', label: 'ИИ-помощник на связи', sub: 'ответит в любое время' },
 ];
 ---
 
@@ -78,6 +94,7 @@ const facts = [
   description={t.seo.description}
   schema={schema}
   edit={[{ label: 'Тексты главной', entry: 'pages/main' }]}
+  darkTop
 >
   <Hero
     image={heroOia}
@@ -94,6 +111,20 @@ const facts = [
     <a href={WHATSAPP.tour} class="btn btn-whatsapp btn-lg" target="_blank" rel="noopener">
       {t.hero.buttonWhatsApp}
     </a>
+
+    <div slot="bar" class="hero-bar">
+      <ul class="container hero-facts">
+        {
+          facts.map((f) => (
+            <li>
+              <strong>{f.n}</strong>
+              <span class="fact-label">{f.label}</span>
+              <span class="fact-sub">{f.sub}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
   </Hero>
 
   <!-- Знакомство -->
@@ -118,16 +149,7 @@ const facts = [
         <h2 class="section-title">{t.about.title}</h2>
         <p class="lede">{t.about.lede}</p>
         <p>{t.about.text}</p>
-        <div class="facts">
-          {
-            facts.map((f) => (
-              <div class="fact">
-                <strong>{f.n}</strong>
-                <span>{f.label}</span>
-              </div>
-            ))
-          }
-        </div>
+        <p class="signature">{t.about.signature}</p>
         <a href={url('/about')} class="btn btn-ghost">{t.about.button}</a>
       </div>
     </div>
@@ -243,6 +265,97 @@ const facts = [
     margin-bottom: var(--sp-7);
   }
 
+  /* --- плашка-факты в низу первого экрана --- */
+  .hero-bar {
+    /* Матовый графит поверх фото; в самом низу — линия под цвет золота */
+    background: rgb(11 13 14 / 0.72);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgb(244 240 232 / 0.12);
+    color: var(--c-ivory);
+  }
+
+  .hero-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-block: clamp(1.25rem, 3vh, 2rem);
+  }
+
+  @container page (min-width: 900px) {
+    .hero-facts {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .hero-facts li {
+    display: flex;
+    flex-direction: column;
+    /* Нижняя граница 0.5rem — чтобы на 320px «судов во флоте» не рвалось */
+    padding: 0.5rem clamp(0.5rem, 2vw, 2rem);
+    border-left: 1px solid rgb(244 240 232 / 0.14);
+  }
+
+  /* На двух колонках линию слева имеют только правые ячейки, на четырёх —
+     все, кроме первой: чтобы у края не висела одинокая черта */
+  .hero-facts li:nth-child(odd) {
+    border-left: 0;
+  }
+
+  @container page (min-width: 900px) {
+    .hero-facts li:nth-child(odd) {
+      border-left: 1px solid rgb(244 240 232 / 0.14);
+    }
+    .hero-facts li:first-child {
+      border-left: 0;
+      padding-left: 0;
+    }
+  }
+
+  .hero-facts strong {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2rem, 1.4rem + 1.8vw, 3.2rem);
+    line-height: 1;
+    color: var(--c-ivory);
+  }
+
+  .fact-label {
+    margin-top: 0.45rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--c-sand-2);
+  }
+
+  .fact-sub {
+    margin-top: 0.15rem;
+    font-size: var(--fs-xs);
+    color: rgb(244 240 232 / 0.72);
+  }
+
+  /* Телефон: плашка 2×2 и так высокая — вторую строку фактов прячем,
+     числа чуть мельче, чтобы первый экран с плашкой умещался в высоту */
+  @container page (max-width: 599px) {
+    .fact-sub {
+      display: none;
+    }
+    .hero-facts {
+      padding-block: 1rem;
+    }
+    .hero-facts strong {
+      font-size: 1.8rem;
+    }
+  }
+
+  /* Низкое окно компьютера — плашка компактнее (в паре с Hero.astro) */
+  @media (min-width: 1024px) and (max-height: 900px) {
+    .hero-facts {
+      padding-block: 1rem;
+    }
+    .hero-facts strong {
+      font-size: clamp(1.8rem, 1.2rem + 1.5vw, 2.6rem);
+    }
+  }
+
   /* --- знакомство --- */
   .about-grid {
     display: grid;
@@ -252,9 +365,6 @@ const facts = [
 
   .about-photo {
     position: relative;
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    box-shadow: var(--shadow-lg);
   }
 
   .about-photo :global(img) {
@@ -263,61 +373,53 @@ const facts = [
     object-fit: cover;
   }
 
+  /* Тонкая золотая рамка со сдвигом — паспарту, как у фото на подстраницах */
+  .about-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    translate: 14px 14px;
+    border: 1px solid var(--gold);
+    pointer-events: none;
+    z-index: -1;
+  }
+
   .about-badge {
     position: absolute;
-    left: var(--sp-4);
-    bottom: var(--sp-4);
+    left: 0;
+    bottom: var(--sp-5);
     display: flex;
     flex-direction: column;
     padding: var(--sp-3) var(--sp-5);
-    border-radius: var(--radius);
-    background: color-mix(in srgb, var(--surface) 92%, transparent);
-    backdrop-filter: blur(8px);
-    box-shadow: var(--shadow);
+    background: var(--c-black);
+    color: var(--c-ivory);
     line-height: 1.2;
   }
 
   .about-badge strong {
     font-family: var(--font-display);
-    font-size: 1.6rem;
-    color: var(--accent);
+    font-weight: 400;
+    font-size: 1.7rem;
+    color: var(--gold);
   }
 
   .about-badge span {
-    font-size: 0.76rem;
-    letter-spacing: 0.08em;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: var(--c-sand-2);
   }
 
   .about-text > * + * {
     margin-top: var(--sp-4);
   }
 
-  .facts {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-    gap: var(--sp-4);
-    padding-block: var(--sp-5);
-    border-block: 1px solid var(--border);
-  }
-
-  .fact {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .fact strong {
-    font-family: var(--font-display);
-    font-size: 1.9rem;
+  /* Рукописная подпись — как в брифе под цитатой */
+  .signature {
+    font-family: var(--font-hand);
+    font-size: 1.7rem;
+    line-height: 1.2;
     color: var(--accent);
-    line-height: 1;
-  }
-
-  .fact span {
-    margin-top: 4px;
-    font-size: 0.8rem;
-    color: var(--text-muted);
   }
 
   /* --- услуги --- */
@@ -328,7 +430,7 @@ const facts = [
     карточки крупные, и «Индивидуальные» не рвётся переносом в узкой
     колонке (проверено скриншотами: 4 в ряд слову уже тесно).
   */
-  @media (min-width: 700px) {
+  @container page (min-width: 700px) {
     .services-grid {
       grid-template-columns: 1fr 1fr;
     }
@@ -438,7 +540,7 @@ const facts = [
     background: var(--surface);
   }
 
-  @media (min-width: 900px) {
+  @container page (min-width: 900px) {
     .about-grid {
       grid-template-columns: 420px 1fr;
     }

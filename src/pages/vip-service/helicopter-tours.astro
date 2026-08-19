@@ -207,6 +207,7 @@ const schema = [
 
   .two-panel {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--sp-6);
   }
 
@@ -230,6 +231,7 @@ const schema = [
 
   .routes li {
     display: flex;
+    flex-wrap: wrap; /* на 320px строка маршрута иначе шире панели */
     align-items: baseline;
     gap: var(--sp-2);
     font-size: var(--fs-sm);
@@ -278,9 +280,9 @@ const schema = [
     color: var(--text-soft);
   }
 
-  @media (min-width: 860px) {
+  @container page (min-width: 860px) {
     .two-panel {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
   }
 </style>

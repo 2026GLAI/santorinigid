@@ -38,6 +38,7 @@ public_folder: ''
 collections:
   - name: content
     label: Содержимое сайта
+    description: '📷 Фото: файл загружается в раздел картинок админки (папка src/assets/img), в поле пишется его имя, напр. hero-oia.jpg. Сайт только уменьшает фото и никогда не увеличивает — маленький оригинал будет мылиться на большом экране. Минимум по ширине: фото первого экрана главной 2400 px, фото шапок страниц 1600 px, карточки 1200 px, портрет 1000×1250 px. JPG или WebP, HEIC с айфона — сначала в JPG. Подробнее — ПРОЧТИ-МЕНЯ-v2.md на компьютере.'
     files:
       # ─────────────────────── ЭКСКУРСИЯ ───────────────────────
       - name: tours
@@ -196,6 +197,7 @@ collections:
   # Метки НЕ УДАЛЯТЬ — иначе число исчезнет из текста.
   - name: pages
     label: Тексты страниц
+    description: '📷 Фото: файл загружается в раздел картинок админки (папка src/assets/img), в поле пишется его имя, напр. hero-oia.jpg. Сайт только уменьшает фото и никогда не увеличивает — маленький оригинал будет мылиться на большом экране. Минимум по ширине: фото первого экрана главной 2400 px, фото шапок страниц 1600 px, карточки 1200 px, портрет 1000×1250 px. JPG или WebP, HEIC с айфона — сначала в JPG. Подробнее — ПРОЧТИ-МЕНЯ-v2.md на компьютере.'
     files:
       - name: main
         label: Главная страница
@@ -233,6 +235,7 @@ collections:
               - { name: title, label: Заголовок, widget: string }
               - { name: lede, label: '📝 Первый абзац', widget: text }
               - { name: text, label: '📝 Второй абзац', widget: text }
+              - { name: signature, label: Рукописная подпись под текстом, widget: string }
               - { name: button, label: Кнопка, widget: string }
           - name: servicesSection
             label: Блок «Услуги» — заголовки
@@ -922,8 +925,15 @@ collections:
             fields:
               - { name: top, label: Первая строка, widget: string }
               - { name: sub, label: Вторая строка, widget: string }
+          - name: topbar
+            label: Плашка вверху справа (телефон и кнопка)
+            widget: object
+            collapsed: true
+            fields:
+              - { name: contactLabel, label: Подпись над телефоном, widget: string }
+              - { name: button, label: Текст золотой кнопки, widget: string }
           - name: cta
-            label: Синяя полоса-призыв (обычная)
+            label: Полоса-призыв (обычная)
             widget: object
             collapsed: true
             fields:

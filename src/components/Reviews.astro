@@ -253,13 +253,13 @@ const bySource = REVIEW_SOURCES.map((s) => ({
     max-width: 100%;
   }
 
-  @media (min-width: 700px) {
+  @container page (min-width: 700px) {
     .rv-list {
       columns: 2;
     }
   }
 
-  @media (min-width: 1200px) {
+  @container page (min-width: 1200px) {
     .rv-list {
       columns: 3;
     }
@@ -267,7 +267,7 @@ const bySource = REVIEW_SOURCES.map((s) => ({
 
   /* На сверхшироких мониторах — четыре колонки, иначе карточки
      растягиваются в неудобные для чтения полосы */
-  @media (min-width: 1900px) {
+  @container page (min-width: 1900px) {
     .rv-list {
       columns: 4;
     }
@@ -360,7 +360,9 @@ const bySource = REVIEW_SOURCES.map((s) => ({
   /* --- призыв оставить отзыв --- */
   .rv-cta {
     margin-top: var(--sp-8);
-    padding: clamp(1.75rem, 5vw, 3rem);
+    /* Нижняя граница 1rem: на 320px заголовок «…САНТОРИНИ?» капителью
+       иначе не помещался на 1px и ломался посреди слова */
+    padding: clamp(1rem, 5vw, 3rem);
     text-align: center;
     background:
       radial-gradient(

@@ -62,7 +62,9 @@ const faqSchema = {
     text-align: center;
   }
 
-  .faq-head .eyebrow::before {
+  /* Заголовок блока по центру — черта надзаголовка (в v2 она справа,
+     ::after) здесь лишняя */
+  .faq-head .eyebrow::after {
     display: none;
   }
 
