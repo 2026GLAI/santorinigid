@@ -3,7 +3,9 @@
  * Подвал — версия 2: тёмный графит, тонкие линии, антиква.
  * Тексты — shared.json (footer), ссылки и контакты — site.ts.
  */
+import { Image } from 'astro:assets';
 import { CONTACTS, FOOTER_NAV, COPYRIGHT, WHATSAPP } from '../data/site';
+import logo from '../assets/img/logo-v2.png';
 import { url } from '../data/url';
 import { fillDeep } from '../data/fill';
 import shared from '../data/pages/shared.json';
@@ -15,7 +17,7 @@ const s = fillDeep(shared.footer);
   <div class="container footer-grid">
     <div class="footer-brand">
       <a href={url('/')} class="brand">
-        <span class="monogram" aria-hidden="true">S</span>
+        <Image src={logo} alt="" width={64} densities={[1, 2, 3]} class="logo" loading="lazy" />
         <span class="brand-text">
           <strong>{shared.brand.top}</strong>
           <span>{shared.brand.sub}</span>
@@ -101,17 +103,9 @@ const s = fillDeep(shared.footer);
     gap: 0.9rem;
   }
 
-  .monogram {
-    display: grid;
-    place-items: center;
-    width: 2.9rem;
-    height: 2.9rem;
-    font-family: var(--font-display);
-    font-size: 2.6rem;
-    font-weight: 300;
-    line-height: 1;
-    color: var(--gold);
-    border: 1px solid rgb(201 169 106 / 0.45);
+  .brand :global(.logo) {
+    width: 3.5rem;
+    height: auto;
   }
 
   .brand-text {
