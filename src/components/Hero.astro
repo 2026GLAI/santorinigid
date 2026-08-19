@@ -74,7 +74,7 @@ const isFull = size === 'full';
 
     {
       !isFull && (
-        <figure class="hero-photo reveal-zoom">
+        <figure class="hero-photo photo-frame reveal-zoom">
           <Image
             src={image}
             alt={alt}
@@ -303,7 +303,6 @@ const isFull = size === 'full';
   }
 
   .hero-photo {
-    position: relative;
     margin: 0;
   }
 
@@ -311,23 +310,6 @@ const isFull = size === 'full';
     width: 100%;
     aspect-ratio: 4 / 3;
     object-fit: cover;
-  }
-
-  /* Тонкая золотая рамка со сдвигом — как паспарту у фотографии */
-  .hero-photo::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    translate: 14px 14px;
-    border: 1px solid var(--gold);
-    pointer-events: none;
-    z-index: -1;
-  }
-
-  @container page (max-width: 879px) {
-    .hero-photo::after {
-      translate: 10px 10px;
-    }
   }
 
   /* ---------- общее ---------- */

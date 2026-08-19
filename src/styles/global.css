@@ -784,6 +784,34 @@
     letter-spacing: 0.04em;
   }
 
+  /*
+    Паспарту: тонкая золотая рамка, сдвинутая вправо-вниз за фотографией —
+    единый приём для одиночных фото рядом с текстом (шапки страниц, портрет,
+    блоки «фото + текст», точки маршрута). Не для карточек — там своя рамка.
+    isolation: isolate обязателен: рамка лежит под фото (z-index −1), и без
+    своего контекста наложения её накрыл бы фон секции.
+  */
+  .photo-frame {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .photo-frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    translate: 14px 14px;
+    border: 1px solid var(--gold);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  @media (max-width: 1023px) {
+    .photo-frame::after {
+      translate: 10px 10px;
+    }
+  }
+
   .card-text {
     color: var(--text-soft);
     font-size: var(--fs-sm);

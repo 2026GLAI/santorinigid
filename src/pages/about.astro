@@ -78,7 +78,7 @@ const schema = [
 >
   <section class="section intro-section">
     <div class="container intro">
-      <div class="intro-photo reveal">
+      <div class="intro-photo photo-frame reveal">
         <Image
           src={portrait}
           alt={t.intro.photoAlt}
@@ -191,9 +191,7 @@ const schema = [
   }
 
   .intro-photo {
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow);
   }
 
   .intro-photo :global(img) {

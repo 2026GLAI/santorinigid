@@ -130,7 +130,7 @@ const facts = [
   <!-- Знакомство -->
   <section class="section" id="content">
     <div class="container about-grid">
-      <div class="about-photo reveal-zoom">
+      <div class="about-photo photo-frame reveal-zoom">
         <Image
           src={getImg(t.about.photo)}
           alt={t.about.photoAlt}
@@ -193,7 +193,7 @@ const facts = [
   <!-- С Крита -->
   <section class="section">
     <div class="container split">
-      <div class="split-media reveal-left">
+      <div class="split-media photo-frame reveal-left">
         <Image
           src={getImg(t.crete.image)}
           alt={t.crete.imageAlt}
@@ -225,7 +225,7 @@ const facts = [
   <!-- Круизным пассажирам -->
   <section class="section section-alt">
     <div class="container split split-reverse">
-      <div class="split-media reveal-left">
+      <div class="split-media photo-frame reveal-left">
         <Image
           src={getImg(t.cruise.image)}
           alt={t.cruise.imageAlt}
@@ -363,25 +363,10 @@ const facts = [
     align-items: center;
   }
 
-  .about-photo {
-    position: relative;
-  }
-
   .about-photo :global(img) {
     width: 100%;
     aspect-ratio: 4 / 5;
     object-fit: cover;
-  }
-
-  /* Тонкая золотая рамка со сдвигом — паспарту, как у фото на подстраницах */
-  .about-photo::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    translate: 14px 14px;
-    border: 1px solid var(--gold);
-    pointer-events: none;
-    z-index: -1;
   }
 
   /* Плашка на портрете — золотая, с тонкой светлой каёмкой (как кнопка
@@ -490,8 +475,6 @@ const facts = [
   }
 
   .split-media {
-    border-radius: var(--radius-xl);
-    overflow: hidden;
     box-shadow: var(--shadow);
   }
 
