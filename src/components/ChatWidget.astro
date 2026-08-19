@@ -1009,56 +1009,49 @@ import { WHATSAPP } from '../data/site';
   }
 
   /*
-    Расходящееся кольцо — «круги по воде» от края кнопки.
-    Лежит ПОД логотипом (z-index: 1), поэтому расходится по сторонам,
-    не закрывая картинку.
-
-    Цвет — «транспортный красный» #cc0605 (токен --c-pulse), выбран
-    владельцем лично. Кольца толстые (4px), яркие на старте и с широким
-    размахом: его же просьбы — «пульсация должна бросаться в глаза»,
-    «+30% силы».
+    Пульсация «свет заката» (просьба владельца 19.08.2026, образец — кнопка
+    чата на его Wix-сайте): не тонкие кольца, а ЗАЛИТЫЙ тёплый диск,
+    который расходится до 1,8× и гаснет — и оставляет за собой мягкий
+    шлейф-тень. Лежит ПОД логотипом (z-index: 1). Цвет — токены
+    --c-pulse (оранжево-красный) и --c-pulse-warm (тёплый край).
+    До 19.08 здесь были два красных кольца по 4px (#cc0605).
   */
-  .chat-toggle::before {
-    content: '';
-    position: absolute;
-    z-index: 1;
-    inset: 0;
-    border-radius: 50%;
-    border: 4px solid var(--c-pulse);
-    animation: chatRing 2.6s var(--ease) infinite;
-    pointer-events: none;
-  }
-
-  /* Второе кольцо, с задержкой — волны идут одна за другой */
+  .chat-toggle::before,
   .chat-toggle::after {
     content: '';
     position: absolute;
     z-index: 1;
     inset: 0;
     border-radius: 50%;
-    border: 4px solid var(--c-pulse);
-    animation: chatRing 2.6s var(--ease) 1.3s infinite;
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--c-pulse-warm) 85%, transparent) 0%,
+      color-mix(in srgb, var(--c-pulse) 70%, transparent) 55%,
+      color-mix(in srgb, var(--c-pulse) 0%, transparent) 74%
+    );
+    animation: chatRing 2.4s ease-out infinite;
     pointer-events: none;
+  }
+
+  /* Второй диск с задержкой — волны идут одна за другой, шлейф не рвётся */
+  .chat-toggle::after {
+    animation-delay: 1.2s;
   }
 
   @keyframes chatRing {
     0% {
       transform: scale(1);
-      opacity: 1;
-    }
-    70% {
-      transform: scale(1.7);
-      opacity: 0;
+      opacity: 0.75;
     }
     100% {
+      transform: scale(1.85);
       opacity: 0;
     }
   }
 
   /*
-    Ореол — мягкая тёплая волна-заливка, расходящаяся от кнопки.
-    Вместе с двумя кольцами даёт ту самую «пышную» пульсацию,
-    которую владелец показал на своём другом сайте (28.07.2026).
+    Ореол — тёплое закатное свечение вокруг кнопки, «дышит» медленно:
+    это и есть постоянная тень-шлейф, на фоне которой расходятся диски.
   */
   .chat-halo {
     position: absolute;
@@ -1066,18 +1059,16 @@ import { WHATSAPP } from '../data/site';
     inset: 0;
     border-radius: 50%;
     pointer-events: none;
-    animation: chatHalo 2.6s var(--ease) infinite;
+    animation: chatHalo 2.4s ease-in-out infinite;
   }
 
   @keyframes chatHalo {
-    0% {
-      box-shadow: 0 0 0 0 color-mix(in srgb, var(--c-pulse) 55%, transparent);
-    }
-    75% {
-      box-shadow: 0 0 0 26px transparent;
-    }
+    0%,
     100% {
-      box-shadow: 0 0 0 26px transparent;
+      box-shadow: 0 0 18px 4px color-mix(in srgb, var(--c-pulse) 45%, transparent);
+    }
+    50% {
+      box-shadow: 0 0 36px 10px color-mix(in srgb, var(--c-pulse-warm) 55%, transparent);
     }
   }
 
