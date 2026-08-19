@@ -955,10 +955,9 @@ collections:
               - { name: title, label: Обычный заголовок, widget: string }
               - { name: eyebrow, label: Надзаголовок, widget: string }
               - { name: lede, label: '📝 Подводка', widget: text }
-              - { name: statReviews, label: Подпись числа отзывов, widget: string }
-              - { name: statReplies, label: Подпись ответов, widget: string }
               - { name: sourcePrefix, label: 'Текст до списка площадок', widget: string }
               - { name: sourceSuffix, label: '📝 Текст после списка площадок', widget: text }
+              - { name: expand, label: Кнопка «показать ещё», widget: string }
               - { name: collapse, label: Кнопка «Свернуть», widget: string }
               - name: cta
                 label: Призыв «Были со мной?»
@@ -966,7 +965,6 @@ collections:
                 fields:
                   - { name: title, label: Заголовок, widget: string }
                   - { name: text, label: '📝 Текст', widget: text }
-                  - { name: buttonTourister, label: Кнопка Tourister, widget: string }
                   - { name: buttonDirect, label: Кнопка «написать мне», widget: string }
           - name: reviewForm
             label: Форма «оставить отзыв»

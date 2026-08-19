@@ -72,10 +72,6 @@ export const REVIEW_SOURCES = [
   { name: 'NeedGuide', url: 'https://needguide.ru/view_guide.php?user_id=1230' },
 ] as const;
 
-/** Ссылка «оставить отзыв» на площадке, где Владимир работает давно. */
-export const LEAVE_REVIEW_URL =
-  'https://www.tourister.ru/add_response_for_expert/Vladimir_Santorini';
-
 /** Сколько отзывов показываем сразу; остальные — под кнопкой (без JS-подгрузки). */
 export const REVIEWS_VISIBLE = 6;
 

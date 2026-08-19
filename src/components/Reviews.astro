@@ -11,8 +11,7 @@
  *  3. Оценок в звёздах нет — их нет и в источнике. См. src/data/reviews.ts.
  */
 import ReviewCard from './ReviewCard.astro';
-import { REVIEWS, REVIEW_SOURCES, REVIEWS_VISIBLE, LEAVE_REVIEW_URL } from '../data/reviews';
-import { plural } from '../data/site';
+import { REVIEWS, REVIEW_SOURCES, REVIEWS_VISIBLE } from '../data/reviews';
 import { url } from '../data/url';
 import shared from '../data/pages/shared.json';
 
@@ -55,19 +54,12 @@ const hidden = REVIEWS.slice(visible);
   что их мало (отзывы годами копились у площадок-партнёров, не у него).
   Даты честно стоят у каждого отзыва — сводную плашку не возвращать.
 */
-const stats = [
-  { n: String(REVIEWS.length), label: s.statReviews },
-  {
-    n: String(REVIEWS.filter((r) => r.reply).length),
-    label: s.statReplies,
-  },
-];
-
-/** Сколько отзывов с какой площадки — показываем открыто. */
-const bySource = REVIEW_SOURCES.map((s) => ({
-  ...s,
-  count: REVIEWS.filter((r) => r.source === s.name).length,
-})).filter((s) => s.count > 0);
+/*
+  Счётчики «22 отзыва / 6 с ответом» и числа у площадок убраны 19.08.2026
+  по слову владельца («лишняя информация»). Площадки перечисляем только те,
+  с которых отзывы действительно есть.
+*/
+const bySource = REVIEW_SOURCES.filter((src) => REVIEWS.some((r) => r.source === src.name));
 ---
 
 <section class:list={['section', { 'section-alt': alt }]} id="reviews">
@@ -76,17 +68,6 @@ const bySource = REVIEW_SOURCES.map((s) => ({
       <p class="eyebrow">{eyebrow}</p>
       <h2 class="section-title">{title}</h2>
       {lede && <p class="lede">{lede}</p>}
-
-      <dl class="rv-stats">
-        {
-          stats.map((s) => (
-            <div class="rv-stat">
-              <dt>{s.n}</dt>
-              <dd>{s.label}</dd>
-            </div>
-          ))
-        }
-      </dl>
 
       {/*
         Пробелы вокруг перечисления площадок заданы явно ({' '}): перенос
@@ -102,7 +83,6 @@ const bySource = REVIEW_SOURCES.map((s) => ({
               <a href={src.url} target="_blank" rel="noopener nofollow">
                 {src.name}
               </a>
-              {' '}({src.count})
             </>
           ))
         }
@@ -132,9 +112,7 @@ const bySource = REVIEW_SOURCES.map((s) => ({
               теперь его ловит глобальная страховка размера нажатия
               для сенсорных экранов (@media pointer: coarse). */}
           <label for="rv-toggle" class="btn btn-ghost rv-more-btn">
-            <span class="rv-more-open">
-              Ещё {hidden.length} {plural(hidden.length, 'отзыв', 'отзыва', 'отзывов')}
-            </span>
+            <span class="rv-more-open">{s.expand}</span>
             <span class="rv-more-close">{s.collapse}</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M6 9l6 6 6-6" />
@@ -150,17 +128,10 @@ const bySource = REVIEW_SOURCES.map((s) => ({
           <h3>{s.cta.title}</h3>
           <p>{s.cta.text}</p>
           <div class="rv-cta-actions">
-            <a
-              href={LEAVE_REVIEW_URL}
-              class="btn btn-primary"
-              target="_blank"
-              rel="noopener"
-            >
-              {s.cta.buttonTourister}
-            </a>
-            {/* Форма живёт только на /reviews — на остальных страницах
-                якорь #review-form сам по себе вёл бы в никуда. */}
-            <a href={url('/reviews#review-form')} class="btn btn-ghost">
+            {/* Отзыв — только через форму на сайте (решение владельца 19.08.2026:
+                кнопка «на Tourister» убрана). Форма живёт на /reviews —
+                на остальных страницах якорь сам по себе вёл бы в никуда. */}
+            <a href={url('/reviews#review-form')} class="btn btn-primary">
               {s.cta.buttonDirect}
             </a>
           </div>
@@ -174,38 +145,6 @@ const bySource = REVIEW_SOURCES.map((s) => ({
   .rv-head {
     max-width: min(64ch, 100%);
     margin-bottom: var(--sp-7);
-  }
-
-  /* Показатели: разделены тонкими линиями, цифра — акцентным шрифтом. */
-  .rv-stats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-5) var(--sp-7);
-    margin-top: var(--sp-5);
-    padding-block: var(--sp-5);
-    border-block: 1px solid var(--border);
-  }
-
-  .rv-stat {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    line-height: 1.1;
-  }
-
-  .rv-stat dt {
-    font-family: var(--font-display);
-    font-size: clamp(1.5rem, 1.2rem + 1.1vw, 2rem);
-    font-weight: 600;
-    color: var(--accent);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .rv-stat dd {
-    font-size: var(--fs-xs);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--text-muted);
   }
 
   .rv-source {
