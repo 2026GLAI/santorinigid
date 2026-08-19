@@ -254,15 +254,19 @@ const num = (i: number) => String(i + 1).padStart(2, '0');
   .sidebar-top {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: var(--sp-3);
   }
 
+  /* Логотип и имя — по оси панели (просьба владельца 19.08: логотип
+     стоял у левого края); меню ниже остаётся у левого края */
   .brand {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    align-self: center;
     gap: var(--sp-3);
+    text-align: center;
   }
 
   .brand :global(.logo) {
@@ -278,6 +282,7 @@ const num = (i: number) => String(i + 1).padStart(2, '0');
   .brand-text {
     display: flex;
     flex-direction: column;
+    align-items: center;
     line-height: 1.25;
   }
 
@@ -487,6 +492,7 @@ const num = (i: number) => String(i + 1).padStart(2, '0');
     }
 
     .sidebar-top {
+      justify-content: space-between;
       height: var(--topbar-h);
       padding-inline: var(--gutter);
       /* Отступ под «чёлку» телефона в горизонтальном положении */
@@ -497,7 +503,13 @@ const num = (i: number) => String(i + 1).padStart(2, '0');
     .brand {
       flex-direction: row;
       align-items: center;
+      align-self: auto;
       gap: 0.8rem;
+      text-align: left;
+    }
+
+    .brand-text {
+      align-items: flex-start;
     }
 
     .brand :global(.logo) {
