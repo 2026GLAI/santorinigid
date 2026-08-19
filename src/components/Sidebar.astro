@@ -14,10 +14,14 @@ import { Image } from 'astro:assets';
 import { NAV, WHATSAPP, CONTACTS } from '../data/site';
 import { url } from '../data/url';
 import shared from '../data/pages/shared.json';
-/* Логотип владельца (19.08.2026): купол, колокольня, море и солнце в
-   золотом полумесяце. Фон снят — рисунок лежит на чёрном панели и на
-   графите подвала без «квадрата». Оригиналы — docs/фото-оригиналы. */
-import logo from '../assets/img/logo-v2.png';
+/* Логотип владельца (19.08.2026): купол, колокольня, море и солнце.
+   Две версии — обе лежат в src/assets/img, переключается ОДНОЙ строкой
+   здесь и в Footer.astro (и иконки: scripts/make-icons.mjs):
+     logo-v2-light.png — светлый круг с золотым кольцом (сейчас, по просьбе
+                         владельца: «Санторини — остров, не похоронное бюро»);
+     logo-v2.png       — тёмная версия, золотой полумесяц, без фона.
+   Оригиналы — docs/фото-оригиналы/лого-*.png. */
+import logo from '../assets/img/logo-v2-light.png';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const path = Astro.url.pathname.replace(base, '').replace(/\/$/, '') || '/';
