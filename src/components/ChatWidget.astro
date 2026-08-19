@@ -1016,6 +1016,9 @@ import { WHATSAPP } from '../data/site';
     --c-pulse (оранжево-красный) и --c-pulse-warm (тёплый край).
     До 19.08 здесь были два красных кольца по 4px (#cc0605).
   */
+  /* Точная копия кода владельца с Wix (#svip-pulse): СПЛОШНОЙ диск
+     rgba(215,49,30), opacity 0.7 → 0, scale 1 → 1.8, 2s ease-out, бесконечно.
+     Сплошная заливка даёт сильную чёткую кромку — этого он и хотел. */
   .chat-toggle::before,
   .chat-toggle::after {
     content: '';
@@ -1023,28 +1026,24 @@ import { WHATSAPP } from '../data/site';
     z-index: 1;
     inset: 0;
     border-radius: 50%;
-    background: radial-gradient(
-      circle,
-      color-mix(in srgb, var(--c-pulse-warm) 85%, transparent) 0%,
-      color-mix(in srgb, var(--c-pulse) 70%, transparent) 55%,
-      color-mix(in srgb, var(--c-pulse) 0%, transparent) 74%
-    );
-    animation: chatRing 2.4s ease-out infinite;
+    background: var(--c-pulse);
+    animation: chatRing 2s ease-out infinite;
     pointer-events: none;
   }
 
-  /* Второй диск с задержкой — волны идут одна за другой, шлейф не рвётся */
+  /* Второй такой же диск с задержкой в секунду — пока первый гаснет,
+     следующий уже идёт: шлейф остаётся дольше */
   .chat-toggle::after {
-    animation-delay: 1.2s;
+    animation-delay: 1s;
   }
 
   @keyframes chatRing {
     0% {
       transform: scale(1);
-      opacity: 0.75;
+      opacity: 0.7;
     }
     100% {
-      transform: scale(1.85);
+      transform: scale(1.8);
       opacity: 0;
     }
   }
@@ -1065,10 +1064,10 @@ import { WHATSAPP } from '../data/site';
   @keyframes chatHalo {
     0%,
     100% {
-      box-shadow: 0 0 18px 4px color-mix(in srgb, var(--c-pulse) 45%, transparent);
+      box-shadow: 0 0 22px 6px color-mix(in srgb, var(--c-pulse) 55%, transparent);
     }
     50% {
-      box-shadow: 0 0 36px 10px color-mix(in srgb, var(--c-pulse-warm) 55%, transparent);
+      box-shadow: 0 0 44px 14px color-mix(in srgb, var(--c-pulse-warm) 60%, transparent);
     }
   }
 
