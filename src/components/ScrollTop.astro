@@ -9,8 +9,10 @@
  * Расположение: правый нижний угол, НАД кнопкой чата с заметным
  * просветом (просьба владельца 28.07.2026 — «подними немного выше»),
  * и ровно по её вертикальной оси — центр в центр (просьба 19.08.2026).
- * Цвет — палитра v2: почти чёрный круг, золотая каёмка и стрелка;
- * при наведении — наоборот (19.08.2026, вместо синего #0040FF).
+ * Цвет — палитра v2 (решение владельца 19.08.2026, вечер): золотой круг,
+ * белая каёмка, за ней тонкий золотой ободок, белая стрелка («чёрная
+ * кнопка — похоронное бюро»). Наведение — только там, где есть мышь:
+ * на телефоне стиль наведения «залипал» после нажатия.
  */
 ---
 
@@ -47,24 +49,37 @@
     width: var(--size);
     height: var(--size);
     border-radius: var(--radius-full);
-    /* Почти чёрный круг, золотая каёмка и стрелка (золото на #0b0d0e —
-       8.69:1). Одинаков в обеих темах. */
-    background: var(--c-black);
-    color: var(--gold);
-    border: 1px solid var(--gold);
-    box-shadow: var(--shadow);
+    /* Золотой круг, белая каёмка 2px, снаружи тонкий золотой ободок
+       (через box-shadow), белая стрелка с лёгкой тенью для чёткости.
+       Одинаков в обеих темах. */
+    background: var(--gold);
+    color: #fff;
+    border: 2px solid #fff;
+    box-shadow:
+      0 0 0 2px var(--gold),
+      var(--shadow);
     transition:
       opacity var(--dur) var(--ease),
       transform var(--dur) var(--ease),
-      background-color var(--dur) var(--ease),
-      color var(--dur) var(--ease);
+      background-color var(--dur) var(--ease);
   }
 
-  /* Наведение — наоборот: золотой круг, чёрная стрелка */
-  .to-top:hover {
-    background: var(--gold);
-    color: var(--c-black);
-    transform: translateY(-2px);
+  .to-top svg {
+    filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.25));
+  }
+
+  /* Наведение — только с мышью: чуть темнее золото и подъём.
+     На сенсорных экранах :hover «залипает» после нажатия — там его нет. */
+  @media (hover: hover) and (pointer: fine) {
+    .to-top:hover {
+      background: color-mix(in srgb, var(--gold) 85%, var(--c-bronze));
+      transform: translateY(-2px);
+    }
+  }
+
+  /* Нажатие — короткое сжатие, видно и на телефоне */
+  .to-top:active {
+    transform: scale(0.94);
   }
 
   /* Плавное появление: скрипт снимает hidden, а класс включает видимость.
