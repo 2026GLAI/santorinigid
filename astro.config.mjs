@@ -4,28 +4,17 @@ import sitemap from '@astrojs/sitemap';
 
 /*
   ════════════════════════════════════════════════════════════════════
-  ГДЕ СЕЙЧАС ЖИВЁТ САЙТ — переключается ОДНОЙ строкой ниже.
+  АДРЕС САЙТА. Вторая версия живёт на своём домене santoriniru.com
+  (куплен владельцем 19.08.2026, Cloudflare Registrar) и выкладывается в
+  Cloudflare Pages (проект santorinigid-v2): `node scripts/deploy.mjs`.
+  Первая версия (ветка main, GitHub Pages, santorinigid.com) — запасная.
 
-  true  — временный адрес GitHub: 2026glai.github.io/santorinigid/
-          Сайт лежит во ВЛОЖЕННОЙ ПАПКЕ, поэтому все ссылки на стили
-          и страницы должны начинаться с «/santorinigid». Без этого
-          страница откроется без оформления и со сломанными ссылками.
-
-  false — свой домен santorinigid.com (сайт в корне).
-          ПЕРЕКЛЮЧИТЬ СРАЗУ ПОСЛЕ ПОКУПКИ ДОМЕНА И ПРИВЯЗКИ.
-
-  ⚠️ Пока стоит true, в canonical и sitemap попадает адрес github.io.
-  Это правильно ровно до тех пор, пока сайт там и живёт: иначе Google
-  получит указание на домен, которого ещё нет.
+  От SITE зависят canonical, sitemap, Open Graph, разметка для поисковиков
+  (site.ts → SITE_URL). Сайт в корне домена — base не нужен.
   ════════════════════════════════════════════════════════════════════
 */
-const НА_GITHUB_ВРЕМЕННО = false;
-
-const SITE = НА_GITHUB_ВРЕМЕННО
-  ? 'https://2026glai.github.io'
-  : 'https://santorinigid.com';
-
-const BASE = НА_GITHUB_ВРЕМЕННО ? '/santorinigid' : undefined;
+const SITE = 'https://santoriniru.com';
+const BASE = undefined;
 
 export default defineConfig({
   site: SITE,
@@ -50,7 +39,7 @@ export default defineConfig({
   /*
     Каждая страница собирается папкой с index.html внутри: /tours/index.html.
     Из-за этого Astro.url.pathname не содержит «.html», и canonical в
-    BaseLayout строится верным: santorinigid.com/tours/ — ровно как в sitemap
+    BaseLayout строится верным: santoriniru.com/tours/ — ровно как в sitemap
     и во всех ссылках сайта.
 
     При прежнем format: 'file' canonical получался «/tours.html», то есть

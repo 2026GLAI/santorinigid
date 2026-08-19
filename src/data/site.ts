@@ -14,14 +14,14 @@
  * «santorinigid.com/santorinigid». Одно значение в одном месте — и такое
  * больше не повторится.
  */
-export const SITE_URL = import.meta.env.SITE?.replace(/\/$/, '') ?? 'https://santorinigid.com';
+export const SITE_URL = import.meta.env.SITE?.replace(/\/$/, '') ?? 'https://santoriniru.com';
 export const SITE_NAME = 'Гид на Санторини — Владимир';
 
 /**
  * Полный адрес страницы для разметки JSON-LD (Google, ИИ-поисковики).
  *
- *   pageUrl('/tours')  → 'https://santorinigid.com/tours/'
- *   pageUrl('/')       → 'https://santorinigid.com/'
+ *   pageUrl('/tours')  → 'https://santoriniru.com/tours/'
+ *   pageUrl('/')       → 'https://santoriniru.com/'
  *
  * КОСАЯ ЧЕРТА В КОНЦЕ ОБЯЗАТЕЛЬНА — по такому адресу GitHub Pages отдаёт
  * страницу сразу, а без неё отвечает «переехало» (301). Разметка обязана

@@ -1,0 +1,44 @@
+# Настройка выкладки САЙТА (вторая версия) на Cloudflare Workers,
+# домен https://santoriniru.com (куплен владельцем 19.08.2026, зона в том же
+# аккаунте Cloudflare 2026glai).
+#
+# Выкладка (сборка + отправка):   node scripts/deploy.mjs
+# Только отправка готовой dist/:  npx wrangler deploy --config wrangler-site.toml
+#
+# Сайт — статика из dist/ (Astro). Worker (worker/site-worker.js) лишь
+# сводит www и служебный адрес к https://santoriniru.com. Секретов нет.
+#
+# Почему Workers, а не Pages: Cloudflare развивает именно Workers
+# (Pages — в режиме поддержки), а привязка домена здесь делается самим
+# wrangler (запись DNS и сертификат создаются автоматически) — без
+# ручных шагов в панели. Корневой wrangler.toml — это ИИ-чат, другой Worker.
+
+name = "santoriniru"
+main = "worker/site-worker.js"
+compatibility_date = "2026-08-01"
+
+# Служебный адрес santoriniru.<аккаунт>.workers.dev не нужен: сайт живёт
+# только на домене (а если адрес всё же включат — Worker отдаст 301).
+workers_dev = false
+preview_urls = false
+
+# Домен и www: custom_domain = true — wrangler сам создаёт DNS-записи
+# и выпускает сертификат. www перенаправляется на основной домен (Worker).
+routes = [
+  { pattern = "santoriniru.com", custom_domain = true },
+  { pattern = "www.santoriniru.com", custom_domain = true },
+]
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+# /tours → /tours/ (адреса сайта — со слешем, см. astro.config.mjs)
+html_handling = "auto-trailing-slash"
+# Несуществующий адрес → наша страница dist/404.html со статусом 404
+not_found_handling = "404-page"
+# Сначала Worker (редирект www → домен), затем статика. Иначе на www
+# платформа отдала бы ту же страницу напрямую, минуя редирект.
+run_worker_first = true
+
+[observability]
+enabled = true

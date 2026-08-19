@@ -13,14 +13,15 @@
 backend:
   name: github
   repo: 2026GLAI/santorinigid
-  branch: main
+  # Ветка второй версии сайта (она и живёт на santoriniru.com)
+  branch: v2
   # Воркер-посредник входа (Cloudflare, аккаунт владельца)
   base_url: https://santorinigid-admin-auth.2026glai.workers.dev
   commit_messages:
     update: 'Правка через админку: {{path}}'
 
-site_url: https://santorinigid.com
-display_url: https://santorinigid.com
+site_url: https://santoriniru.com
+display_url: https://santoriniru.com
 # Языка интерфейса здесь нет намеренно: Sveltia не понимает параметр
 # locale (писала предупреждение в консоль) и сама берёт язык браузера —
 # у владельца это русский.
