@@ -135,9 +135,9 @@ const schema = [
                   <Image
                     src={getImg(s.image)}
                     alt={`${s.title} — ${s.subtitle}`}
-                    widths={[420, 640, 880]}
+                    widths={[420, 640, 880, 1140]}
                     sizes="(min-width: 900px) 480px, 92vw"
-                    quality={80}
+                    quality={84}
                   />
                   <span class="stop-num">{String(i + 1).padStart(2, '0')}</span>
                 </div>
@@ -174,9 +174,9 @@ const schema = [
               <Image
                 src={g}
                 alt={`Гости Владимира на экскурсии по Санторини, фото ${i + 1}`}
-                widths={[300, 500, 700]}
+                widths={[300, 500, 700, 920]}
                 sizes="(min-width: 1000px) 280px, (min-width: 640px) 45vw, 90vw"
-                quality={76}
+                quality={84}
               />
             </figure>
           ))
