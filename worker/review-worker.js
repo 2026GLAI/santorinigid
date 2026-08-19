@@ -13,8 +13,9 @@
  *     с полным текстом, фотографиями и двумя кнопками.
  *  3. Владимир жмёт «Опубликовать» (и подтверждает) → Worker дописывает
  *     отзыв в файл src/data/reviews.json на GitHub.
- *  4. Изменение файла в ветке main запускает GitHub Actions → сайт
- *     пересобирается сам. Через 2–3 минуты отзыв на сайте.
+ *  4. Изменение файла в ветке main репозитория 2026GLAI/santoriniru
+ *     запускает GitHub Actions → сайт пересобирается и выкладывается
+ *     в Cloudflare сам. Через 2–4 минуты отзыв на сайте.
  *  5. Жмёт «Удалить» → отзыв стирается из KV и никуда не попадает.
  *
  * ГЛАВНОЕ: без нажатия Владимира на сайт не попадает НИЧЕГО.
@@ -26,7 +27,8 @@
  * (подпись кнопок в письме). Развёрнуто 28.07.2026.
  *
  * ПИСЬМА — встроенной почтой Cloudflare (Email Routing домена
- * santorinigid.com), БЕЗ сторонних сервисов: решение владельца
+ * santoriniru.com; отправитель reviews@santoriniru.com), БЕЗ сторонних
+ * сервисов: решение владельца
  * «меньше платформ». Письмо может уйти только на его подтверждённый
  * адрес — это зашито привязкой send_email в настройке.
  *
@@ -38,24 +40,30 @@ import { EmailMessage } from 'cloudflare:email';
  * Кто имеет право слать сюда отзывы.
  *
  * Раньше стояло '*' — принимали от кого угодно, и форму можно было дёргать
- * с любого чужого сайта. Теперь только наши адреса: сам сайт и его версия
- * на GitHub Pages, а также основной сайт santoriniru.com (вторая версия, с 19.08.2026).
+ * с любого чужого сайта. Теперь только наши адреса: основной сайт
+ * santoriniru.com (с 19.08.2026) и прежние адреса первой версии.
  *
  * Если появится ещё один адрес — дописать сюда, а не возвращать звёздочку.
  */
 const ALLOWED_ORIGINS = [
+  // Основной сайт (первым: он же — запасной Access-Control-Allow-Origin)
+  'https://santoriniru.com',
+  'https://www.santoriniru.com',
+  // Прежние адреса первой версии — безвредны, пока santorinigid.com жив
   'https://santorinigid.com',
   'https://www.santorinigid.com',
   'https://2026glai.github.io',
-  // Вторая версия сайта — свой домен с 19.08.2026 (это и есть основной сайт)
-  'https://santoriniru.com',
-  'https://www.santoriniru.com',
 ];
 
-/** Адрес основного сайта, если переменная SITE_URL в настройках не задана
-    (wrangler-reviews.toml): ссылки «Открыть страницу отзывов» и адрес
-    опубликованного отзыва. */
+/** Адрес основного сайта. Кнопка «Открыть страницу отзывов» на страницах
+    подтверждения использует его всегда; адрес опубликованного отзыва и
+    подпись площадки берут env.SITE_URL (wrangler-reviews.toml), а это —
+    запас на случай, если переменная не задана. */
 const SITE_FALLBACK = 'https://santoriniru.com';
+
+/** Адрес самого воркера, если WORKER_URL не задан: от него строятся кнопки
+    в письме и ссылка «удалить с сайта». Рабочий служебный адрес, не домен. */
+const WORKER_FALLBACK = 'https://santorinigid-reviews.2026glai.workers.dev';
 
 /** Заголовки доступа для конкретного просителя. Чужому — без разрешения. */
 function corsFor(request) {
@@ -176,6 +184,44 @@ export default {
       return handleModerate(url, env, request);
     }
 
+    /*
+      --- 4. Самопроверка (для агента, не для гостей) ---
+      Отвечает, настроен ли Worker: есть ли секреты и видит ли ключ GitHub
+      репозиторий сайта. Значений секретов НЕ раскрывает — только «да/нет».
+      Нужна потому, что `wrangler secret put` охотно сохраняет ПУСТОЙ
+      секрет и говорит «Success» (грабля 06.08.2026) — без этой проверки
+      пустой ключ всплыл бы только при публикации первого отзыва.
+    */
+    if (url.pathname === '/health' && request.method === 'GET') {
+      let github = 'нет ключа';
+      if (env.GITHUB_TOKEN) {
+        // Ответ GitHub держим в KV 5 минут: адрес /health публичный, и без
+        // кэша каждый залётный запрос дёргал бы GitHub API ключом владельца.
+        github = await env.REVIEWS.get('health:github');
+        if (!github) {
+          const r = await fetch(`https://api.github.com/repos/${env.GITHUB_REPO}`, {
+            headers: {
+              Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+              'User-Agent': 'santorinigid-reviews',
+              Accept: 'application/vnd.github+json',
+            },
+          });
+          github = r.ok ? 'ключ видит репозиторий' : `ключ есть, но репозиторий не открывается (HTTP ${r.status})`;
+          await env.REVIEWS.put('health:github', github, { expirationTtl: 300 });
+        }
+      }
+      return json(
+        {
+          repo: env.GITHUB_REPO,
+          branch: env.GITHUB_BRANCH || 'main',
+          site: env.SITE_URL || SITE_FALLBACK,
+          github,
+          adminSecret: env.ADMIN_SECRET ? 'есть' : 'нет',
+        },
+        200,
+      );
+    }
+
     return json({ error: 'Not found' }, 404, request);
   },
 };
@@ -185,7 +231,7 @@ export default {
  *
  * Ловушка _gotcha останавливает простых ботов, но не того, кто задался
  * целью: без этого ограничения можно залить тысячи записей в хранилище
- * и завалить почту Владимира, сжёгши бесплатные лимиты Cloudflare и Resend.
+ * и завалить почту Владимира, сжёгши бесплатные лимиты Cloudflare.
  *
  * 3 отзыва в час с адреса — живому человеку хватает с запасом (он пишет
  * один), а поток отсекается.
@@ -303,7 +349,7 @@ async function handleSubmit(request, env) {
 
 async function sendEmail(review, env) {
   const token = await sign(review.id, env.ADMIN_SECRET);
-  const base = env.WORKER_URL || 'https://reviews.santorinigid.com';
+  const base = env.WORKER_URL || WORKER_FALLBACK;
   const approve = `${base}/moderate?id=${review.id}&action=approve&t=${token}`;
   const reject = `${base}/moderate?id=${review.id}&action=reject&t=${token}`;
   // «Передумал» — снять УЖЕ опубликованный отзыв с сайта. Подпись та же,
@@ -365,7 +411,7 @@ box-shadow:0 4px 16px rgb(10 47 77/.08)">
     сервисов — решение владельца. Фотографии гостя идут вложениями.
   */
   const mime = buildMime({
-    from: 'reviews@santorinigid.com',
+    from: 'reviews@santoriniru.com',
     to: env.OWNER_EMAIL,
     replyTo: review.contact.includes('@') ? review.contact : null,
     subject: `Новый отзыв: ${review.author.slice(0, 40)}`,
@@ -374,7 +420,7 @@ box-shadow:0 4px 16px rgb(10 47 77/.08)">
   });
 
   try {
-    await env.OWNER_MAIL.send(new EmailMessage('reviews@santorinigid.com', env.OWNER_EMAIL, mime));
+    await env.OWNER_MAIL.send(new EmailMessage('reviews@santoriniru.com', env.OWNER_EMAIL, mime));
     return true;
   } catch (e) {
     // Причина остаётся в журнале Worker; гостю ответит handleSubmit.
@@ -694,7 +740,9 @@ async function publishToGitHub(review, env) {
     tripWith: clean(review.tripWith),
     published: clean(review.published),
     datePublished: clean(review.datePublished),
-    source: 'santorinigid.com',
+    // Подпись площадки на карточке отзыва — хост сайта из настройки,
+    // а не вписанная строка (иначе при смене домена показывался бы старый).
+    source: new URL(env.SITE_URL || SITE_FALLBACK).hostname,
     sourceUrl:
       (env.SITE_URL || SITE_FALLBACK) + '/reviews/#review-own-' + review.id.slice(0, 8),
   };
