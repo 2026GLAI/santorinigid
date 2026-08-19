@@ -19,6 +19,9 @@ import data from '../data/pages/tours.json';
  * неточностью. Метки {ГОД}/{ЛЕТ_ГИДОМ} подставляет сборка (fill.ts).
  */
 const t = fillDeep(data);
+/* Условия и вопросы-ответы из tours.json тоже содержат метки (цены, часы) */
+const details = fillDeep(TOUR_DETAILS);
+const faq = fillDeep(FAQ);
 
 const heroTour = getImg(t.hero.image);
 
@@ -106,7 +109,7 @@ const schema = [
 
       <dl class="details reveal">
         {
-          TOUR_DETAILS.map((d) => (
+          details.map((d) => (
             <div class="detail">
               <dt>{d.label}</dt>
               <dd>{d.value}</dd>
@@ -185,9 +188,9 @@ const schema = [
     </div>
   </section>
 
-  <Reviews title={t.reviewsSection.title} lede="" />
+  <Reviews title={t.reviewsSection.title} lede="" limit={6} />
 
-  <Faq items={FAQ} />
+  <Faq items={faq} />
 
   <CtaBand title={t.cta.title} text={t.cta.text} waLink={WHATSAPP.tour} />
 </BaseLayout>

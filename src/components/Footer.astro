@@ -50,14 +50,14 @@ const s = fillDeep(shared.footer);
     </div>
 
     <nav class="footer-nav" aria-label="Навигация в подвале">
-      <h2>{s.sectionsTitle}</h2>
+      <p class="footer-h">{s.sectionsTitle}</p>
       <ul>
         {FOOTER_NAV.map((i) => <li><a href={url(i.href)}>{i.label}</a></li>)}
       </ul>
     </nav>
 
     <div class="footer-contacts">
-      <h2>{s.contactsTitle}</h2>
+      <p class="footer-h">{s.contactsTitle}</p>
       <a href={CONTACTS.phoneHref} class="contact-line big">{CONTACTS.phone}</a>
       <p class="messengers">{CONTACTS.messengers}</p>
       <a href={CONTACTS.emailHref} class="contact-line">{CONTACTS.email}</a>
@@ -160,7 +160,9 @@ const s = fillDeep(shared.footer);
   }
 
   /* --- колонки --- */
-  .site-footer h2 {
+  /* Заголовки колонок подвала — не <h2>: они не разделы страницы и не должны
+     попадать в её структуру заголовков для поисковиков */
+  .footer-h {
     font-family: var(--font-body);
     font-size: 0.7rem;
     font-weight: 500;

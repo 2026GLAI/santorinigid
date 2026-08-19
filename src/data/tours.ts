@@ -35,3 +35,4 @@ export const FAQ: { q: string; a: string }[] = data.FAQ;
 
 /** Галерея страницы экскурсий — имена файлов из src/assets/img. */
 export const GALLERY: string[] = data.GALLERY;
+

@@ -25,6 +25,13 @@ interface Props {
   alt?: boolean;
   /** Сколько показать сразу. Остальные — под кнопкой «Показать ещё». */
   visible?: number;
+  /**
+   * Сколько отзывов вообще класть на страницу. Полный список — только на
+   * /reviews/; на главной, «Обо мне» и экскурсии — первые `limit` и ссылка
+   * «Все отзывы» (иначе один и тот же текст дублируется на четырёх страницах,
+   * и страница отзывов теряет уникальность для поисковиков).
+   */
+  limit?: number;
   /** Показывать ли форму «оставить отзыв». */
   showForm?: boolean;
 }
@@ -35,11 +42,14 @@ const {
   lede = s.lede,
   alt = false,
   visible = REVIEWS_VISIBLE,
+  limit,
   showForm = true,
 } = Astro.props;
 
-const shown = REVIEWS.slice(0, visible);
-const hidden = REVIEWS.slice(visible);
+const pool = limit ? REVIEWS.slice(0, limit) : REVIEWS;
+const shown = pool.slice(0, visible);
+const hidden = pool.slice(visible);
+const more = limit ? REVIEWS.length > limit : false;
 
 /**
  * Показатели под заголовком.
@@ -93,6 +103,19 @@ const bySource = REVIEW_SOURCES.filter((src) => REVIEWS.some((r) => r.source ===
     <ol class="rv-list">
       {shown.map((r) => <ReviewCard review={r} reveal />)}
     </ol>
+
+    {
+      more && (
+        <div class="rv-more-wrap">
+          <a href={url('/reviews')} class="btn btn-ghost rv-more-btn">
+            {s.allLink}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </a>
+        </div>
+      )
+    }
 
     {
       hidden.length > 0 && (

@@ -18,17 +18,27 @@ import {
   SITE_NAME,
   OWNER_FULL_NAME,
   PROFILES,
+  CONTACTS,
+  ON_ISLAND_SINCE,
   GUIDE_SINCE,
   ISLAND_YEARS_TEXT,
   GUIDE_YEARS_TEXT,
+  TOUR_PRICE_BASE,
+  TOUR_HOURS_BASE,
+  TOUR_PRICE_HOUR,
   pageUrl,
 } from '../data/site';
+import { YACHT_PRICE_FROM, YACHT_PRICE_TO } from '../data/yachts';
 
 interface Props {
   title: string;
   description: string;
   /** Путь к OG-картинке относительно корня сайта, напр. /og/tours.jpg */
   ogImage?: string;
+  /** Описание OG-картинки (для пересылок и читалок) */
+  ogAlt?: string;
+  /** Ключевые фразы страницы (meta keywords — читает Яндекс; Google игнорирует) */
+  keywords?: string;
   /** Дополнительный JSON-LD, специфичный для страницы */
   schema?: Record<string, unknown> | Record<string, unknown>[];
   noindex?: boolean;
@@ -46,6 +56,8 @@ const {
   title,
   description,
   ogImage = '/og-default.jpg',
+  ogAlt = 'Панорама деревни Ия на Санторини: белые дома и синие купола над морем',
+  keywords,
   schema,
   noindex = false,
   edit = [],
@@ -68,18 +80,90 @@ const {
 const canonical = new URL(Astro.url.pathname, SITE_URL).href;
 const ogUrl = new URL(ogImage, SITE_URL).href;
 
-/** Организация — основная сущность сайта. Показывается ИИ-поисковикам и Google. */
+/**
+ * Персона гида — одна на весь сайт, с постоянным @id: бизнес ссылается на
+ * неё как на основателя, страница «Обо мне» — как на главную сущность.
+ * Только проверенные факты: язык — русский (греческий не подтверждён —
+ * не указываем), профили — из PROFILES.
+ */
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  '@id': `${SITE_URL}/#person`,
+  name: OWNER_FULL_NAME,
+  alternateName: 'Владимир',
+  jobTitle: 'Частный русскоязычный гид на Санторини',
+  description: `Живёт на Санторини с ${ON_ISLAND_SINCE} года (${ISLAND_YEARS_TEXT}), ${GUIDE_YEARS_TEXT} профессионального опыта проведения индивидуальных экскурсий.`,
+  url: pageUrl('/about'),
+  image: `${SITE_URL}/og-default.jpg`,
+  telephone: CONTACTS.phone,
+  email: CONTACTS.email,
+  knowsLanguage: 'ru',
+  knowsAbout: [
+    'Санторини',
+    'Экскурсии по Санторини',
+    'Кальдера Санторини',
+    'Ия (Ойя)',
+    'Виноделие Санторини',
+    'Аренда яхт на Санторини',
+    'Вертолётные туры на Санторини',
+  ],
+  worksFor: { '@id': `${SITE_URL}/#business` },
+  sameAs: [...PROFILES],
+};
+
+/**
+ * Организация — основная сущность сайта. Показывается ИИ-поисковикам и Google.
+ * Тип LocalBusiness (надтип, который понимают Google и Яндекс): частный гид —
+ * не «туристический информационный центр». Услуги и цены — из тех же данных,
+ * что видимый текст (makesOffer).
+ */
 const localBusiness = {
   '@context': 'https://schema.org',
-  '@type': 'TouristInformationCenter',
+  '@type': 'LocalBusiness',
   '@id': `${SITE_URL}/#business`,
-  name: 'Владимир — русскоязычный гид на Санторини',
-  description: `Индивидуальные экскурсии по Санторини с русскоязычным гидом. ${ISLAND_YEARS_TEXT} жизни на острове, ${GUIDE_YEARS_TEXT} профессионального опыта. Аренда яхт, вертолётные туры, подбор отелей.`,
+  name: 'Владимир Лунгу — частный русскоязычный гид на Санторини',
+  alternateName: 'Гид на Санторини Владимир',
+  description: `Индивидуальные экскурсии по Санторини с частным русскоязычным гидом. ${ISLAND_YEARS_TEXT} жизни на острове, ${GUIDE_YEARS_TEXT} профессионального опыта. Аренда яхт и катамаранов, вертолётные туры, подбор отелей.`,
   url: pageUrl('/'),
-  telephone: '+306946800255',
-  email: 'santorinivip@gmail.com',
+  telephone: CONTACTS.phone,
+  email: CONTACTS.email,
   image: `${SITE_URL}/og-default.jpg`,
+  logo: `${SITE_URL}/icon-512.png`,
   priceRange: '€€€',
+  knowsLanguage: 'ru',
+  contactPoint: {
+    '@type': 'ContactPoint',
+    contactType: 'customer service',
+    telephone: CONTACTS.phone,
+    email: CONTACTS.email,
+    availableLanguage: 'ru',
+  },
+  knowsAbout: ['Санторини', 'Ия', 'кальдера Санторини', 'экскурсии для гостей круизных лайнеров', 'аренда яхт и катамаранов', 'вертолётные туры'],
+  makesOffer: [
+    {
+      '@type': 'Offer',
+      price: TOUR_PRICE_BASE,
+      priceCurrency: 'EUR',
+      description: `Базовая индивидуальная экскурсия ${TOUR_HOURS_BASE} ч на автомобиле; каждый дополнительный час — ${TOUR_PRICE_HOUR} €`,
+      itemOffered: { '@type': 'Service', name: 'Индивидуальная экскурсия по Санторини', serviceType: 'Экскурсия с частным русскоязычным гидом', areaServed: 'Санторини, Греция', url: pageUrl('/tours') },
+    },
+    {
+      '@type': 'AggregateOffer',
+      lowPrice: YACHT_PRICE_FROM,
+      highPrice: YACHT_PRICE_TO,
+      priceCurrency: 'EUR',
+      itemOffered: { '@type': 'Service', name: 'Аренда яхт и катамаранов на Санторини', serviceType: 'Морские прогулки и круизы', areaServed: 'Санторини, Греция', url: pageUrl('/vip-service/yacht-rent-santorini') },
+    },
+    {
+      '@type': 'Offer',
+      itemOffered: { '@type': 'Service', name: 'Вертолётные прогулки и VIP-трансферы', serviceType: 'Вертолётные туры', areaServed: 'Санторини, Греция', url: pageUrl('/vip-service/helicopter-tours') },
+    },
+    {
+      '@type': 'Offer',
+      itemOffered: { '@type': 'Service', name: 'Подбор отелей на Санторини', serviceType: 'Подбор и бронирование отелей', areaServed: 'Санторини, Греция', url: pageUrl('/vip-service/santorini-hotels-2026') },
+    },
+  ],
   // Год начала работы гидом — подтверждён владельцем и профилем NeedGuide.
   foundingDate: String(GUIDE_SINCE),
   address: {
@@ -104,15 +188,14 @@ const localBusiness = {
     '@type': 'Place',
     name: 'Санторини, Греция',
   },
-  availableLanguage: { '@type': 'Language', name: 'Russian', alternateName: 'ru' },
   // Профили на других площадках — так поисковики и ИИ понимают,
   // что сайт, отзывы и профили относятся к одному человеку.
   sameAs: [...PROFILES],
-  founder: { '@type': 'Person', name: OWNER_FULL_NAME },
-  employee: { '@type': 'Person', name: OWNER_FULL_NAME },
+  founder: { '@id': `${SITE_URL}/#person` },
+  employee: { '@id': `${SITE_URL}/#person` },
 };
 
-const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [schema]) : [])];
+const schemas = [localBusiness, person, ...(schema ? (Array.isArray(schema) ? schema : [schema]) : [])];
 
 /*
   ПРЕДПРОСМОТР (скрытый адрес *.pages.dev для владельца): сборка с
@@ -162,6 +245,7 @@ const noRobots = noindex || isPreview;
     </script>
     <title>{title}</title>
     <meta name="description" content={description} />
+    {keywords && <meta name="keywords" content={keywords} />}
     <link rel="canonical" href={canonical} />
     {noRobots && <meta name="robots" content="noindex, nofollow" />}
     {!noRobots && <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />}
@@ -176,6 +260,7 @@ const noRobots = noindex || isPreview;
     <meta property="og:image" content={ogUrl} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogAlt} />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
@@ -197,8 +282,11 @@ const noRobots = noindex || isPreview;
       серверам при открытии страницы: сайт работает, даже если Google
       недоступен, и адрес гостя никуда не уходит.
     */}
-    <Font cssVariable="--font-lora" preload />
-    <Font cssVariable="--font-cormorant" preload />
+    {/* Предзагружаем только кириллицу (тексты русские): латиница и курсив
+        подгружаются по мере надобности через unicode-range — это −136 КБ
+        на первом экране каждой страницы. */}
+    <Font cssVariable="--font-lora" preload={[{ subset: 'cyrillic' }]} />
+    <Font cssVariable="--font-cormorant" preload={[{ subset: 'cyrillic', style: 'normal' }]} />
     <Font cssVariable="--font-script" />
 
     <!-- Структурированные данные для Google и ИИ-поисковиков -->

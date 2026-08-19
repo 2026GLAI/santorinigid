@@ -8,10 +8,6 @@ import {
   WHATSAPP,
   CONTACTS,
   SITE_URL,
-  OWNER_FULL_NAME,
-  PROFILES,
-  ISLAND_YEARS_TEXT,
-  GUIDE_YEARS_TEXT,
   pageUrl,
 } from '../data/site';
 import { GALLERY } from '../data/tours';
@@ -38,25 +34,8 @@ const schema = [
     '@context': 'https://schema.org',
     '@type': 'AboutPage',
     url: pageUrl('/about'),
-    mainEntity: {
-      '@type': 'Person',
-      name: OWNER_FULL_NAME,
-      alternateName: 'Владимир',
-      jobTitle: 'Частный русскоязычный гид на Санторини',
-      description: `${ISLAND_YEARS_TEXT} живёт на Санторини, ${GUIDE_YEARS_TEXT} профессионального опыта проведения индивидуальных экскурсий.`,
-      knowsLanguage: ['ru', 'el'],
-      knowsAbout: [
-        'Санторини',
-        'Экскурсии по Санторини',
-        'Кальдера Санторини',
-        'Ия (Ойя)',
-        'Виноделие Санторини',
-        'Аренда яхт на Санторини',
-        'Вертолётные туры на Санторини',
-      ],
-      worksFor: { '@id': `${SITE_URL}/#business` },
-      sameAs: [...PROFILES],
-    },
+    /* Персона гида описана один раз в BaseLayout (#person) — здесь только ссылка */
+    mainEntity: { '@id': `${SITE_URL}/#person` },
   },
   {
     '@context': 'https://schema.org',
@@ -144,7 +123,7 @@ const schema = [
     </div>
   </section>
 
-  <Reviews alt />
+  <Reviews alt limit={6} />
 
   <!-- Галерея -->
   <section class="section">

@@ -192,7 +192,8 @@ collections:
   # скобках: {ГОД}, {ЛЕТ_НА_ОСТРОВЕ}, {ЛЕТ_ГИДОМ}, {НА_ОСТРОВЕ_С}, {ГИД_С},
   # {ЧИСЛО_СУДОВ}, {СУДОВ_ВО_ФЛОТЕ}, {ЧИСЛО_ОТЕЛЕЙ}, {ОТЕЛЕЙ_СЛОВОМ},
   # {ПРОВЕРЕННЫХ_ОТЕЛЕЙ}, {ЧИСЛО_ОТЗЫВОВ}, {ОТЗЫВОВ_СЛОВОМ},
-  # {ПЛОЩАДКИ_ОТЗЫВОВ}, {ЦЕНА_ЯХТ_ОТ}, {ЦЕНА_ЯХТ_ДО} —
+  # {ПЛОЩАДКИ_ОТЗЫВОВ}, {ЦЕНА_ЯХТ_ОТ}, {ЦЕНА_ЯХТ_ДО}, {ЦЕНА_ЭКСКУРСИИ},
+  # {ЧАСОВ_БАЗОВО}, {ЦЕНА_ЧАСА}, {ЦЕНА_МИКРОАВТОБУСА}, {ЦЕНА_СПРИНТЕРА} —
   # сборка заменяет их живыми числами (стаж, цены, количества считаются сами).
   # Метки НЕ УДАЛЯТЬ — иначе число исчезнет из текста.
   - name: pages
@@ -210,6 +211,7 @@ collections:
             fields:
               - { name: title, label: Заголовок вкладки (title), widget: string }
               - { name: description, label: '📝 Описание для поисковиков', widget: text }
+              - { name: keywords, label: 'Ключевые фразы через запятую (для Яндекса)', widget: string, required: false }
           - name: hero
             label: Шапка страницы
             widget: object
@@ -233,6 +235,7 @@ collections:
               - { name: badgeLabel, label: Подпись плашки на фото (число считается само), widget: string }
               - { name: eyebrow, label: Надзаголовок, widget: string }
               - { name: title, label: Заголовок, widget: string }
+              - { name: fact, label: 'Визитка одной фразой (кто, где, с какого года)', widget: string }
               - { name: lede, label: '📝 Первый абзац', widget: text }
               - { name: text, label: '📝 Второй абзац', widget: text }
               - { name: signature, label: Рукописная подпись под текстом, widget: string }
@@ -255,6 +258,7 @@ collections:
             fields:
               - { name: href, label: '🚫 Адрес страницы (НЕ МЕНЯТЬ)', widget: string }
               - { name: image, label: '📷 Файл фото', widget: string }
+              - { name: alt, label: 'Описание фото (alt — для поисковиков и незрячих)', widget: string }
               - { name: title, label: Название, widget: string }
               - { name: text, label: '📝 Описание', widget: text }
               - { name: tag, label: Плашка на фото, widget: string }
@@ -958,6 +962,7 @@ collections:
               - { name: sourcePrefix, label: 'Текст до списка площадок', widget: string }
               - { name: sourceSuffix, label: '📝 Текст после списка площадок', widget: text }
               - { name: expand, label: Кнопка «показать ещё», widget: string }
+              - { name: allLink, label: Ссылка «Все отзывы» (на главной и «Обо мне»), widget: string }
               - { name: collapse, label: Кнопка «Свернуть», widget: string }
               - name: cta
                 label: Призыв «Были со мной?»

@@ -138,7 +138,18 @@ import { WHATSAPP } from '../data/site';
   DOM чата ему уже виден — как и раньше, когда он стоял в конце body.
 */}
 <script>
-  import { WHATSAPP, CONTACTS, ON_ISLAND_SINCE, ISLAND_YEARS_TEXT, GUIDE_YEARS_TEXT } from '../data/site';
+  import {
+    WHATSAPP,
+    CONTACTS,
+    ON_ISLAND_SINCE,
+    ISLAND_YEARS_TEXT,
+    GUIDE_YEARS_TEXT,
+    TOUR_PRICE_BASE,
+    TOUR_HOURS_BASE,
+    TOUR_PRICE_HOUR,
+    TOUR_PRICE_MINIBUS,
+    TOUR_PRICE_SPRINTER,
+  } from '../data/site';
   import { CHAT_EMOJI, twemojiFile } from '../data/chat-emoji';
 
   const WA = WHATSAPP.general;
@@ -192,7 +203,7 @@ import { WHATSAPP } from '../data/site';
       id: 'price',
       keys: ['цен', 'стоим', 'сколько стоит', 'бюджет', 'дорог', 'деньг', 'евро'],
       q: 'Сколько стоит экскурсия?',
-      a: 'Стоимость зависит от маршрута и продолжительности. Точную цену Владимир называет лично — напишите ему в WhatsApp или Telegram, он предложит оптимальный вариант.',
+      a: `Базовая индивидуальная экскурсия на автомобиле — ${TOUR_PRICE_BASE} € за ${TOUR_HOURS_BASE} часа, каждый дополнительный час — ${TOUR_PRICE_HOUR} €. Для компаний: микроавтобус до 8 человек — ${TOUR_PRICE_MINIBUS} €, Спринтер до 17 человек — ${TOUR_PRICE_SPRINTER} €. Точный маршрут и цену Владимир подберёт в WhatsApp или Telegram.`,
     },
     {
       id: 'route',

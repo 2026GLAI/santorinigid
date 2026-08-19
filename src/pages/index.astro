@@ -9,12 +9,9 @@ import {
   WHATSAPP,
   EXTERNAL,
   SITE_URL,
-  OWNER_FULL_NAME,
-  PROFILES,
   ON_ISLAND_SINCE,
   CURRENT_YEAR,
   ISLAND_YEARS_TEXT,
-  GUIDE_YEARS_TEXT,
   YEARS_AS_GUIDE,
   plural,
   pageUrl,
@@ -34,29 +31,16 @@ const t = fillDeep(data);
 
 const heroOia = getImg(t.hero.image);
 
-/** Разметка для поисковиков: сайт + личность гида. */
-const schema = [
-  {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    '@id': `${SITE_URL}/#website`,
-    url: pageUrl('/'),
-    name: 'Гид на Санторини — Владимир',
-    inLanguage: 'ru',
-    publisher: { '@id': `${SITE_URL}/#business` },
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'Person',
-    name: OWNER_FULL_NAME,
-    alternateName: 'Владимир',
-    jobTitle: 'Частный русскоязычный гид на Санторини',
-    knowsLanguage: ['ru', 'el'],
-    worksFor: { '@id': `${SITE_URL}/#business` },
-    sameAs: [...PROFILES],
-    description: `Живёт на Санторини с ${ON_ISLAND_SINCE} года (${ISLAND_YEARS_TEXT}), ${GUIDE_YEARS_TEXT} профессионального опыта проведения индивидуальных экскурсий.`,
-  },
-];
+/** Разметка для поисковиков: сайт (персона гида — в BaseLayout, одна на весь сайт). */
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': `${SITE_URL}/#website`,
+  url: pageUrl('/'),
+  name: 'Гид на Санторини — Владимир Лунгу',
+  inLanguage: 'ru',
+  publisher: { '@id': `${SITE_URL}/#business` },
+};
 
 /*
  * Плашки-факты СЧИТАЮТСЯ и в админку не выносятся намеренно: числа и
@@ -93,6 +77,8 @@ const facts = [
   title={t.seo.title}
   description={t.seo.description}
   schema={schema}
+  keywords={t.seo.keywords}
+  ogAlt={t.hero.alt}
   edit={[{ label: 'Тексты главной', entry: 'pages/main' }]}
   darkTop
 >
@@ -147,6 +133,9 @@ const facts = [
       <div class="about-text reveal">
         <p class="eyebrow">{t.about.eyebrow}</p>
         <h2 class="section-title">{t.about.title}</h2>
+        {/* Одно фактическое предложение-визитка: кто, где, с какого года,
+            на каком языке — то, что ИИ-поисковики берут в ответ первым */}
+        <p class="about-fact">{t.about.fact}</p>
         <p class="lede">{t.about.lede}</p>
         <p>{t.about.text}</p>
         <p class="signature">{t.about.signature}</p>
@@ -171,7 +160,7 @@ const facts = [
               <div class="service-media">
                 <Image
                   src={getImg(s.image)}
-                  alt={s.title}
+                  alt={s.alt}
                   widths={[380, 560, 760, 980, 1500]}
                   sizes="(min-width: 1024px) calc((100vw - 232px) * 0.45), (min-width: 700px) 45vw, 92vw"
                   quality={84}
@@ -254,7 +243,7 @@ const facts = [
     </div>
   </section>
 
-  <Reviews title={t.reviewsSection.title} lede="" />
+  <Reviews title={t.reviewsSection.title} lede="" limit={6} />
 
   <CtaBand />
 </BaseLayout>
@@ -402,6 +391,14 @@ const facts = [
 
   .about-text > * + * {
     margin-top: var(--sp-4);
+  }
+
+  .about-fact {
+    font-size: var(--fs-sm);
+    line-height: 1.6;
+    color: var(--text-soft);
+    padding-left: var(--sp-4);
+    border-left: 2px solid var(--gold);
   }
 
   /* Рукописная подпись — как в брифе под цитатой */

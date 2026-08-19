@@ -20,6 +20,11 @@ import {
   GUIDE_YEARS_TEXT,
   eur,
   plural,
+  TOUR_PRICE_BASE,
+  TOUR_HOURS_BASE,
+  TOUR_PRICE_HOUR,
+  TOUR_PRICE_MINIBUS,
+  TOUR_PRICE_SPRINTER,
 } from './site';
 import { YACHTS, YACHT_PRICE_FROM, YACHT_PRICE_TO } from './yachts';
 import { HOTELS } from './hotels';
@@ -61,6 +66,16 @@ const VALUES: Record<string, string> = {
   ЦЕНА_ЯХТ_ОТ: eur(YACHT_PRICE_FROM),
   /** Максимальная цена круиза: {ЦЕНА_ЯХТ_ДО} → «€7 000» */
   ЦЕНА_ЯХТ_ДО: eur(YACHT_PRICE_TO),
+  /** Базовая экскурсия на автомобиле: {ЦЕНА_ЭКСКУРСИИ} → «€330» */
+  ЦЕНА_ЭКСКУРСИИ: eur(TOUR_PRICE_BASE),
+  /** Длительность базовой экскурсии со склонением: {ЧАСОВ_БАЗОВО} → «4 часа» */
+  ЧАСОВ_БАЗОВО: `${TOUR_HOURS_BASE} ${plural(TOUR_HOURS_BASE, 'час', 'часа', 'часов')}`,
+  /** Доплата за каждый дополнительный час: {ЦЕНА_ЧАСА} → «€60» */
+  ЦЕНА_ЧАСА: eur(TOUR_PRICE_HOUR),
+  /** Микроавтобус до 8 человек: {ЦЕНА_МИКРОАВТОБУСА} → «€550» */
+  ЦЕНА_МИКРОАВТОБУСА: eur(TOUR_PRICE_MINIBUS),
+  /** Спринтер до 17 человек: {ЦЕНА_СПРИНТЕРА} → «€750» */
+  ЦЕНА_СПРИНТЕРА: eur(TOUR_PRICE_SPRINTER),
 };
 
 /** Заменяет метки в одной строке. */

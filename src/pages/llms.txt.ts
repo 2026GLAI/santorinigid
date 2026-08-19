@@ -14,14 +14,30 @@
  * согласованного с содержимым сайта (числа сверены аудитом 06.08.2026).
  */
 import type { APIRoute } from 'astro';
-import { CONTACTS, ON_ISLAND_SINCE, GUIDE_SINCE, PROFILES, eur, plural, pageUrl } from '../data/site';
+import {
+  CONTACTS,
+  ON_ISLAND_SINCE,
+  GUIDE_SINCE,
+  PROFILES,
+  eur,
+  plural,
+  pageUrl,
+  TOUR_PRICE_BASE,
+  TOUR_HOURS_BASE,
+  TOUR_PRICE_HOUR,
+  TOUR_PRICE_MINIBUS,
+  TOUR_PRICE_MINIBUS_HOUR,
+  TOUR_PRICE_SPRINTER,
+  TOUR_PRICE_SPRINTER_HOUR,
+} from '../data/site';
 import { YACHTS, YACHT_PRICE_FROM, YACHT_PRICE_TO } from '../data/yachts';
 import { HOTELS } from '../data/hotels';
-import { REVIEWS } from '../data/reviews';
+import { REVIEWS, REVIEW_SOURCES } from '../data/reviews';
 
-const touristerCount = REVIEWS.filter((r) => r.source === 'Tourister.ru').length;
-const needguideCount = REVIEWS.filter((r) => r.source === 'NeedGuide').length;
-const replyCount = REVIEWS.filter((r) => r.reply).length;
+/* Площадки, с которых реально есть отзывы — без счётчиков (решение владельца 19.08.2026) */
+const reviewSources = REVIEW_SOURCES.filter((s) => REVIEWS.some((r) => r.source === s.name))
+  .map((s) => s.name)
+  .join(' и ');
 const yachtNames = YACHTS.map((y) => y.name).join(', ');
 
 /* Подпись профиля по домену. Список профилей живёт в PROFILES (site.ts) —
@@ -67,7 +83,7 @@ const text = `# Владимир Лунгу — русскоязычный ги�
 - [Вертолётные туры](${pageUrl('/vip-service/helicopter-tours')}): Robinson R44, Airbus H125. Обзор Кальдеры 20/30/60 минут; трансферы Санторини–Крит 45 мин, Санторини–Миконос 45 мин, Санторини–Афины 75 мин. Вылет с частных площадок, лицензированные пилоты.
 - [Отели](${pageUrl('/vip-service/santorini-hotels-2026')}): авторская подборка ${HOTELS.length} ${plural(HOTELS.length, 'отеля', 'отелей', 'отелей')} и вилл с видом на Кальдеру. Бронирование любыми картами мира, включая карты РФ и UnionPay.
 - [Контакты](${pageUrl('/contacts')}): все каналы связи и форма заявки.
-- [Отзывы](${pageUrl('/reviews')}): ${REVIEWS.length} ${plural(REVIEWS.length, 'отзыв', 'отзыва', 'отзывов')} реальных туристов, собраны с двух площадок — Tourister.ru (${touristerCount}) и NeedGuide.ru (${needguideCount}), у каждого есть ссылка на оригинал. У ${replyCount} ${plural(replyCount, 'отзыва', 'отзывов', 'отзывов')} есть ответ Владимира. Оценок в звёздах нет — площадки-источники их не используют.
+- [Отзывы](${pageUrl('/reviews')}): отзывы реальных туристов с площадок ${reviewSources}, у каждого — прямая ссылка на оригинал; новый отзыв можно оставить через форму на сайте.
 
 ## Профили на других площадках
 
@@ -78,16 +94,16 @@ ${PROFILES.map(profileLine).join('\n')}
 - Продолжительность обзорной экскурсии: обычно 4–7 часов, базовая программа 4 часа.
 - Экскурсии всегда индивидуальные — без посторонних туристов.
 - Язык проведения: русский.
-- Цена экскурсии зависит от маршрута и продолжительности, называется индивидуально через мессенджер.
+- Цена индивидуальной экскурсии: базовая программа ${TOUR_HOURS_BASE} ч на автомобиле — ${TOUR_PRICE_BASE} €, каждый дополнительный час — ${TOUR_PRICE_HOUR} €; микроавтобус до 8 человек — ${TOUR_PRICE_MINIBUS} € (+${TOUR_PRICE_MINIBUS_HOUR} €/ч), Спринтер до 17 человек — ${TOUR_PRICE_SPRINTER} € (+${TOUR_PRICE_SPRINTER_HOUR} €/ч). Точный маршрут и цена — через мессенджер.
 - Подъём из Старого порта в Фиру: фуникулёр 10 евро, ослики 10 евро, либо 588 ступеней пешком.
 - Паром с Крита (Ираклион, Ретимно) скоростным катамараном: около 2–2,5 часов, прибытие в порт Афиньос.
 - Гид встречает гостей круизных лайнеров у выхода со станции фуникулёра.
-- Отзывы: ${REVIEWS.length} ${plural(REVIEWS.length, 'опубликованный отзыв', 'опубликованных отзыва', 'опубликованных отзывов')} туристов с двух площадок (Tourister.ru и NeedGuide.ru), самые подробные — от Мартыновой Татьяны (2019) и Козловской Елены (2019).
+- Отзывы: реальные отзывы туристов с площадок ${reviewSources} и с формы на сайте; звёздных оценок нет.
 
 ## Примечания
 
 - Страница отелей содержит партнёрские ссылки; это раскрыто на самой странице и не увеличивает стоимость бронирования для гостя.
-- Точные цены на экскурсии и вертолёты на сайте не публикуются — запрашиваются в WhatsApp или Telegram.
+- Цены вертолётных туров на сайте не публикуются — запрашиваются в WhatsApp или Telegram.
 `;
 
 export const GET: APIRoute = () =>
