@@ -384,6 +384,9 @@ const facts = [
     z-index: -1;
   }
 
+  /* Плашка на портрете — золотая, с тонкой светлой каёмкой (как кнопка
+     «наверх»): владелец попросил без чёрного (19.08). Почти чёрная цифра
+     на золоте — 8.69:1, подпись бронзой. */
   .about-badge {
     position: absolute;
     left: 0;
@@ -391,23 +394,25 @@ const facts = [
     display: flex;
     flex-direction: column;
     padding: var(--sp-3) var(--sp-5);
-    background: var(--c-black);
-    color: var(--c-ivory);
+    background: var(--gold);
+    color: var(--c-black);
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px var(--gold), var(--shadow);
     line-height: 1.2;
   }
 
   .about-badge strong {
     font-family: var(--font-display);
-    font-weight: 400;
+    font-weight: 500;
     font-size: 1.7rem;
-    color: var(--gold);
+    color: var(--c-black);
   }
 
   .about-badge span {
     font-size: 0.68rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--c-sand-2);
+    color: #3d2e12; /* тёмная бронза на золоте — 5.86:1 */
   }
 
   .about-text > * + * {

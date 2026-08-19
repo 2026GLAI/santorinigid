@@ -6,8 +6,6 @@
  *         крупнее на четверть: на 16–32 точках кремовый круг иначе сливается
  *         с белой вкладкой (идея владельца 19.08.2026). Иконки телефона —
  *         без каёмки, они большие.
- *   node scripts/make-icons.mjs src/assets/img/logo-v2.png --on-disc
- *       — тёмная версия (кладётся на тёмный круг)
  *
  * Пишет в public/: favicon.ico (16/32/48), favicon.svg (256px, чётко на любом
  * экране), apple-touch-icon.png (180), icon-192.png, icon-512.png (запас по
@@ -22,14 +20,13 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [logoArg, ...flags] = process.argv.slice(2);
 if (!logoArg) { console.error('Укажите файл логотипа'); process.exit(1); }
 const logo = path.resolve(root, logoArg);
-const onDisc = flags.includes('--on-disc');
 const ring = (flags.find((f) => f.startsWith('--ring=')) || '').slice(7) || null;
 const zoom = Number((flags.find((f) => f.startsWith('--zoom=')) || '').slice(7)) || 1;
 const BG = '#0b0d0e';
 const pub = path.join(root, 'public');
 
-/** Круглая иконка вкладки: логотип (он уже круг), при --ring с цветной
-    каёмкой и при --zoom крупнее сюжетом; при --on-disc — на тёмном диске */
+/** Круглая иконка вкладки: логотип (он уже круг); при --ring — с цветной
+    каёмкой, при --zoom — сюжет крупнее */
 async function disc(size) {
   if (ring) {
     const ringW = 0.09;
@@ -44,10 +41,7 @@ async function disc(size) {
     const svg = Buffer.from(`<svg width="${size}" height="${size}"><circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="${ring}"/></svg>`);
     return sharp(svg).composite([{ input: buf, gravity: 'centre' }]).png().toBuffer();
   }
-  if (!onDisc) return sharp(logo).resize(size, size).png().toBuffer();
-  const inner = await sharp(logo).resize(Math.round(size * 0.86), Math.round(size * 0.86)).png().toBuffer();
-  const circle = Buffer.from(`<svg width="${size}" height="${size}"><circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="${BG}"/></svg>`);
-  return sharp(circle).composite([{ input: inner, gravity: 'centre' }]).png().toBuffer();
+  return sharp(logo).resize(size, size).png().toBuffer();
 }
 
 /** Квадратная непрозрачная иконка (iOS, Android) — логотип на тёмной подложке */
@@ -80,4 +74,4 @@ fs.writeFileSync(path.join(pub, 'favicon.svg'),
 fs.writeFileSync(path.join(pub, 'apple-touch-icon.png'), await square(180, 0.82));
 fs.writeFileSync(path.join(pub, 'icon-192.png'), await square(192, 0.82));
 fs.writeFileSync(path.join(pub, 'icon-512.png'), await square(512, 0.72));
-console.log('✓ Иконки обновлены из', path.relative(root, logo), onDisc ? '(на тёмном диске)' : '', ring ? `(каёмка ${ring}, ×${zoom})` : '');
+console.log('✓ Иконки обновлены из', path.relative(root, logo), ring ? `(каёмка ${ring}, ×${zoom})` : '');
