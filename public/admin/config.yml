@@ -926,11 +926,10 @@ collections:
               - { name: top, label: Первая строка, widget: string }
               - { name: sub, label: Вторая строка, widget: string }
           - name: topbar
-            label: Плашка вверху справа (телефон и кнопка)
+            label: Плашка вверху справа (кнопка)
             widget: object
             collapsed: true
             fields:
-              - { name: contactLabel, label: Подпись над телефоном, widget: string }
               - { name: button, label: Текст золотой кнопки, widget: string }
           - name: cta
             label: Полоса-призыв (обычная)
