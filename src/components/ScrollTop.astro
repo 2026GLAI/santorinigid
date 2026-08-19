@@ -7,7 +7,10 @@
  * отзывы — иначе приходится долго листать обратно.
  *
  * Расположение: правый нижний угол, НАД кнопкой чата с заметным
- * просветом (просьба владельца 28.07.2026 — «подними немного выше»).
+ * просветом (просьба владельца 28.07.2026 — «подними немного выше»),
+ * и ровно по её вертикальной оси — центр в центр (просьба 19.08.2026).
+ * Цвет — палитра v2: почти чёрный круг, золотая каёмка и стрелка;
+ * при наведении — наоборот (19.08.2026, вместо синего #0040FF).
  */
 ---
 
@@ -21,7 +24,13 @@
   .to-top {
     position: fixed;
     z-index: 94;
-    right: max(clamp(1rem, 3vw, 1.75rem), env(safe-area-inset-right, 0px));
+    /* Кнопка чата шире (clamp(68px, 5vw, 84px)); сдвигаем на половину
+       разницы — центры совпадают на любом экране */
+    --size: 48px;
+    right: calc(
+      max(clamp(1rem, 3vw, 1.75rem), env(safe-area-inset-right, 0px)) +
+        (clamp(68px, 5vw, 84px) - var(--size)) / 2
+    );
     /* Над кнопкой чата: её высота (68–84px) плюс просвет.
        Считается тем же clamp — если кнопка чата изменится,
        поправить надо будет обе в одном месте.
@@ -35,23 +44,26 @@
     );
     display: grid;
     place-items: center;
-    width: 46px;
-    height: 46px;
+    width: var(--size);
+    height: var(--size);
     border-radius: var(--radius-full);
-    /* Цвет #0040FF выбран владельцем лично 29.07.2026 —
-       не подбирать на глаз и не «согласовывать» с палитрой.
-       Одинаков в обеих темах. Белая стрелка: контраст 4.7:1. */
-    background: #0040ff;
-    color: #fff;
+    /* Почти чёрный круг, золотая каёмка и стрелка (золото на #0b0d0e —
+       8.69:1). Одинаков в обеих темах. */
+    background: var(--c-black);
+    color: var(--gold);
+    border: 1px solid var(--gold);
     box-shadow: var(--shadow);
     transition:
       opacity var(--dur) var(--ease),
       transform var(--dur) var(--ease),
-      background-color var(--dur) var(--ease);
+      background-color var(--dur) var(--ease),
+      color var(--dur) var(--ease);
   }
 
+  /* Наведение — наоборот: золотой круг, чёрная стрелка */
   .to-top:hover {
-    background: #0033cc;
+    background: var(--gold);
+    color: var(--c-black);
     transform: translateY(-2px);
   }
 
