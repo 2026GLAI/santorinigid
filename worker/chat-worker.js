@@ -43,6 +43,8 @@ const ALLOWED_ORIGINS = [
   'https://santorinigid.com',
   'https://www.santorinigid.com',
   'https://2026glai.github.io',
+  // Скрытый предпросмотр второй версии сайта (Cloudflare Pages, 19.08.2026)
+  'https://santorinigid-v2.pages.dev',
 ];
 
 function corsFor(request) {

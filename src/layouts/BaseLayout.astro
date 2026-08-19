@@ -113,6 +113,16 @@ const localBusiness = {
 };
 
 const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [schema]) : [])];
+
+/*
+  ПРЕДПРОСМОТР (скрытый адрес *.pages.dev для владельца): сборка с
+  PUBLIC_PREVIEW=1 (scripts/deploy-preview.mjs) ставит noindex на все
+  страницы — поисковики не должны индексировать копию сайта на чужом
+  адресе, иначе это дубль будущего основного сайта. В обычной сборке
+  переменной нет, и всё как прежде.
+*/
+const isPreview = import.meta.env.PUBLIC_PREVIEW === '1';
+const noRobots = noindex || isPreview;
 ---
 
 <!doctype html>
@@ -153,8 +163,8 @@ const schemas = [localBusiness, ...(schema ? (Array.isArray(schema) ? schema : [
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
-    {!noindex && <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />}
+    {noRobots && <meta name="robots" content="noindex, nofollow" />}
+    {!noRobots && <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />}
 
     <!-- Open Graph — красивые карточки при пересылке ссылки -->
     <meta property="og:type" content="website" />
