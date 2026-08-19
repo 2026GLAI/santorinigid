@@ -36,6 +36,9 @@ id = "ab69ee2ac8c04e108353d79da3c910d9"
 # не используется. Адрес обязан совпадать с destination_address выше.
 OWNER_EMAIL = "2026glai@gmail.com"
 GITHUB_REPO = "2026GLAI/santorinigid"
-GITHUB_BRANCH = "main"
-SITE_URL = "https://santorinigid.com"
+# Отзывы ложатся в ветку ОСНОВНОГО сайта. С 19.08.2026 это ветка v2
+# (вторая версия дизайна, домен santoriniru.com); ветка main — запасная
+# первая версия (santorinigid.com), она новых отзывов не получает.
+GITHUB_BRANCH = "v2"
+SITE_URL = "https://santoriniru.com"
 WORKER_URL = "https://santorinigid-reviews.2026glai.workers.dev"

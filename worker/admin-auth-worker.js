@@ -24,7 +24,7 @@
  */
 
 /** Разрешённые окна-родители: только сама админка. */
-const ALLOWED_ORIGINS = ['https://santorinigid.com'];
+const ALLOWED_ORIGINS = ['https://santorinigid.com', 'https://santoriniru.com', 'https://www.santoriniru.com'];
 
 const html = (body) =>
   new Response(`<!doctype html><html lang="ru"><head><meta charset="utf-8"></head><body>${body}</body></html>`, {

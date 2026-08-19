@@ -1,5 +1,5 @@
 /**
- * Приём и модерация отзывов для santorinigid.com
+ * Приём и модерация отзывов для santoriniru.com (и запасного santorinigid.com)
  * =============================================
  *
  * ЗАЧЕМ ЭТО НУЖНО
@@ -39,7 +39,7 @@ import { EmailMessage } from 'cloudflare:email';
  *
  * Раньше стояло '*' — принимали от кого угодно, и форму можно было дёргать
  * с любого чужого сайта. Теперь только наши адреса: сам сайт и его версия
- * на GitHub Pages (пока домен не привязан).
+ * на GitHub Pages, а также основной сайт santoriniru.com (вторая версия, с 19.08.2026).
  *
  * Если появится ещё один адрес — дописать сюда, а не возвращать звёздочку.
  */
@@ -47,9 +47,15 @@ const ALLOWED_ORIGINS = [
   'https://santorinigid.com',
   'https://www.santorinigid.com',
   'https://2026glai.github.io',
-  // Скрытый предпросмотр второй версии сайта (Cloudflare Pages, 19.08.2026)
-  'https://santorinigid-v2.pages.dev',
+  // Вторая версия сайта — свой домен с 19.08.2026 (это и есть основной сайт)
+  'https://santoriniru.com',
+  'https://www.santoriniru.com',
 ];
+
+/** Адрес основного сайта, если переменная SITE_URL в настройках не задана
+    (wrangler-reviews.toml): ссылки «Открыть страницу отзывов» и адрес
+    опубликованного отзыва. */
+const SITE_FALLBACK = 'https://santoriniru.com';
 
 /** Заголовки доступа для конкретного просителя. Чужому — без разрешения. */
 function corsFor(request) {
@@ -101,7 +107,7 @@ const page = (title, text, tone = 'ok', extra = '', showLink = true) =>
 </style></head><body><div class="card">
 <div class="ico">${tone === 'ok' ? '✓' : '🗑'}</div>
 <h1>${title}</h1><p>${text}</p>
-${showLink ? '<a class="btn" href="https://santorinigid.com/reviews/">Открыть страницу отзывов</a>' : ''}
+${showLink ? '<a class="btn" href="' + SITE_FALLBACK + '/reviews/">Открыть страницу отзывов</a>' : ''}
 ${extra ? `<div class="extra">${extra}</div>` : ''}
 </div></body></html>`,
     { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } },
@@ -690,7 +696,7 @@ async function publishToGitHub(review, env) {
     datePublished: clean(review.datePublished),
     source: 'santorinigid.com',
     sourceUrl:
-      (env.SITE_URL || 'https://santorinigid.com') + '/reviews/#review-own-' + review.id.slice(0, 8),
+      (env.SITE_URL || SITE_FALLBACK) + '/reviews/#review-own-' + review.id.slice(0, 8),
   };
   // Благодарность владельца — рисуется на сайте тем же блоком,
   // что и его ответы у прежних отзывов с площадок.
